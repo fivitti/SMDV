@@ -78,4 +78,4 @@ target/
 #Specials
 Old_SMDV_Backup/
 MatrixMarket/
-.pyc
+*.pyc
