@@ -4,6 +4,7 @@ Created on Thu Feb 20 15:02:08 2014
 
 @author: HP
 """
+from jinja2 import Template
 
 def getELLCudaCode():
     return '''
@@ -55,8 +56,8 @@ def getELLCudaCode():
         }
     '''
 
-def getSlicedELLCudaCode():
-    return '''
+def getSlicedELLCudaCode(sh_cache_size = 100, threadPerRow = 2):
+    tpl = Template('''
         texture<float, 1, cudaReadModeElementType> mainVecTexRef;
 
         extern "C" __global__ void SlicedEllpackFormatKernel(
@@ -66,18 +67,17 @@ def getSlicedELLCudaCode():
         	const int* sliceStart, 
         	float* result,
         	const int nrRows, 
-        	const int align,
-        	const int ThreadPerRow)
+        	const int align)
         	{
-                 __shared__  float sh_cache[100];
+                 __shared__  float sh_cache[{{ sh_cache_size }}];
                  int tx = threadIdx.x;
-                 int txm = tx %  ThreadPerRow;
+                 int txm = tx %  {{ threadPerRow }};
         		int thIdx = (blockIdx.x*blockDim.x+tx);
-        		int row = thIdx/ThreadPerRow;  //thIdx>> 2;
+        		int row = thIdx/{{ threadPerRow }};  //thIdx>> 2;
         
         		if (row < nrRows){
         			float sub = 0.0;
-        			int maxRow = (int)ceil(vecLengths[row]/(float)ThreadPerRow);
+        			int maxRow = (int)ceil(vecLengths[row]/(float){{ threadPerRow }});
         			int col=-1;
         			float value =0.0;
         			int idx=0;
@@ -93,7 +93,7 @@ def getSlicedELLCudaCode():
                        __syncthreads();
         			volatile float *shMem = sh_cache;
            
-                       for(int s=ThreadPerRow/2; s>0; s>>=1) //s/=2
+                       for(int s={{ threadPerRow }}/2; s>0; s>>=1) //s/=2
         			{
         				if(txm < s){
         					shMem[tx] += shMem[tx+s];
@@ -110,91 +110,97 @@ def getSlicedELLCudaCode():
            int ty=threadIdx.x;
            data[ty] =tex1Dfetch(mainVecTexRef, ty);
         }
-        '''
+        ''')
+    rendered_tpl = tpl.render(sh_cache_size = sh_cache_size, threadPerRow = threadPerRow)
+    return rendered_tpl
 
-def getSertlipCudaCode():
-    return '''
-texture<float, 1, cudaReadModeElementType> mainVecTexRef;
-const int PREFETCH = 8;
-
-extern "C" __global__ void rbfSERTILP_old(const float *vecVals,
-	const int *vecCols,
-	const int *vecLengths, 
-	const int * sliceStart, 
-	float *result,
-	const int nrRows, 
-	const int align,
-	const int ThreadPerRow,
-	const int SliceSize,
-	const int prefetch_size){
-
-		__shared__  float shDot[260];	
-		__shared__ int shSliceStart;
-
-		if(threadIdx.x==0)
-		{
-			shSliceStart=sliceStart[blockIdx.x];
-		}
-		__syncthreads();
-
-		int idxT = threadIdx.x % ThreadPerRow; //thread number in Thread group
-		int idxR = threadIdx.x/ThreadPerRow; //row index mapped into block region
-
-		//map group of thread to row, in this case 4 threads are mapped to one row
-		int row = (blockIdx.x*blockDim.x+threadIdx.x)/ThreadPerRow; //(blockIdx.x*blockDim.x+threadIdx.x)>> LOG_THREADS; 
-
-		if (row < nrRows){
-			int maxRow = vecLengths[row];
-			//int maxRow = (int)ceil(vecLengths[row]/(float)(ThreadPerRow*prefetch_size) );
-
-			float val[PREFETCH];
-			int col[PREFETCH];
-			float dot[PREFETCH]={0};
-
-			unsigned int j=0;
-			unsigned int arIdx=0;
-			for(int i=0; i < maxRow; i++){
-
-#pragma unroll
-				for( j=0; j<prefetch_size;j++)	{
-					arIdx = (i*prefetch_size+j )*align+shSliceStart+threadIdx.x;
-					col[j] = vecCols[arIdx];
-					val[j] = vecVals[arIdx];
-				}
-
-#pragma unroll
-				for( j=0; j<prefetch_size;j++){
-					dot[j]+=val[j]*tex1Dfetch(mainVecTexRef,col[j]); 
-				}
-			}
-
-#pragma unroll
-			for( j=1; j<prefetch_size;j++){
-				dot[0]+=dot[j];	
-			}
-
-
-
-			shDot[idxT*SliceSize+idxR]=dot[0];
-			__syncthreads();		
-
-			volatile float *shDotv = shDot;
-			//reduction to some level
-			for( j=blockDim.x/2; j>=SliceSize; j>>=1) //s/=2
-			{
-				if(threadIdx.x<j){
-					shDotv[threadIdx.x]+=shDotv[threadIdx.x+j];
-				}
-				__syncthreads();
-			}
-
-			if(threadIdx.x<SliceSize){			
-				unsigned int row2=blockIdx.x* SliceSize+threadIdx.x;
-				if(row2<nrRows){
-					result[row2]= shDotv[threadIdx.x];
-				}
-			}
-
-		}//if row<nrRows 
-}//end func
-    '''
+def getSertilpCudaCode(shDot_size = 0, threadPerRow = 2, sliceSize = 32, prefetch = 2):
+    if shDot_size == 0:
+        shDot_size = threadPerRow * sliceSize
+    tpl = Template('''
+        texture<float, 1, cudaReadModeElementType> mainVecTexRef;
+        
+        extern "C" __global__ void rbfSERTILP_old(const float *vecVals,
+        	const int *vecCols,
+        	const int *vecLengths, 
+        	const int * sliceStart, 
+        	float *result,
+        	const int nrRows, 
+        	const int align){
+        
+        		__shared__  float shDot[{{ shDot_size }}];	
+        		__shared__ int shSliceStart;
+        
+        		if(threadIdx.x==0)
+        		{
+        			shSliceStart=sliceStart[blockIdx.x];
+        		}
+        		__syncthreads();
+        
+        		int idxT = threadIdx.x % {{ threadPerRow }}; //thread number in Thread group
+        		int idxR = threadIdx.x/{{ threadPerRow }}; //row index mapped into block region
+        
+        		//map group of thread to row, in this case 4 threads are mapped to one row
+        		int row = (blockIdx.x*blockDim.x+threadIdx.x)/{{ threadPerRow }}; //(blockIdx.x*blockDim.x+threadIdx.x)>> LOG_THREADS; 
+        
+        		if (row < nrRows){
+        			int maxRow = vecLengths[row];
+        			//int maxRow = (int)ceil(vecLengths[row]/(float)({{ threadPerRow }}*{{ prefetch }}) );
+        
+        			float val[{{ prefetch }}];
+        			int col[{{ prefetch }}];
+        			float dot[{{ prefetch }}]={0};
+        
+        			unsigned int j=0;
+        			unsigned int arIdx=0;
+        			for(int i=0; i < maxRow; i++){
+        
+                            #pragma unroll
+        				for( j=0; j<{{ prefetch }};j++)	{
+        					arIdx = (i*{{ prefetch }}+j )*align+shSliceStart+threadIdx.x;
+        					col[j] = vecCols[arIdx];
+        					val[j] = vecVals[arIdx];
+        				}
+        
+                            #pragma unroll
+        				for( j=0; j<{{ prefetch }};j++){
+        					dot[j]+=val[j]*tex1Dfetch(mainVecTexRef,col[j]); 
+        				}
+        			}
+        
+                       #pragma unroll
+        			for( j=1; j<{{ prefetch }};j++){
+        				dot[0]+=dot[j];	
+        			}
+        
+        
+        
+        			shDot[idxT*{{ sliceSize }}+idxR]=dot[0];
+        			__syncthreads();		
+        
+        			volatile float *shDotv = shDot;
+        			//reduction to some level
+        			for( j=blockDim.x/2; j>={{ sliceSize }}; j>>=1) //s/=2
+        			{
+        				if(threadIdx.x<j){
+        					shDotv[threadIdx.x]+=shDotv[threadIdx.x+j];
+        				}
+        				__syncthreads();
+        			}
+        
+        			if(threadIdx.x<{{ sliceSize }}){			
+        				unsigned int row2=blockIdx.x* {{ sliceSize }}+threadIdx.x;
+        				if(row2<nrRows){
+        					result[row2]= shDotv[threadIdx.x];
+        				}
+        			}
+        
+        		}//if row<nrRows 
+        }//end func
+    ''')
+    tpl_rendered = tpl.render(shDot_size = shDot_size, threadPerRow = threadPerRow, sliceSize = sliceSize, prefetch = prefetch)
+    return tpl_rendered
+    
+if __name__ == "__main__":
+    p = getSertilpCudaCode()
+    print p

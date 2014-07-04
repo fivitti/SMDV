@@ -91,7 +91,6 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     ### Przygotowanie stalych wlasciwych dla SlicedELL
     align = numpy.int32(align)
     sliceSize = numpy.int32(sliceSize)
-    threadPerRow = numpy.int32(threadPerRow)
     ###
     
     ### Przygotowanie stałych czasu ###
@@ -107,7 +106,7 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     ###
     
     ### Przygotowanie funkcji i tekstury SlicedEllPack ###
-    modSlicedELL = SourceModule(cudaAgregator.getSlicedELLCudaCode())
+    modSlicedELL = SourceModule(cudaAgregator.getSlicedELLCudaCode(threadPerRow=threadPerRow))
     kernelSlicedELL = modSlicedELL.get_function("SlicedEllpackFormatKernel")
     texrefSlicedELL = modSlicedELL.get_texref("mainVecTexRef")
     
@@ -125,7 +124,6 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
                             cuda.Out(wynik), \
                             numRows, \
                             align, \
-                            threadPerRow, \
                             block=block, \
                             grid=grid, \
                             texrefs=texSliced)
@@ -153,9 +151,6 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     
     ### Przygotowanie stalych wlasciwych ###
     align = numpy.int32(align)
-    sliceSize = numpy.int32(sliceSize)
-    threadPerRow = numpy.int32(threadPerRow)
-    prefetch = numpy.int32(prefetch)
     ###
     
     ### Przygotowanie stałych czasu ###
@@ -171,7 +166,7 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     ###
     
     ### Przygotowanie funkcji i tekstury ###
-    mod = SourceModule(cudaAgregator.getSertlipCudaCode())
+    mod = SourceModule(cudaAgregator.getSertilpCudaCode(threadPerRow=threadPerRow, sliceSize=sliceSize, prefetch=prefetch))
     kernel = mod.get_function("rbfSERTILP_old")
     texref = mod.get_texref("mainVecTexRef")
     
@@ -189,9 +184,6 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
                             cuda.Out(wynik), \
                             numRows, \
                             align, \
-                            threadPerRow, \
-                            sliceSize, \
-                            prefetch, \
                             block=block, \
                             grid=grid, \
                             texrefs=tex)
