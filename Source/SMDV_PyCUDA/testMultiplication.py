@@ -45,7 +45,8 @@ if __name__ == '__main__':
 #    plikMacierzy = 'Macierz_float_128x128.mtx'
     
 #    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\"
-    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\wygenerowane\\"
+#    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\wygenerowane\\"
+    folderMacierzy = "..\\..\\Matrices\\Generated\\"
     
     blockSize = 128
     sliceSize = 64 # 64 128 
@@ -87,11 +88,11 @@ if __name__ == '__main__':
         macierz = scipy.io.mmread(folderMacierzy + plikMacierzy)
         resultCPU = multiplyCPU(macierz, repeat=powtorzenia)
         
-        print '========================'
+#        print '========================'
         resultSertilpELLPack = multiplySertilp(macierz, alignConst=alignStala, sliceSize=sliceSize, threadPerRow=threadPerRow, prefetch=prefetch, repeat=powtorzenia)
-#        if rowEqualsIgnoreEndZero(resultSertilpELLPack[0], resultCPU[0]):
-#            print plikMacierzy #+ ": " + str(rowEqualsIgnoreEndZeroGetRows(resultSertilpELLPack[0], resultCPU[0]))
-        print resultSertilpELLPack[0]
+        if rowEqualsIgnoreEndZero(resultSertilpELLPack[0], resultCPU[0]):
+            print plikMacierzy #+ ": " + str(rowEqualsIgnoreEndZeroGetRows(resultSertilpELLPack[0], resultCPU[0]))
+#        print resultSertilpELLPack[0]
     print "Skonczylem!"
         
     
