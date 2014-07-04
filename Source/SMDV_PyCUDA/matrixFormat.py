@@ -56,13 +56,18 @@ def kolumnyDoListy(listaList, grupuj = 1):
 
 def reshapeDoWielokrotnosciELL(macierzDoRozszerzenia, podstawaWielokrotnosciWierszy):
     u'''
-    Metoda rozszerza macierz ELL. Dodaje do przekazanej metody zerowych wierszy.
+    Metoda rozszerza macierz ELL. Dodaje do przekazanej metody zerowe wiersze.
     Dodawanych jest tyle wierszy, aby ich ilość była wielokrotności przekazanej liczby.
     
     Metoda działa w miejscu, nadpisuje przekazaną macierz.
     '''
     wiersze = len(macierzDoRozszerzenia[2])  
-    doDodania = ((wiersze / podstawaWielokrotnosciWierszy) + 1) * (podstawaWielokrotnosciWierszy - wiersze)
+#    doDodania = ((wiersze / podstawaWielokrotnosciWierszy) + 1) * (podstawaWielokrotnosciWierszy - wiersze)
+    modulo = wiersze % podstawaWielokrotnosciWierszy
+    if modulo == 0:
+        return
+    else:
+        doDodania = podstawaWielokrotnosciWierszy - modulo
     for i in range(doDodania):
         macierzDoRozszerzenia[0].append([])
         macierzDoRozszerzenia[1].append([])
