@@ -259,7 +259,7 @@ def convertToSertilpELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sli
     else:
         return (wartosci, indeksyKolumn, dlugosciWierszy, sliceStart)
 
-def transformToSERTILP(matrix, array = True, threadsPerRow, sliceSize, preFetch, alignParam = 64):
+def transformToSERTILP(matrix, threadsPerRow, sliceSize, preFetch, alignParam = 64, array = True):
     try:
         matrix = matrix.tocsr()
     except AttributeError:
