@@ -137,15 +137,15 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
     if convertMethod == 'new':
         mac = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam = alignConst)
-    elif convertMethod == 'old':
+    else: #elif convertMethod == 'old':
         mac = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align, prefetch=prefetch)
-    else:
-        mac = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align, prefetch=prefetch)
+        rowLengthTemp = numpy.array([int(ceil((1.0 * i) / (threadPerRow * prefetch))) for i in mac[2]])
+        rowLength = rowLengthTemp
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     #(int)Math.Ceiling(1.0 * rowLenght[idx] / (threadsPerRow * preFetch))
-    rowLengthTemp = numpy.array([int(ceil((1.0 * i) / (threadPerRow * prefetch))) for i in mac[2]])
-    rowLength = cuda.to_device(rowLengthTemp)
+    
+    rowLength = cuda.to_device(rowLength)
     sliceStart = cuda.to_device(mac[3])
     
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
