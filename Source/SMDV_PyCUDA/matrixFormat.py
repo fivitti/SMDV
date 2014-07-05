@@ -15,7 +15,7 @@ def normalizujDlugosci(listaList, podstawaWielokrotnosci = 1):
     Metoda wyszukuje najdłuższą listę w zestawie. Następnie zwiększa długość 
     wszystkich pozostałych, aby były jej równe. W tym celu dopisuje do nich
     na koniec zera.
-    
+
     Metoda pracuje "w miejscu". Nie zwraca wyniku.
     '''
     dlugosc = 0
@@ -259,6 +259,63 @@ def convertToSertilpELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sli
     else:
         return (wartosci, indeksyKolumn, dlugosciWierszy, sliceStart)
 
+def transformToSERTILP(matrix, array = True, threadsPerRow, sliceSize, preFetch, alignParam = 64):
+    try:
+        matrix = matrix.tocsr()
+    except AttributeError:
+        matrix = scipy.sparse.csr_matrix(matrix)
+    from math import ceil
+    align = int(ceil(1.0 * sliceSize * threadsPerRow / alignParam) * alignParam)
+    numRows = matrix.shape[0]
+    numSlices = int(ceil((numRows + 0.0) / sliceSize))
+    rowLength = [0, ] * numRows
+    sliceStart = [0, ] * (numSlices + 1)
+    sliceMax = [0, ] * numSlices
+    sliceNr = 0
+    
+    for i in range(numSlices):
+        sliceMax[i] = -1
+        idx = -1
+        for j in range(sliceSize):
+            idx = j + i * sliceSize
+            if idx < numRows:
+                rowLength[idx] = matrix.getrow(idx).getnnz()
+                if sliceMax[i] < rowLength[idx]:
+                    sliceMax[i] = rowLength[idx]
+                rowLength[idx] = int(ceil(1.0 * rowLength[idx] / (threadsPerRow * preFetch)))
+        sliceStart[i+1] = sliceStart[i] + int(ceil(1.0*sliceMax[i] / (preFetch * threadsPerRow)) * preFetch * align)
+    nnzEl = sliceStart[numSlices]
+    vecCols = [0,] * nnzEl
+    vecVals = [0,] * nnzEl
+    sliceNr = 0
+    rowInSlice = 0
+    for i in range(numRows):
+        sliceNr = i / sliceSize
+        rowInSlice = i % sliceSize
+        vec = matrix.getrow(i)
+        
+        threadNr = -1
+        value = 0
+        col = -1
+        
+        rowSlice = -1
+        for k in range(vec.getnnz()):
+            threadNr = k % threadsPerRow
+            rowSlice = k / threadsPerRow
+            value = vec.data[k]
+            col = vec.indices[k]
+            idx = sliceStart[sliceNr] + align * rowSlice + rowInSlice * threadsPerRow + threadNr
+            
+            vecVals[idx] = value
+            vecCols[idx] = col
+            
+    if array == True:
+        return (numpy.array(vecVals, dtype=numpy.float32), \
+            numpy.array(vecCols, dtype=numpy.int32), \
+            numpy.array(rowLength, dtype=numpy.int32), \
+            numpy.array(sliceStart, dtype=numpy.int32))
+    else:
+        return (vecVals, vecCols, rowLength, sliceStart)
         
 if __name__ == "__main__":
     A = numpy.array([[3, 0, 5, 0, 2],
@@ -297,12 +354,15 @@ if __name__ == "__main__":
     
     for macierz in macierze:
 #        mELL = convertToELL(macierz, array=False)
-        mSlicedELL = convertToSlicedELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala)
+#        mSlicedELL = convertToSlicedELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala)
         mSertilpELL = convertToSertilpELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala, prefetch=prefetch)
+        mSertilpELLTransform = TransformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam=alignStala)
         print "Macierz:\n" + str(macierz) 
 #        print "ELL:\n" + stringListInList(mELL)
-        print "SlicedELL:\n" + stringListInList(mSlicedELL)
+#        print "SlicedELL:\n" + stringListInList(mSlicedELL)
         print "SertilpELL:\n" + stringListInList(mSertilpELL)
+        print "SertilpELL:\n" + stringListInList(mSertilpELLTransform)
+        
         
 
     
