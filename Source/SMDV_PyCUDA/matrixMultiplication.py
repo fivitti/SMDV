@@ -137,6 +137,7 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
     if convertMethod == 'new':
         mac = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam = alignConst)
+        rowLength = mac[2]
     else: #elif convertMethod == 'old':
         mac = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align, prefetch=prefetch)
         rowLengthTemp = numpy.array([int(ceil((1.0 * i) / (threadPerRow * prefetch))) for i in mac[2]])
