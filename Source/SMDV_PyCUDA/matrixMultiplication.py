@@ -11,7 +11,7 @@ from pycuda.compiler import SourceModule
 import numpy
 from math import ceil
  
-from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL
+from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL, transformToSERTILP
 import cudaAgregator
 
 import stoper
@@ -132,10 +132,15 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     
     return (wynik, timer.get_elapsed())    
     
-def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, repeat = 1):    
+def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, repeat = 1, convertMethod = "new"):    
     ### Przygotowanie macierzy###
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
-    mac = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align, prefetch=prefetch)
+    if convertMethod == 'new':
+        mac = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam = alignConst)
+    elif convertMethod == 'old':
+        mac = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align, prefetch=prefetch)
+    else:
+        mac = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align, prefetch=prefetch)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     #(int)Math.Ceiling(1.0 * rowLenght[idx] / (threadsPerRow * preFetch))
