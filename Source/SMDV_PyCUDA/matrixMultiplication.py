@@ -134,7 +134,7 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     
 def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, repeat = 1):    
     ### Przygotowanie macierzy###
-    align = ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst
+    align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
     mac = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align, prefetch=prefetch)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
