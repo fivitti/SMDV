@@ -356,7 +356,7 @@ if __name__ == "__main__":
 #        mELL = convertToELL(macierz, array=False)
 #        mSlicedELL = convertToSlicedELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala)
         mSertilpELL = convertToSertilpELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala, prefetch=prefetch)
-        mSertilpELLTransform = TransformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam=alignStala)
+        mSertilpELLTransform = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam=alignStala)
         print "Macierz:\n" + str(macierz) 
 #        print "ELL:\n" + stringListInList(mELL)
 #        print "SlicedELL:\n" + stringListInList(mSlicedELL)
