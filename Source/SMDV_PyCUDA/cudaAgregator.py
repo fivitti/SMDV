@@ -56,7 +56,7 @@ def getELLCudaCode():
         }
     '''
 
-def getSlicedELLCudaCode(sh_cache_size = 100, threadPerRow = 2):
+def getSlicedELLCudaCode(sh_cache_size, threadPerRow = 2):
     tpl = Template('''
         texture<float, 1, cudaReadModeElementType> mainVecTexRef;
 

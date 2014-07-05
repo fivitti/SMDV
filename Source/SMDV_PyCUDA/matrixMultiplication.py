@@ -106,7 +106,7 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     ###
     
     ### Przygotowanie funkcji i tekstury SlicedEllPack ###
-    modSlicedELL = SourceModule(cudaAgregator.getSlicedELLCudaCode(threadPerRow=threadPerRow))
+    modSlicedELL = SourceModule(cudaAgregator.getSlicedELLCudaCode(sh_cache_size=threadPerRow*sliceSize, threadPerRow=threadPerRow))
     kernelSlicedELL = modSlicedELL.get_function("SlicedEllpackFormatKernel")
     texrefSlicedELL = modSlicedELL.get_texref("mainVecTexRef")
     
