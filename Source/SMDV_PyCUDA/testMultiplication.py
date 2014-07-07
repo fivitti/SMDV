@@ -47,7 +47,8 @@ if __name__ == '__main__':
     
 #    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\"
 #    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\wygenerowane\\"
-    folderMacierzy = "..\\..\\Matrices\\Generated\\"
+#    folderMacierzy = "..\\..\\Matrices\\Generated\\"
+    folderMacierzy = "../../Matrices/Generated/"
     
     blockSize = 128
     sliceSize = 32 # 64 128 
