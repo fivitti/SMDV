@@ -4,7 +4,6 @@ Created on Thu Feb 20 15:02:08 2014
 
 @author: HP
 """
-from jinja2 import Template
 
 def getELLCudaCode():
     return '''
@@ -57,7 +56,7 @@ def getELLCudaCode():
     '''
 
 def getSlicedELLCudaCode(sh_cache_size, threadPerRow = 2):
-    tpl = Template('''
+    tpl = '''
         texture<float, 1, cudaReadModeElementType> mainVecTexRef;
 
         extern "C" __global__ void SlicedEllpackFormatKernel(
@@ -110,14 +109,15 @@ def getSlicedELLCudaCode(sh_cache_size, threadPerRow = 2):
            int ty=threadIdx.x;
            data[ty] =tex1Dfetch(mainVecTexRef, ty);
         }
-        ''')
-    rendered_tpl = tpl.render(sh_cache_size = sh_cache_size, threadPerRow = threadPerRow)
-    return rendered_tpl
+        '''
+    tpl = tpl.replace("{{ sh_cache_size }}", str(sh_cache_size))
+    tpl = tpl.replace("{{ threadPerRow }}", str(threadPerRow))
+    return tpl
 
 def getSertilpCudaCode(shDot_size = 0, threadPerRow = 2, sliceSize = 32, prefetch = 2):
     if shDot_size == 0:
         shDot_size = threadPerRow * sliceSize
-    tpl = Template('''
+    tpl = '''
         texture<float, 1, cudaReadModeElementType> mainVecTexRef;
         
         extern "C" __global__ void rbfSERTILP_old(const float *vecVals,
@@ -197,9 +197,13 @@ def getSertilpCudaCode(shDot_size = 0, threadPerRow = 2, sliceSize = 32, prefetc
         
         		}//if row<nrRows 
         }//end func
-    ''')
-    tpl_rendered = tpl.render(shDot_size = shDot_size, threadPerRow = threadPerRow, sliceSize = sliceSize, prefetch = prefetch)
-    return tpl_rendered
+    '''
+    tpl = tpl.replace("{{ shDot_size }}", str(shDot_size))
+    tpl = tpl.replace("{{ threadPerRow }}", str(threadPerRow))
+    tpl = tpl.replace("{{ sliceSize }}", str(sliceSize))
+    tpl = tpl.replace("{{ prefetch }}", str(prefetch))
+    
+    return tpl
     
 if __name__ == "__main__":
     p = getSertilpCudaCode()
