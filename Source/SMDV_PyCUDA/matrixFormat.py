@@ -319,6 +319,12 @@ def transformToSERTILP(matrix, threadsPerRow, sliceSize, preFetch, alignParam = 
         
 def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
     '''
+    METODA DZIAŁA BŁĘDNIE.
+    
+    NIE STOSOWAĆ.
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+    
     Metoda przekształca numpy.array w macierz w formacie Ertilp.
     
     Jeżeli parametr array = True to metoda zwraca krotkę, ktrórej pierwszym elementem jest numpy.array typu float32 zawierająca niezerowe wartości,
@@ -350,6 +356,42 @@ def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
                 numpy.array(dlugosciWierszy, dtype=numpy.int32))
     else:
         return (wartosci, indeksyKolumn, dlugosciWierszy)
+        
+def transformToERTILPFormat(matrix, align, ThreadsPerRow, array = True):
+    try:
+        matrix = matrix.tocsr()
+    except AttributeError:
+        matrix = scipy.sparse.csr_matrix(matrix)
+    from math import ceil#, mean
+    
+    maxEl = 1
+    maxEl = max([m.getnnz() for m in matrix])
+    rest = maxEl % align
+    
+    if rest != 0:
+        maxEl = maxEl + align - rest
+    
+#    avgEl = mean([m.getnnz() for m in matrix])
+    numRows = matrix.shape[0]
+    vecVals = [0, ] * (numRows * maxEl)
+    vecCols = [0, ] * (numRows * maxEl)
+    rowLength = [0, ] * numRows
+    
+    for i in range(numRows):
+        vec = matrix.getrow(i)
+        for j in range(vec.getnnz()):
+            k = j / ThreadsPerRow
+            t = j % ThreadsPerRow
+            vecVals[k * numRows * ThreadsPerRow + i * ThreadsPerRow + t] = vec.data[j]
+            vecCols[k * numRows * ThreadsPerRow + i * ThreadsPerRow + t] = vec.indices[j]
+        rowLength[i] = int(ceil((vec.getnnz() + 0.0) / align))
+
+    if array == True:
+        return (numpy.array(vecVals, dtype=numpy.float32), \
+            numpy.array(vecCols, dtype=numpy.int32), \
+            numpy.array(rowLength, dtype=numpy.int32))
+    else:
+        return (vecVals, vecCols, rowLength)
         
 if __name__ == "__main__":
     A = numpy.array([[3, 0, 5, 0, 2],
@@ -390,8 +432,8 @@ if __name__ == "__main__":
 #    macierze = [A, B, C]
     macierze = [E, ] 
     sliceSize = 4 # 64 128 
-    threadPerRow = 4# 2 4 
-    alignStala = 2
+    threadPerRow = 2# 2 4 
+    alignStala = 32
     prefetch = 2
     
     from matrixUtilites import stringListInList
@@ -399,13 +441,15 @@ if __name__ == "__main__":
     for macierz in macierze:
 #        mELL = convertToELL(macierz, array=False)
 #        mSlicedELL = convertToSlicedELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala)
-        mSertilpELL = convertToSertilpELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala, prefetch=prefetch)
-        mSertilpELLTransform = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam=alignStala)
+#        mSertilpELL = convertToSertilpELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala, prefetch=prefetch)
+#        mSertilpELLTransform = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam=alignStala)
+        mErtilpTransform = transformToERTILPFormat(macierz, align=alignStala, ThreadsPerRow=threadPerRow)
         print "Macierz:\n" + str(macierz) 
 #        print "ELL:\n" + stringListInList(mELL)
 #        print "SlicedELL:\n" + stringListInList(mSlicedELL)
-        print "SertilpELL:\n" + stringListInList(mSertilpELL)
-        print "SertilpELL:\n" + stringListInList(mSertilpELLTransform)
+#        print "SertilpELL:\n" + stringListInList(mSertilpELL)
+#        print "SertilpELL:\n" + stringListInList(mSertilpELLTransform)
+        print "Ertilp:\n" + stringListInList(mErtilpTransform)
         
         
 
