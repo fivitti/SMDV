@@ -42,29 +42,30 @@ if __name__ == '__main__':
 #    plikMacierzy = 'wbp128.mtx'
 #    plikMacierzy = 'wbp256.mtx'
 #    plikMacierzy = 'dw8192.mtx'
-    plikMacierzy = 'Macierz_int_9x9.mtx'
+#    plikMacierzy = 'Macierz_int_9x9.mtx'
 #    plikMacierzy = 'Macierz_float_128x128.mtx'
+
     
 #    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\"
 #    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\wygenerowane\\"
 #    folderMacierzy = "..\\..\\Matrices\\Generated\\"
     folderMacierzy = "../../Matrices/Generated/"
     
-    blockSize = 128
-    sliceSize =32 # 64 128 
+    blockSize = 32
+    sliceSize =64 # 64 128 
     threadPerRow =2# 2 4 
-    alignStala = 64
+    alignStala = 32
     prefetch = 2
     powtorzenia = 1
     dokladnoscCzasu = 3
     ###
-    macierz = scipy.io.mmread(folderMacierzy + plikMacierzy)
-#    from math import ceil
-#    conv = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=int(ceil((sliceSize*threadPerRow*1.0)/alignStala)*alignStala), prefetch=prefetch)
-#    macierz = numpy.array([[0, 0, 3], \
-#                           [0, 0, 2], \
-#                           [0, 0, 1]])
-    
+#    macierz = scipy.io.mmread(folderMacierzy + plikMacierzy)
+##    from math import ceil
+##    conv = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=int(ceil((sliceSize*threadPerRow*1.0)/alignStala)*alignStala), prefetch=prefetch)
+##    macierz = numpy.array([[0, 0, 3], \
+##                           [0, 0, 2], \
+##                           [0, 0, 1]])
+#    
 ##    resultELLPack = multiplyELL(macierz, blockSize=blockSize, repeat=powtorzenia)
 ##    print "Czas ELL: " + str(round(resultELLPack[1], dokladnoscCzasu))
 ##    resultSlicedELLPack = multiplySlicedELL(macierz, alignStala, sliceSize, threadPerRow, repeat=powtorzenia)
@@ -89,7 +90,7 @@ if __name__ == '__main__':
 #    bledneWiersze = rowEqualsIgnoreEndZeroGetRows(rC, rEr)
 #    print bledneWiersze
     
-    for i in range(5, 68):
+    for i in range(32, 68):
         blad = False
         log = ''
         plikMacierzy = "Macierz_int_" + str(i) + "x" + str(i) + ".mtx"
@@ -111,13 +112,16 @@ if __name__ == '__main__':
 #        if not rowEqualsIgnoreEndZero(resultELLPack[0], resultCPU[0]):
 #            blad = True
 #            log += " ELLPack"
-        if not rowEqualsIgnoreEndZero(resultErtilp[0], resultCPU[0]):
-            row = rowEqualsIgnoreEndZeroGetRows(resultErtilp[0], resultCPU[0])
-            print plikMacierzy + " " + str(row)
-            blad = True
-            log += " Ertilp"
+#        if not rowEqualsIgnoreEndZero(resultErtilp[0], resultCPU[0]):
+#            row = rowEqualsIgnoreEndZeroGetRows(resultErtilp[0], resultCPU[0])
+#            print plikMacierzy + " " + str(row)
+#            blad = True
+#            log += " Ertilp"
 #        if blad:
 #            print plikMacierzy + log
+            
+        if rowEqualsIgnoreEndZero(resultErtilp[0], resultCPU[0]):
+            print plikMacierzy
             
     print "Skonczylem!"
         

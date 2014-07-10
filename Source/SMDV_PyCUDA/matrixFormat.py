@@ -318,13 +318,7 @@ def transformToSERTILP(matrix, threadsPerRow, sliceSize, preFetch, alignParam = 
         return (vecVals, vecCols, rowLength, sliceStart)
         
 def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
-    '''
-    METODA DZIAŁA BŁĘDNIE.
-    
-    NIE STOSOWAĆ.
-
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
-    
+    '''    
     Metoda przekształca numpy.array w macierz w formacie Ertilp.
     
     Jeżeli parametr array = True to metoda zwraca krotkę, ktrórej pierwszym elementem jest numpy.array typu float32 zawierająca niezerowe wartości,
@@ -358,6 +352,13 @@ def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
         return (wartosci, indeksyKolumn, dlugosciWierszy)
         
 def transformToERTILPFormat(matrix, align, ThreadsPerRow, array = True):
+    '''
+        METODA DZIAŁA BŁĘDNIE.
+    
+    NIE STOSOWAĆ.
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
+    '''
     try:
         matrix = matrix.tocsr()
     except AttributeError:

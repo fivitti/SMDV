@@ -11,7 +11,7 @@ from pycuda.compiler import SourceModule
 import numpy
 from math import ceil
  
-from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL, transformToSERTILP, convertToErtilp
+from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL, transformToSERTILP, convertToErtilp, transformToERTILPFormat
 import cudaAgregator
 
 import stoper
@@ -200,9 +200,10 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
 
 def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1):
     mac = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)
+#    mac = transformToERTILPFormat(macierz, align = 32, ThreadsPerRow=threadPerRow)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
-    rowLength = cuda.to_device(mac[2])
+    rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
     
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
     wektor = numpy.arange(1, kolumnyMacierzy+1, dtype=numpy.float32)      
