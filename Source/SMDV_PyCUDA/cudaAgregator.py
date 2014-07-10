@@ -265,7 +265,7 @@ def getErtilpCudaCode(block_sice, threadPerRow, prefetch):
         		
         		#pragma unroll
         		for( j=0; j<{{ PREFETCH_SIZE }};j++){
-        			dot[j]+=preVals[j]*fetchTex<TexSel>(preColls[j]);
+        			dot[j]+=preVals[j]*tex1Dfetch(labelsTexRef,preColls[j]);
         		}
         	}
         	
@@ -321,7 +321,7 @@ def getErtilpCudaCode(block_sice, threadPerRow, prefetch):
         	if(row<shRows)
         	{
         
-        		SpMV_ERTILP<1>(vals,colIdx,rowLength,row,rowsB,shRows,shDot);
+        		SpMV_ERTILP(vals,colIdx,rowLength,row,rowsB,shRows,shDot);
         		//if(row2<shRows){
         		if(threadIdx.x<rowsB){
         			//results[row2]=row2;			

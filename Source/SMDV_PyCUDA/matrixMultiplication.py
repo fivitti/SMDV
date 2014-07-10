@@ -199,7 +199,7 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     return (wynik, timer.get_elapsed())
 
 def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1):
-    mac = convertToErtilp(macierz)
+    mac = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     rowLength = cuda.to_device(mac[2])
