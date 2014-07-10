@@ -11,7 +11,7 @@ from pycuda.compiler import SourceModule
 import numpy
 from math import ceil
  
-from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL, transformToSERTILP
+from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL, transformToSERTILP, convertToErtilp
 import cudaAgregator
 
 import stoper
@@ -195,6 +195,52 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
                             texrefs=tex)
         timer.stop()
     ###
+    
+    return (wynik, timer.get_elapsed())
+
+def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1):
+    mac = convertToErtilp(macierz)
+    vals = cuda.to_device(mac[0])
+    colIdx = cuda.to_device(mac[1])
+    rowLength = cuda.to_device(mac[2])
+    
+    wierszeMacierzy, kolumnyMacierzy = macierz.shape
+    wektor = numpy.arange(1, kolumnyMacierzy+1, dtype=numpy.float32)      
+    wynik = numpy.zeros(wierszeMacierzy, dtype=numpy.float32)
+    numRows = numpy.int32(wierszeMacierzy)
+    
+    ### Przygotowanie stałych czasu ###
+    timer = stoper.Timer()
+    ###
+    
+    ### Przygotowanie stałych CUDA ###
+    gridSize = int(numpy.ceil((wierszeMacierzy+0.0)/blockSize))  
+    block=(blockSize,1,1)
+    grid=(gridSize,1)                    
+    g_wektor = cuda.to_device(wektor)
+    ###
+    
+    ### Przygotowanie funkcji i tekstury dla EllPack ###
+    mod = SourceModule(cudaAgregator.getErtilpCudaCode(block_sice=blockSize, threadPerRow=threadPerRow, prefetch=prefetch)) 
+    kernel = mod.get_function("rbfERTILP")
+    texref = mod.get_texref("labelsTexRef")    
+    
+    texref.set_address(g_wektor, wektor.nbytes)
+    tex = [texref]
+    ###
+    
+    
+    for i in range(repeat):
+        timer.start()
+        kernel(vals, \
+                colIdx, \
+                rowLength, \
+                cuda.Out(wynik), \
+                numRows, \
+                block=block, \
+                grid=grid, \
+                texrefs=tex)
+        timer.stop()
     
     return (wynik, timer.get_elapsed())
 

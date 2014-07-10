@@ -7,7 +7,7 @@ Created on Wed Jun 25 12:42:14 2014
 
 import scipy.io
 from matrixUtilites import rowEqualsIgnoreEndZero
-from matrixMultiplication import multiplyELL, multiplySlicedELL, multiplyCPU, multiplySertilp
+from matrixMultiplication import multiplyELL, multiplySlicedELL, multiplyCPU, multiplySertilp, multiplyErtilp
 from matrixFormat import convertToSertilpELL
 import numpy
 
@@ -97,6 +97,7 @@ if __name__ == '__main__':
         resultELLPack = multiplyELL(macierz, blockSize=blockSize, repeat=powtorzenia)
         resultSlicedELLPack = multiplySlicedELL(macierz, alignStala, sliceSize, threadPerRow, repeat=powtorzenia)        
         resultSertilpELLPack = multiplySertilp(macierz, alignConst=alignStala, sliceSize=sliceSize, threadPerRow=threadPerRow, prefetch=prefetch, repeat=powtorzenia)
+        resultErtilp = multiplyErtilp(macierz,threadPerRow=threadPerRow, prefetch=prefetch, blockSize=blockSize, repeat=powtorzenia)  
         if not rowEqualsIgnoreEndZero(resultSertilpELLPack[0], resultCPU[0]):
 #            row = rowEqualsIgnoreEndZeroGetRows(resultSertilpELLPack[0], resultCPU[0])
 #            print plikMacierzy + " " + str(row)
@@ -108,6 +109,9 @@ if __name__ == '__main__':
         if not rowEqualsIgnoreEndZero(resultELLPack[0], resultCPU[0]):
             blad = True
             log += " ELLPack"
+        if not rowEqualsIgnoreEndZero(resultErtilp[0], resultCPU[0]):
+            blad = True
+            log += " Ertilp"
         if blad:
             print plikMacierzy + log
             

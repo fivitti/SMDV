@@ -317,6 +317,40 @@ def transformToSERTILP(matrix, threadsPerRow, sliceSize, preFetch, alignParam = 
     else:
         return (vecVals, vecCols, rowLength, sliceStart)
         
+def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
+    '''
+    Metoda przekształca numpy.array w macierz w formacie Ertilp.
+    
+    Jeżeli parametr array = True to metoda zwraca krotkę, ktrórej pierwszym elementem jest numpy.array typu float32 zawierająca niezerowe wartości,
+    drugim numpy.array typu int32 zawierająca indeksy kolumn, gdzie znajdują się niezerowe wartości,
+    trzecim numpy.array typu int32 zawierająca długości poszczególnych wierszy.
+    
+    Jeżeli parametr array = False to metoda zwraca krotkę, której pierwszym elementem jest lista zawierająca niezerowe wartości,
+    drugim lista zawierająca indeksy kolumn, gdzie znajdują się niezerowe wartości,
+    trzecim lista zawierająca długości poszczególnych wierszy.
+    
+    return (vals, colIdx, rowLength)
+    '''
+    wartosci = []
+    indeksyKolumn = []
+    mdp = preconvertToELL(macierzDoKonwersji)
+    wartosciSurowe = mdp[0]
+    kolumnySurowe = mdp[1]
+    dlugosciWierszy = mdp[2]
+        
+    normalizujDlugosci(wartosciSurowe, threadPerRow*prefetch)
+    normalizujDlugosci(kolumnySurowe, threadPerRow*prefetch)
+    
+    wartosci = kolumnyDoListy(wartosciSurowe, threadPerRow)
+    indeksyKolumn = kolumnyDoListy(kolumnySurowe, threadPerRow)
+    
+    if array == True:
+        return (numpy.array(wartosci, dtype=numpy.float32), \
+                numpy.array(indeksyKolumn, dtype=numpy.int32), \
+                numpy.array(dlugosciWierszy, dtype=numpy.int32))
+    else:
+        return (wartosci, indeksyKolumn, dlugosciWierszy)
+        
 if __name__ == "__main__":
     A = numpy.array([[3, 0, 5, 0, 2],
                      [0, 1, 0, 3, 2],
