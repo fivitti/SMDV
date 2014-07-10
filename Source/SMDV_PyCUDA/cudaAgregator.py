@@ -4,7 +4,16 @@ Created on Thu Feb 20 15:02:08 2014
 
 @author: HP
 """
-
+def convertString(string, **kwargs):
+    s = string
+    for name, value in kwargs.items():
+        value = str(value)
+        s = s.replace("{{"+name+"}}", value)
+        s = s.replace("{{ "+name+"}}", value)
+        s = s.replace("{{"+name+" }}", value)
+        s = s.replace("{{ "+name+" }}", value)
+    return s
+        
 def getELLCudaCode():
     return '''
         texture<float,1,cudaReadModeElementType> mainVecTexRef;
@@ -110,8 +119,9 @@ def getSlicedELLCudaCode(sh_cache_size, threadPerRow = 2):
            data[ty] =tex1Dfetch(mainVecTexRef, ty);
         }
         '''
-    tpl = tpl.replace("{{ sh_cache_size }}", str(sh_cache_size))
-    tpl = tpl.replace("{{ threadPerRow }}", str(threadPerRow))
+#    tpl = tpl.replace("{{ sh_cache_size }}", str(sh_cache_size))
+#    tpl = tpl.replace("{{ threadPerRow }}", str(threadPerRow))
+    tpl = convertString(tpl, sh_cache_size=sh_cache_size, threadPerRow=threadPerRow)
     return tpl
 
 def getSertilpCudaCode(shDot_size = 0, threadPerRow = 2, sliceSize = 32, prefetch = 2):
@@ -135,23 +145,28 @@ def getSertilpCudaCode(shDot_size = 0, threadPerRow = 2, sliceSize = 32, prefetc
         		{
         			shSliceStart=sliceStart[blockIdx.x];
         		}
+                 shDot[threadIdx.x]=0.0f;
         		__syncthreads();
         
         		int idxT = threadIdx.x % {{ threadPerRow }}; //thread number in Thread group
         		int idxR = threadIdx.x/{{ threadPerRow }}; //row index mapped into block region
         
         		//map group of thread to row, in this case 4 threads are mapped to one row
-        		int row = (blockIdx.x*blockDim.x+threadIdx.x)/{{ threadPerRow }}; //(blockIdx.x*blockDim.x+threadIdx.x)>> LOG_THREADS; 
+        		int row = (blockIdx.x*blockDim.x+threadIdx.x)/{{ threadPerRow }}; 
+                 //(blockIdx.x*blockDim.x+threadIdx.x)>> LOG_THREADS; 
         
+        
+                //to zmienilem, wyciagnalem wyzej
+                 unsigned int j=0;
         		if (row < nrRows){
         			int maxRow = vecLengths[row];
         			//int maxRow = (int)ceil(vecLengths[row]/(float)({{ threadPerRow }}*{{ prefetch }}) );
         
         			float val[{{ prefetch }}];
         			int col[{{ prefetch }}];
-        			float dot[{{ prefetch }}]={0};
+        			float dot[{{ prefetch }}]={0, 0};
         
-        			unsigned int j=0;
+        			
         			unsigned int arIdx=0;
         			for(int i=0; i < maxRow; i++){
         
@@ -177,6 +192,7 @@ def getSertilpCudaCode(shDot_size = 0, threadPerRow = 2, sliceSize = 32, prefetc
         
         			shDot[idxT*{{ sliceSize }}+idxR]=dot[0];
         			__syncthreads();		
+           }///dodalem nawias zamykajacy
         
         			volatile float *shDotv = shDot;
         			//reduction to some level
@@ -195,13 +211,15 @@ def getSertilpCudaCode(shDot_size = 0, threadPerRow = 2, sliceSize = 32, prefetc
         				}
         			}
         
-        		}//if row<nrRows 
+                //zakomentowalem ponizej nawias zamykajacy
+        		//}//if row<nrRows 
         }//end func
     '''
-    tpl = tpl.replace("{{ shDot_size }}", str(shDot_size))
-    tpl = tpl.replace("{{ threadPerRow }}", str(threadPerRow))
-    tpl = tpl.replace("{{ sliceSize }}", str(sliceSize))
-    tpl = tpl.replace("{{ prefetch }}", str(prefetch))
+#    tpl = tpl.replace("{{ shDot_size }}", str(shDot_size))
+#    tpl = tpl.replace("{{ threadPerRow }}", str(threadPerRow))
+#    tpl = tpl.replace("{{ sliceSize }}", str(sliceSize))
+#    tpl = tpl.replace("{{ prefetch }}", str(prefetch))
+    tpl = convertString(tpl, shDot_size = shDot_size, threadPerRow = threadPerRow, sliceSize = sliceSize, prefetch = prefetch)
     
     return tpl
     
