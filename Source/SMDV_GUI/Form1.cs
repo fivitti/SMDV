@@ -10,6 +10,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using GUIforSMDV.Properties;
+
 
 
 namespace GUIforSMDV
@@ -26,105 +28,58 @@ namespace GUIforSMDV
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            try
-            {
-                #region odczyt ustawień z pliku
-                StreamReader czytaj = File.OpenText("UstawieniaSMDV.txt");
-                string linijka = czytaj.ReadLine();
-                if (linijka == "null")
-                    textBoxSciezkaDoProgramu.Text = "";
-                else
-                    textBoxSciezkaDoProgramu.Text = linijka;
-                textBoxSciezkaDoMacierzy.Text = czytaj.ReadLine();
-                textBoxSciezkaDoLogow.Text = czytaj.ReadLine();
-                textBoxSeparator.Text = czytaj.ReadLine();
-                textBoxSymbolBrakDanych.Text = czytaj.ReadLine();
-                textBoxPowtorzenia.Text = czytaj.ReadLine();
-                string czyCUDA = czytaj.ReadLine();
-                string czyCPU = czytaj.ReadLine();
-                string czyDodatkoweDane = czytaj.ReadLine();
-                string czyKomunikatyNaKonsoli = czytaj.ReadLine();
-                string czyUtworzycLog = czytaj.ReadLine();
-                
-                if (czyCUDA == "true")
-                    checkBoxCUDA.Checked = true;
-                else
-                    checkBoxCUDA.Checked = false;
+                #region odczyt ustawień 
+                textBoxSciezkaDoProgramu.Text = Settings.Default.SciezkaDoSMDV;
+                textBoxSciezkaDoPythonSMDV.Text = Settings.Default.SciezkaDoPySMDV;
+                textBoxSciezkaDoMacierzy.Text = Settings.Default.SciezkaDoMacierzy;
+                textBoxSciezkaDoLogow.Text = Settings.Default.SciezkaDoLogow;
+                textBoxSeparator.Text = Settings.Default.Separator;
+                textBoxSymbolBrakDanych.Text = Settings.Default.SymbolBrakDanych;
+                textBoxPowtorzenia.Text = Settings.Default.Powtorzenia;
+                checkBoxKonsola.Checked = Settings.Default.KomunikatyNaKonsoli;
+                checkBoxPlik.Checked = Settings.Default.UtworzenieLogu;
+                checkBoxCPU.Checked = Settings.Default.ObliczeniaNaCPU;
+                checkBoxCUDA.Checked = Settings.Default.ObliczeniaNaCUDA;
+                checkBoxSMDV.Checked = Settings.Default.ObliczeniaSMDV;
+                checkBoxPySMDV.Checked = Settings.Default.ObliczeniaPySMDV;
+                textBoxPython.Text = Settings.Default.PythonExe;
+                textBoxRozmiarBloku.Text = Settings.Default.RozmiarBloku;
+                textBoxSliceSize.Text = Settings.Default.SliceSize;
+                textBoxWatkiNaWiersz.Text = Settings.Default.WatkiNaWiersz;
 
-                if (czyCPU == "true")
-                    checkBoxCPU.Checked = true;
-                else
-                    checkBoxCPU.Checked = false;
+                szukajMacierzy(Settings.Default.Macierze);                           //Przeszukuje katalog z macierzami pod kątem plików .mtx
 
-                if (czyDodatkoweDane == "true")
-                    checkBoxBrakDanych.Checked = true;
-                else
-                    checkBoxBrakDanych.Checked = false;
-
-                if (czyKomunikatyNaKonsoli == "true")
-                    checkBoxKonsola.Checked = true;
-                else
-                    checkBoxKonsola.Checked = false;
-
-                if (czyUtworzycLog == "true")
-                    checkBoxPlik.Checked = true;
-                else
-                    checkBoxPlik.Checked = false;
-
-                szukajMacierzy();                           //Przeszukuje katalog z macierzami pod kątem plików .mtx
-
-                List<string> macierze = czytaj.ReadToEnd().Split(new string[] { "\r\n" }, StringSplitOptions.None).ToList<string>();
-
-                zaznaczCheckedList(checkedListBoxMacierze, macierze);
-
-                czytaj.Close();
-                #endregion
-            }
-            catch (IOException ioe) 
-            {
-                //To specjalnie. W przypadku braku pliku nie rób nic.
-            }     
+                #endregion    
         }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            #region zapis ustawień do pliku
-            StreamWriter pisz = new StreamWriter("UstawieniaSMDV.txt");
-            if (textBoxSciezkaDoProgramu.Text == "")
-                pisz.WriteLine("null");
-            else
-                pisz.WriteLine(textBoxSciezkaDoProgramu.Text);
-            pisz.WriteLine(textBoxSciezkaDoMacierzy.Text);
-            pisz.WriteLine(textBoxSciezkaDoLogow.Text);
-            pisz.WriteLine(textBoxSeparator.Text);
-            pisz.WriteLine(textBoxSymbolBrakDanych.Text);
-            pisz.WriteLine(textBoxPowtorzenia.Text);
+            #region zapis ustawień
+            Settings.Default.SciezkaDoSMDV = textBoxSciezkaDoProgramu.Text;
+            Settings.Default.SciezkaDoPySMDV = textBoxSciezkaDoPythonSMDV.Text;
+            Settings.Default.SciezkaDoMacierzy = textBoxSciezkaDoMacierzy.Text;
+            Settings.Default.SciezkaDoLogow = textBoxSciezkaDoLogow.Text;
+            Settings.Default.Separator = textBoxSeparator.Text;
+            Settings.Default.SymbolBrakDanych = textBoxSymbolBrakDanych.Text;
+            Settings.Default.Powtorzenia = textBoxPowtorzenia.Text;
+            Settings.Default.KomunikatyNaKonsoli = checkBoxKonsola.Checked;
+            Settings.Default.UtworzenieLogu = checkBoxPlik.Checked;
+            Settings.Default.ObliczeniaNaCPU = checkBoxCPU.Checked;
+            Settings.Default.ObliczeniaNaCUDA = checkBoxCUDA.Checked;
+            Settings.Default.ObliczeniaSMDV = checkBoxSMDV.Checked;
+            Settings.Default.ObliczeniaPySMDV = checkBoxPySMDV.Checked;
+            Settings.Default.PythonExe = textBoxPython.Text;
+            Settings.Default.RozmiarBloku = textBoxRozmiarBloku.Text;
+            Settings.Default.SliceSize = textBoxSliceSize.Text;
+            Settings.Default.WatkiNaWiersz = textBoxWatkiNaWiersz.Text;
 
-            if (checkBoxCUDA.Checked)
-                pisz.WriteLine("true");
-            else
-                pisz.WriteLine("false");
-            if (checkBoxCPU.Checked)
-                pisz.WriteLine("true");
-            else
-                pisz.WriteLine("false");
-            if (checkBoxBrakDanych.Checked)
-                pisz.WriteLine("true");
-            else
-                pisz.WriteLine("false");
-            if (checkBoxKonsola.Checked)
-                pisz.WriteLine("true");
-            else
-                pisz.WriteLine("false");
-            if (checkBoxPlik.Checked)
-                pisz.WriteLine("true");
-            else
-                pisz.WriteLine("false");
-
-            for (int i = 0; i < checkedListBoxMacierze.CheckedItems.Count; ++i)
+            System.Collections.Specialized.StringCollection macierzeZaznaczone = new System.Collections.Specialized.StringCollection();
+            foreach (var item in checkedListBoxMacierze.CheckedItems)
             {
-                pisz.WriteLine(checkedListBoxMacierze.CheckedItems[i].ToString());
+                macierzeZaznaczone.Add(item.ToString());
             }
-            pisz.Close();
+            Settings.Default.Macierze = macierzeZaznaczone;
+
+            Settings.Default.Save();         
             #endregion
         }
 
@@ -134,12 +89,32 @@ namespace GUIforSMDV
             labelLog.Text = "Brak błędów.";
             try
             {
-                int powtorzenia = 0;
-                bool czyPowtorzenia = Int32.TryParse(textBoxPowtorzenia.Text, out powtorzenia);
-                if (!(czyPowtorzenia && (powtorzenia > 0)))
+                TextBox[] polaTekstowe = new TextBox[] {textBoxSciezkaDoProgramu, textBoxSciezkaDoLogow, textBoxSciezkaDoMacierzy, textBoxSciezkaDoPythonSMDV, textBoxPython, textBoxSeparator, textBoxSymbolBrakDanych};
+                TextBox[] polaLiczbowe = new TextBox[] {textBoxPowtorzenia, textBoxRozmiarBloku, textBoxSliceSize, textBoxWatkiNaWiersz};
+                bool czyBlad = false;
+
+                foreach (var item in polaTekstowe)
                 {
-                    throw new InvalidDataException("Błąd: Powtórzenia.");
+                    item.BackColor = Color.FromKnownColor(KnownColor.Window);
+                    if (item.Text.Trim() == "")
+                    {
+                        item.BackColor = Color.Red;
+                        czyBlad = true;
+                    }
                 }
+                foreach (var item in polaLiczbowe)
+                {
+                    item.BackColor = Color.FromKnownColor(KnownColor.Window);
+                    int liczba = 0;
+                    bool czy = Int32.TryParse(item.Text, out liczba);
+                    if (czy == false || liczba < 1)
+                    {
+                        item.BackColor = Color.Red;
+                        czyBlad = true;
+                    }
+                }
+                if (czyBlad)
+                    throw new InvalidDataException("Błąd: Nieprawidłowy format danych.");
                 else if (!(checkBoxCPU.Checked || checkBoxCUDA.Checked))
                 {
                     throw new InvalidDataException("Błąd: Brak sposobu wykonania obliczeń.");
@@ -148,25 +123,13 @@ namespace GUIforSMDV
                 {
                     throw new InvalidDataException("Błąd: Program nic nie zwraca.");
                 }
-                else if (textBoxSciezkaDoMacierzy.Text.Trim() == "")
-                {
-                    throw new InvalidDataException("Błąd: Ścieżka macierzy jest pusta.");
-                }
-                else if (textBoxSciezkaDoLogow.Text.Trim() == "")
-                {
-                    throw new InvalidDataException("Błąd: Ścieżka logów jest pusta.");
-                }
-                else if (textBoxSeparator.Text.Trim() == "")
-                {
-                    throw new InvalidDataException("Błąd: Brak separatora.");
-                }
-                else if (textBoxSymbolBrakDanych.Text.Trim() == "")
-                {
-                    throw new InvalidDataException("Błąd: Brak symbolu oznaczającego brak danych.");
-                }
                 else if (checkedListBoxMacierze.CheckedItems.Count < 1)
                 {
                     throw new InvalidDataException("Błąd: Brak macierzy.");
+                }
+                else if (checkBoxPySMDV.Checked && !checkBoxCUDA.Checked)
+                {
+                    throw new InvalidDataException("Błąd: Obliczenia PySMDV dostępne tylko na CUDA.");
                 }
             }
             catch (InvalidDataException ide)
@@ -176,38 +139,75 @@ namespace GUIforSMDV
             }
             
             #endregion
-
-            string wyjscie = string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}",
+                              
+            if (checkBoxSMDV.Checked == true)
+            {
+                string wyjscie = string.Format("{0} {1} {2} {3} {4} \"{5}\\\\\" \"{6}\\\\\" {7} {8} {9} {10}",
                                             checkBoxCUDA.Checked,           //0
                                             checkBoxCPU.Checked,            //1
                                             checkBoxKonsola.Checked,        //2
                                             checkBoxPlik.Checked,           //3
-                                            checkBoxBrakDanych.Checked,     //4
+                                            textBoxRozmiarBloku.Text,       //4
                                             textBoxSciezkaDoMacierzy.Text,  //5
                                             textBoxSciezkaDoLogow.Text,     //6
                                             textBoxSeparator.Text,          //7
                                             textBoxSymbolBrakDanych.Text,   //8
                                             textBoxPowtorzenia.Text,        //9
-                                            checkedElementsInCheckedListToString(checkedListBoxMacierze)//10                       //10
-                                            );
-            try
-            {
-                Process myProcess = new Process();
-                myProcess.StartInfo.FileName = textBoxSciezkaDoProgramu.Text+@"SMDV.exe";
-                //Do not receive an event when the process exits.
-                myProcess.EnableRaisingEvents = false;
-                // Parameters
-                myProcess.StartInfo.Arguments = wyjscie;
-                // Modify the following to hide / show the window
-                myProcess.StartInfo.CreateNoWindow = false;
-                myProcess.StartInfo.UseShellExecute = true;
-                myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
-                myProcess.Start();
+                                            checkedElementsInCheckedListToString(checkedListBoxMacierze));//10    
+                try
+                {
+                    Process myProcess = new Process();
+                    myProcess.StartInfo.FileName = textBoxSciezkaDoProgramu.Text;
+                    //Do not receive an event when the process exits.
+                    myProcess.EnableRaisingEvents = false;
+                    // Parameters
+                    myProcess.StartInfo.Arguments = wyjscie;
+                    // Modify the following to hide / show the window
+                    myProcess.StartInfo.CreateNoWindow = false;
+                    myProcess.StartInfo.UseShellExecute = true;
+                    myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    myProcess.Start();
+                }
+                catch (Exception fe)
+                {
+                    labelLog.Text = "Błąd: Brak pliku programu SMDV.";
+                    return;
+                }
             }
-            catch (Exception fe)
+            if (checkBoxPySMDV.Checked == true)
             {
-                labelLog.Text = "Błąd: Brak pliku programu SMDV.exe.";
-                return;
+                string wyjscie = string.Format("{0} {1} {2} \"{3}\\\\\" \"{4}\\\\\" {5} {6} {7} {8} {9} {10}",
+                                            checkBoxKonsola.Checked,        //0
+                                            checkBoxPlik.Checked,           //1
+                                            textBoxRozmiarBloku.Text,       //2
+                                            textBoxSciezkaDoMacierzy.Text,  //3
+                                            textBoxSciezkaDoLogow.Text,     //4
+                                            textBoxSeparator.Text,          //5
+                                            textBoxSymbolBrakDanych.Text,   //6
+                                            textBoxPowtorzenia.Text,        //7
+                                            textBoxSliceSize.Text,          //8
+                                            textBoxWatkiNaWiersz.Text,      //9
+                                            checkedElementsInCheckedListToString(checkedListBoxMacierze));//10
+                                            
+                try
+                {
+                    Process myProcess = new Process();
+                    myProcess.StartInfo.FileName = textBoxPython.Text;
+                    //Do not receive an event when the process exits.
+                    myProcess.EnableRaisingEvents = false;
+                    // Parameters
+                    myProcess.StartInfo.Arguments = string.Format("\"{0}\" {1}", textBoxSciezkaDoPythonSMDV.Text, wyjscie);
+                    // Modify the following to hide / show the window
+                    myProcess.StartInfo.CreateNoWindow = false;
+                    myProcess.StartInfo.UseShellExecute = true;
+                    myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    myProcess.Start();
+                }
+                catch (Exception fe)
+                {
+                    labelLog.Text = "Błąd: Brak pliku programu PySMDV. "+fe.Message;
+                    return;
+                }
             }
         }
 
@@ -218,10 +218,23 @@ namespace GUIforSMDV
             szukajMacierzy();
         }
 
-        private void szukajMacierzy()                                               //TO DO: Funkcja do poprawienia
+        private void szukajMacierzy(System.Collections.Specialized.StringCollection doZaznaczenia = null)                                               //TO DO: Funkcja do poprawienia
         {
             string sciezka = textBoxSciezkaDoMacierzy.Text;
             List<string> macierzePliki;
+            System.Collections.Specialized.StringCollection macierzeZaznaczone;
+            if (doZaznaczenia == null)
+            {
+                macierzeZaznaczone = new System.Collections.Specialized.StringCollection();
+
+                foreach (var item in checkedListBoxMacierze.CheckedItems)
+                {
+                    macierzeZaznaczone.Add(item.ToString());
+                }
+            }
+            else
+                macierzeZaznaczone = doZaznaczenia;
+
             try
             {
                 macierzePliki = Directory.GetFiles(sciezka, "*.mtx").ToList<string>();
@@ -235,34 +248,25 @@ namespace GUIforSMDV
             #region normalizacja
             for (int i = 0; i < macierzePliki.Count; ++i)
             {
-                macierzePliki[i] = macierzePliki[i].Replace(sciezka, "");
+                macierzePliki[i] = macierzePliki[i].Replace(sciezka+"\\", "");
             }
             #endregion
 
-            #region usuwanie nieistniejacych elementow
-            for (int i = 0; i < checkedListBoxMacierze.Items.Count; ++i)
+            checkedListBoxMacierze.Items.Clear();
+
+            foreach (string macierz in macierzePliki)
             {
-                if (stringWLiscie(checkedListBoxMacierze.Items[i].ToString(), macierzePliki))
+                if (stringWLiscie(macierz, macierzeZaznaczone))
                 {
-                    macierzePliki.Remove(checkedListBoxMacierze.Items[i].ToString());
+                    checkedListBoxMacierze.Items.Add(macierz, true);
+                    macierzeZaznaczone.Remove(macierz);
                 }
                 else
-                {
-                    checkedListBoxMacierze.Items.RemoveAt(i);
-                }
+                    checkedListBoxMacierze.Items.Add(macierz, false);
             }
-            #endregion
-
-            #region dodawanie nowych elementow
-            foreach (string m in macierzePliki)
-            {
-                checkedListBoxMacierze.Items.Add(m);
-            }
-            #endregion
-
         }
 
-        private bool stringWLiscie(string s, List<string> lista)
+        private bool stringWLiscie(string s, System.Collections.Specialized.StringCollection lista)
         {
             foreach (string item in lista)
             {
@@ -270,17 +274,6 @@ namespace GUIforSMDV
                     return true;      
             }
             return false;
-        }
-
-        private void zaznaczCheckedList(CheckedListBox clb, List<string> lista)
-        {
-            for (int i = 0; i < clb.Items.Count; ++i)
-            {
-                if (stringWLiscie(clb.Items[i].ToString(), lista))
-                {
-                    clb.SetItemChecked(i, true);    
-                }
-            }
         }
 
         private string checkedElementsInCheckedListToString(CheckedListBox clb)
@@ -293,6 +286,36 @@ namespace GUIforSMDV
             }
             wynik += clb.CheckedItems[dlugosc - 1].ToString();
             return wynik;
+        }
+
+        private void buttonWyborSciezkiSMDV_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.ShowDialog();
+            textBoxSciezkaDoProgramu.Text = openFileDialog1.FileName;
+        }
+
+        private void buttonSciezkaDoMacierzy_Click(object sender, EventArgs e)
+        {
+            folderBrowserDialog1.ShowDialog();
+            textBoxSciezkaDoMacierzy.Text = folderBrowserDialog1.SelectedPath;
+        }
+
+        private void buttonSciezkaDoLogow_Click(object sender, EventArgs e)
+        {
+            folderBrowserDialog1.ShowDialog();
+            textBoxSciezkaDoLogow.Text = folderBrowserDialog1.SelectedPath;
+        }
+
+        private void buttonSciezkaPySMDV_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.ShowDialog();
+            textBoxSciezkaDoPythonSMDV.Text = openFileDialog1.FileName;
+        }
+
+        private void buttonPython_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.ShowDialog();
+            textBoxPython.Text = openFileDialog1.FileName;
         }
     }
 }
