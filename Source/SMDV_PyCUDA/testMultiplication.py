@@ -44,7 +44,7 @@ if __name__ == '__main__':
 #    plikMacierzy = 'dw8192.mtx'
 #    plikMacierzy = 'Macierz_int_9x9.mtx'
 #    plikMacierzy = 'Macierz_float_128x128.mtx'
-    plikMacierzy = 'Macierz_int_35x35.mtx'
+    plikMacierzy = 'Macierz_int_65x65.mtx'
     
 #    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\"
 #    folderMacierzy = "E:\Slawek\SMVD\SMDV\Macierze\\wygenerowane\\"
