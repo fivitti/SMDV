@@ -434,8 +434,9 @@ if __name__ == "__main__":
     macierze = [E, ] 
     sliceSize = 4 # 64 128 
     threadPerRow = 2# 2 4 
-    alignStala = 32
+    
     prefetch = 2
+    alignStala = prefetch*threadPerRow
     
     from matrixUtilites import stringListInList
     

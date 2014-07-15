@@ -192,7 +192,7 @@ def getSertilpCudaCode(shDot_size = 0, threadPerRow = 2, sliceSize = 32, prefetc
         
         			shDot[idxT*{{ sliceSize }}+idxR]=dot[0];
         			__syncthreads();		
-           }///dodalem nawias zamykajacy
+                   }///dodalem nawias zamykajacy dla if
         
         			volatile float *shDotv = shDot;
         			//reduction to some level
