@@ -98,7 +98,7 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     ###    
     
     ### Przygotowanie stałych CUDA ###
-    blockSize = threadPerRow * sliceSize;
+    blockSize = int(threadPerRow * sliceSize);
     gridSize = int(numpy.ceil((wierszeMacierzy*threadPerRow+0.0)/blockSize)) 
     block=(blockSize,1,1)
     grid=(gridSize,1)                    
