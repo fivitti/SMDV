@@ -353,11 +353,7 @@ def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
         
 def transformToERTILPFormat(matrix, align, ThreadsPerRow, array = True):
     '''
-        METODA DZIAŁA BŁĘDNIE.
-    
-    NIE STOSOWAĆ.
-
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
+        align - ThreadsPerRow * prefetch
     '''
     try:
         matrix = matrix.tocsr()
@@ -445,13 +441,14 @@ if __name__ == "__main__":
 #        mSlicedELL = convertToSlicedELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala)
 #        mSertilpELL = convertToSertilpELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala, prefetch=prefetch)
 #        mSertilpELLTransform = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam=alignStala)
-        mErtilpTransform = transformToERTILPFormat(macierz, align=alignStala, ThreadsPerRow=threadPerRow)
+        eT = transformToERTILPFormat(macierz, align=alignStala, ThreadsPerRow=threadPerRow)
+        eC = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)        
         print "Macierz:\n" + str(macierz) 
 #        print "ELL:\n" + stringListInList(mELL)
 #        print "SlicedELL:\n" + stringListInList(mSlicedELL)
 #        print "SertilpELL:\n" + stringListInList(mSertilpELL)
 #        print "SertilpELL:\n" + stringListInList(mSertilpELLTransform)
-        print "Ertilp:\n" + stringListInList(mErtilpTransform)
+
         
         
 

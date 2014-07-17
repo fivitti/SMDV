@@ -198,13 +198,15 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     
     return (wynik, timer.get_elapsed())
 
-def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1):
-    mac = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)
-    mac = transformToERTILPFormat(macierz, align = prefetch*threadPerRow, ThreadsPerRow=threadPerRow)
+def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1, convertMethod = 'new'):
+    if convertMethod == 'new':
+        mac = transformToERTILPFormat(macierz, align = prefetch*threadPerRow, ThreadsPerRow=threadPerRow)
+        rowLength = cuda.to_device(mac[2])
+    else:
+        mac = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)
+        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
     vals = cuda.to_device(mac[0])
-    colIdx = cuda.to_device(mac[1])
-#    rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
-    rowLength = cuda.to_device(mac[2])   
+    colIdx = cuda.to_device(mac[1])  
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
     wektor = numpy.arange(1, kolumnyMacierzy+1, dtype=numpy.float32)      
     wynik = numpy.zeros(wierszeMacierzy, dtype=numpy.float32)
