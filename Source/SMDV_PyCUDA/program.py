@@ -103,11 +103,11 @@ def cli(block, ss, tpr, align, prefetch, repeat, pt, ell, sle, see, ert, cpu, pm
             
 def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lang):
     if resultPrint:
-        click.echo(('' if quite else getMessage('result', lang)) + resultMuliply[0])
+        click.echo(('' if quite else getMessage('result', lang)) + str(resultMuliply[0]))
     if timePrint:
-        click.echo(('' if quite else getMessage('timeList', lang)) + resultMuliply[1])
+        click.echo(('' if quite else getMessage('timeList', lang)) + str(resultMuliply[1]))
     if avrTimePrint:
-        click.echo(('' if quite else getMessage('avrtime', lang)) + avr(resultMuliply[1]))
+        click.echo(('' if quite else getMessage('avrtime', lang)) + str(avr(resultMuliply[1])))
 def getMessage(idMessage, lang='pl'):
     if lang == 'pl':
         return {
