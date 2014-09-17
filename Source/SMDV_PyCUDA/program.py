@@ -98,7 +98,7 @@ def cli(block, ss, tpr, align, prefetch, repeat, pt, ell, sle, see, ert, cpu, pm
             if ert:
                 if not quite: click.echo(getMessage('multiplyErtilp', lang), color=colors['danger'])
                 from matrixMultiplication import multiplyErtilp
-                resultMultiply = multiplyErtilp(matrix, alignConst=align, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
+                resultMultiply = multiplyErtilp(matrix, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
             
 def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lang):
