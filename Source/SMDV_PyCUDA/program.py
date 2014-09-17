@@ -107,7 +107,7 @@ def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lan
     if timePrint:
         click.echo(('' if quite else getMessage('timeList', lang)) + str(resultMuliply[1]))
     if avrTimePrint:
-        click.echo(('' if quite else getMessage('avrtime', lang)) + str(avr(resultMuliply[1])))
+        click.echo(('' if quite else getMessage('avrTime', lang)) + str(avr(resultMuliply[1])))
 def getMessage(idMessage, lang='pl'):
     if lang == 'pl':
         return {
