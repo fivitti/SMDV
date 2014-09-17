@@ -81,7 +81,7 @@ def multiplyELL(macierz, repeat = 1, blockSize = 128):
     
 def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):    
     ### Przygotowanie macierzy SlicedEllPack ###
-    align = ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst
+    align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
     mac = convertToSlicedELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
