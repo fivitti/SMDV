@@ -7,6 +7,7 @@ Created on Wed Sep 17 13:47:34 2014
 
 import click
 import scipy.io
+import os
 from numpy import average as avr
  
 @click.command()
@@ -47,7 +48,7 @@ def cli(block, ss, tpr, align, prefetch, repeat, pt, ell, sle, see, ert, cpu, pm
         'danger' : 'red'
     }    
     for matrixFilename in matrices:
-        matrixPath = folder + '/' + matrixFilename
+        matrixPath = os.path.join(folder, matrixFilename)
         matrix = scipy.io.mmread(matrixPath)
         if not quite: click.echo(getMessage('title', lang) + matrixFilename, color=colors['success']) 
         if pm:
