@@ -19,13 +19,16 @@ import stoper
 def multiplyCPU(matrix, repeat = 1):
     wektor = numpy.arange(1, matrix.shape[1]+1, dtype=numpy.float32)
     timer = stoper.Timer()
+    timeList = []
     
     for i in range(repeat):
         timer.start()
         wynik = matrix.dot(wektor)
         timer.stop()
+        timeList.append(timer.get_elapsed())
+        timer.reset()
     
-    return (wynik, timer.get_elapsed())
+    return (wynik, timeList)
 
 def multiplyELL(macierz, repeat = 1, blockSize = 128): 
     mac = convertToELL(macierz)
@@ -40,6 +43,7 @@ def multiplyELL(macierz, repeat = 1, blockSize = 128):
     
     ### Przygotowanie stałych czasu ###
     timer = stoper.Timer()
+    timeList = []
     ###
     
     ### Przygotowanie stałych CUDA ###
@@ -70,8 +74,10 @@ def multiplyELL(macierz, repeat = 1, blockSize = 128):
                 grid=grid, \
                 texrefs=texELL)
         timer.stop()
+        timeList.append(timer.get_elapsed())
+        timer.reset()
     
-    return (wynik, timer.get_elapsed())
+    return (wynik, timeList)
     
 def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):    
     ### Przygotowanie macierzy SlicedEllPack ###
@@ -95,6 +101,7 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     
     ### Przygotowanie stałych czasu ###
     timer = stoper.Timer()
+    timeList = []
     ###    
     
     ### Przygotowanie stałych CUDA ###
@@ -128,9 +135,11 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
                             grid=grid, \
                             texrefs=texSliced)
         timer.stop()
+        timeList.append(timer.get_elapsed())
+        timer.reset()
     ###
     
-    return (wynik, timer.get_elapsed())    
+    return (wynik, timeList)    
     
 def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, repeat = 1, convertMethod = "new"):    
     ### Przygotowanie macierzy###
@@ -161,6 +170,7 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     
     ### Przygotowanie stałych czasu ###
     timer = stoper.Timer()
+    timeList = []
     ###    
     
     ### Przygotowanie stałych CUDA ###
@@ -194,9 +204,11 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
                             grid=grid, \
                             texrefs=tex)
         timer.stop()
+        timeList.append(timer.get_elapsed())
+        timer.reset()
     ###
     
-    return (wynik, timer.get_elapsed())
+    return (wynik, timeList)
 
 def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1, convertMethod = 'new'):
     if convertMethod == 'new':
@@ -214,6 +226,7 @@ def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, rep
     
     ### Przygotowanie stałych czasu ###
     timer = stoper.Timer()
+    timeList = []
     ###
     
     ### Przygotowanie stałych CUDA ###
@@ -244,8 +257,10 @@ def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, rep
                 grid=grid, \
                 texrefs=tex)
         timer.stop()
+        timeList.append(timer.get_elapsed())
+        timer.reset()
     
-    return (wynik, timer.get_elapsed())
+    return (wynik, timeList)
 
     
     
