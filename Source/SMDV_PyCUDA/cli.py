@@ -163,7 +163,7 @@ def getMessage(idMessage, lang='en'):
             'result' : u'Result: ',
             'timeList' : u'List of times multiplication [ms]: ',
             'avrTime' : u'Average time [ms]: ',
-            'test': 'Errors (position, different):'
+            'test': 'Errors (position, different): '
         }.get(idMessage, 'error')
     else:
         return 'Not implement language: ' + lang
