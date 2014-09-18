@@ -13,11 +13,12 @@ from numpy import average as avr
 @click.command()
 #@click.option('--count', default=1, help='number of greetings')/
 @click.option('-b', '--block', default=128, help='Block size for CUDA. Default: 128')
-@click.option('-ss', '--sliceSize', 'ss', default=64, help='Slice size for ...Ellpack. Default: 64')
-@click.option('-tpr', '--threadPerRow', 'tpr', default=2, help='Thread per row. Default: 2')
+@click.option('-ss', '--slice-size', 'ss', default=64, help='Slice size for ...Ellpack. Default: 64')
+@click.option('-tpr', '--thread-per-row', 'tpr', default=2, help='Thread per row. Default: 2')
 @click.option('-a', '--align', default=32, help='Align const for Ellpack. Default: 32')
 @click.option('-p', '--prefetch', default=2, help='PreFetch for SlicedEllpack. Default: 2')
 @click.option('-r', '--repeat', default=1, help='Count of repetitions calculations. Deafult: 1')
+@click.option('-ci', '--confidence-interval', default=0.05, help='Confidence interval for test multiplication. Default: 0.05')
 
 @click.option('-ell', '--ellpack', 'ell', is_flag=True, help='Use Ellpack format')
 @click.option('-sle', '--sliced', 'sle', is_flag=True, help='Use Sliced Ellpack format')
@@ -32,6 +33,7 @@ from numpy import average as avr
 @click.option('-rst', '--result', is_flag=True, help='Print result multiplication')
 @click.option('-t', '--time', is_flag=True, help='Print list of time multiplication')
 @click.option('-avr', '--avrtime', is_flag=True, help='Print average time multiplication')
+@click.option('--test', is_flag=True, help='Testing result multiplication. Print bad row')
 
 @click.option('-q', '--quite', is_flag=True, help='Without messages, only effects functions.')
 @click.option('--lang', default='en', type=click.Choice(['en', 'pl']), help='Language messages.')
@@ -40,7 +42,7 @@ from numpy import average as avr
 #@click.argument('matrices', nargs=-1, required=True)
 @click.argument('matrices', nargs=-1, required=True, type=click.Path(exists=True))
 
-def cli(block, ss, tpr, align, prefetch, repeat, ell, sle, see, ert, cpu, pm, conv, multiply, result, time, avrtime, quite, lang, matrices):
+def cli(block, ss, tpr, align, prefetch, repeat, confidence_interval, ell, sle, see, ert, cpu, pm, conv, multiply, result, time, avrtime, test, quite, lang, matrices):
     colors = {
         'success' : 'green',
         'info' : 'blue',
@@ -76,32 +78,41 @@ def cli(block, ss, tpr, align, prefetch, repeat, ell, sle, see, ert, cpu, pm, co
                 click.echo(stringListInList(convertToErtilp(matrix, threadPerRow=tpr, prefetch=prefetch, array=False)))
         if multiply:
             if not quite: click.echo(getMessage('multiply', lang), color=colors['info'])
+            resultNumpy = ''
             if cpu:
                 if not quite: click.echo(getMessage('multiplyCpu', lang), color=colors['danger'])
                 from matrixMultiplication import multiplyCPU
                 resultMultiply = multiplyCPU(matrix, repeat=repeat)
+                if test: resultNumpy = resultMultiply
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
+            elif test:
+                from matrixMultiplication import multiplyCPU
+                resultNumpy = multiplyCPU(matrix, repeat=repeat)
             if ell:
                 if not quite: click.echo(getMessage('multiplyEll', lang), color=colors['danger'])
                 from matrixMultiplication import multiplyELL
                 resultMultiply = multiplyELL(matrix, repeat=repeat, blockSize=block)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
+                if test: testResult(resultNumpy, resultMultiply, confidence_interval, quite, lang)
             if sle:
                 if not quite: click.echo(getMessage('multiplySliced', lang), color=colors['danger'])
                 from matrixMultiplication import multiplySlicedELL
                 resultMultiply = multiplySlicedELL(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
+                if test: testResult(resultNumpy, resultMultiply, confidence_interval, quite, lang)
             if see:
                 if not quite: click.echo(getMessage('multiplySertilp', lang), color=colors['danger'])
                 from matrixMultiplication import multiplySertilp
                 resultMultiply = multiplySertilp(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
+                if test: testResult(resultNumpy, resultMultiply, confidence_interval, quite, lang)
             if ert:
                 if not quite: click.echo(getMessage('multiplyErtilp', lang), color=colors['danger'])
                 from matrixMultiplication import multiplyErtilp
                 resultMultiply = multiplyErtilp(matrix, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-            
+                if test: testResult(resultNumpy, resultMultiply, confidence_interval, quite, lang)
+                    
 def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lang):
     if resultPrint:
         click.echo(('' if quite else getMessage('result', lang)) + str(resultMuliply[0]))
@@ -109,6 +120,8 @@ def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lan
         click.echo(('' if quite else getMessage('timeList', lang)) + str(resultMuliply[1]))
     if avrTimePrint:
         click.echo(('' if quite else getMessage('avrTime', lang)) + str(avr(resultMuliply[1])))
+def testResult(model, check, confidenceInterval, quite, lang):
+    click.echo(('' if quite else getMessage('test', lang)) + str(resultEquals(model, check, confidenceInterval)))
 def getMessage(idMessage, lang='en'):
     if lang == 'pl':
         return {
@@ -128,7 +141,8 @@ def getMessage(idMessage, lang='en'):
             'multiplyErtilp' : u'Mnożenie formatem ERTILP',
             'result' : u'Wynik: ',
             'timeList' : u'Lista czasów [ms]: ',
-            'avrTime' : u'Średni czas [ms]: '
+            'avrTime' : u'Średni czas [ms]: ',
+            'test': u'Błędy (pozycja, różnica): '
         }.get(idMessage, 'error')
     elif lang == 'en':
         return {
@@ -148,13 +162,42 @@ def getMessage(idMessage, lang='en'):
             'multiplyErtilp' : u'Multiplication with ERTILP',
             'result' : u'Result: ',
             'timeList' : u'List of times multiplication [ms]: ',
-            'avrTime' : u'Average time [ms]: '
+            'avrTime' : u'Average time [ms]: ',
+            'test': 'Errors (position, different)'
         }.get(idMessage, 'error')
     else:
         return 'Not implement language: ' + lang
 
 def printMatrix(matrixFile):
     click.echo(str(matrixFile))
+    
+def resultEquals(correct, current, confidenceInterval = 0.05):
+    '''
+    If the length of the list correct and current are different additional fields should be zero.
+    If not as different is "#".
+    If the array contains floating-point numbers, set the appropriate confidence interval.
+    (correct - correct*confidenceInterval : correct + correct*confidenceInterval)
+    Returns a list of pairs: the number of fields in the list, and the difference from 
+    the correct result [correct - current].
+    '''
+    result = []
+    if len(correct) > len(current):
+        endMin = len(current)
+        objMax = correct
+    else:
+        endMin = len(correct)
+        objMax = current
+    for i in range(endMin):
+        if correct[i] == 0:
+            if round(abs(current[i]), 8) != 0:
+                result.append((i, current[i]*(-1)))
+        else:
+            if current[i] > correct[i]*(1+confidenceInterval) or current[i] < correct[i]*(1-confidenceInterval):
+                result.append((i, correct[i] - current[i]))
+    for i in range(endMin, len(objMax)):
+        if objMax[i] != 0:
+            return result.append((i, '#'))
+    return result
           
 if __name__ == '__main__':
     cli()
