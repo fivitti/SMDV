@@ -83,35 +83,35 @@ def cli(block, ss, tpr, align, prefetch, repeat, confidence_interval, ell, sle, 
                 if not quite: click.echo(getMessage('multiplyCpu', lang), color=colors['danger'])
                 from matrixMultiplication import multiplyCPU
                 resultMultiply = multiplyCPU(matrix, repeat=repeat)
-                if test: resultNumpy = resultMultiply
+                if test: resultNumpy = resultMultiply[0]
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
             elif test:
                 from matrixMultiplication import multiplyCPU
-                resultNumpy = multiplyCPU(matrix, repeat=repeat)
+                resultNumpy = multiplyCPU(matrix, repeat=repeat)[0]
             if ell:
                 if not quite: click.echo(getMessage('multiplyEll', lang), color=colors['danger'])
                 from matrixMultiplication import multiplyELL
                 resultMultiply = multiplyELL(matrix, repeat=repeat, blockSize=block)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-                if test: testResult(resultNumpy, resultMultiply, confidence_interval, quite, lang)
+                if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
             if sle:
                 if not quite: click.echo(getMessage('multiplySliced', lang), color=colors['danger'])
                 from matrixMultiplication import multiplySlicedELL
                 resultMultiply = multiplySlicedELL(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-                if test: testResult(resultNumpy, resultMultiply, confidence_interval, quite, lang)
+                if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
             if see:
                 if not quite: click.echo(getMessage('multiplySertilp', lang), color=colors['danger'])
                 from matrixMultiplication import multiplySertilp
                 resultMultiply = multiplySertilp(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-                if test: testResult(resultNumpy, resultMultiply, confidence_interval, quite, lang)
+                if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
             if ert:
                 if not quite: click.echo(getMessage('multiplyErtilp', lang), color=colors['danger'])
                 from matrixMultiplication import multiplyErtilp
                 resultMultiply = multiplyErtilp(matrix, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-                if test: testResult(resultNumpy, resultMultiply, confidence_interval, quite, lang)
+                if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
                     
 def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lang):
     if resultPrint:
