@@ -7,40 +7,40 @@ Created on Wed Sep 17 13:47:34 2014
 
 import click
 import scipy.io
-import os
+#import os
 from numpy import average as avr
  
 @click.command()
 #@click.option('--count', default=1, help='number of greetings')/
-@click.option('--block', default=32, help='Block size for CUDA')
-@click.option('--ss', default=64, help='Slice size for ...Ellpack')
-@click.option('--tpr', default=2, help='Thread per row')
-@click.option('--align', default=32, help='Align const for Ellpack')
-@click.option('--prefetch', default=2, help='PreFetch for SlicedEllpack')
-@click.option('--repeat', default=1, help='Count of repetitions calculations')
-@click.option('--pt', default=3, help='Precision of time')
+@click.option('-b', '--block', default=128, help='Block size for CUDA. Default: 128')
+@click.option('-ss', '--sliceSize', 'ss', default=64, help='Slice size for ...Ellpack. Default: 64')
+@click.option('-tpr', '--threadPerRow', 'tpr', default=2, help='Thread per row. Default: 2')
+@click.option('-a', '--align', default=32, help='Align const for Ellpack. Default: 32')
+@click.option('-p', '--prefetch', default=2, help='PreFetch for SlicedEllpack. Default: 2')
+@click.option('-r', '--repeat', default=1, help='Count of repetitions calculations. Deafult: 1')
 
-@click.option('--ell/--no-ell', default=False, help='Use Ellpack format')
-@click.option('--sle/--no-sle', default=False, help='Use Sliced Ellpack format')
-@click.option('--see/--no-see', default=False, help='Use Sertilp Ellpack format')
-@click.option('--ert/--no-ert', default=False, help='Use Ertilp format')
-@click.option('--cpu/--no-cpu', default=False, help='Use CPU method multiplication (without GPU) on Numpy')
+@click.option('-ell', '--ellpack', 'ell', is_flag=True, help='Use Ellpack format')
+@click.option('-sle', '--sliced', 'sle', is_flag=True, help='Use Sliced Ellpack format')
+@click.option('-see', '--sertilp', 'see', is_flag=True, help='Use Sertilp Ellpack format')
+@click.option('-ert', '--ertilp', 'ert', is_flag=True, help='Use Ertilp format')
+@click.option('-cpu', '--cpu', 'cpu', is_flag=True, help='Use CPU method multiplication (without GPU) on Numpy')
 
-@click.option('--pm/--no-pm', default=False, help='Print matrix representation')
-@click.option('--conv/--no-conv', default=False, help='Print converted matrix to format')
-@click.option('--multiply/--no-multiply', default=False, help='Multiply matrix to vector (1, 2, 3, ...)')
+@click.option('-pm', '--printMatrix', 'pm', is_flag=True, help='Print matrix representation')
+@click.option('-c', '--convertion', 'conv', is_flag=True, help='Print converted matrix to format')
+@click.option('-m', '--multiply', is_flag=True, help='Multiply matrix to vector (1, 2, 3, ...)')
 
-@click.option('--result/--no-result', default=False, help='Print result multiplication')
-@click.option('--time/--no-time', default=False, help='Print list of time multiplication')
-@click.option('--avrtime/--no-avrtime', default=True, help='Print average time multiplication')
+@click.option('-rst', '--result', is_flag=True, help='Print result multiplication')
+@click.option('-t', '--time', is_flag=True, help='Print list of time multiplication')
+@click.option('-avr', '--avrtime', is_flag=True, help='Print average time multiplication')
 
-@click.option('--quite/--no-quite', default=False, help='Without messages, only effects functions.')
-@click.option('--lang', default='en', help='Language messages. Polish (pl) or english (en).')
+@click.option('-q', '--quite', is_flag=True, help='Without messages, only effects functions.')
+@click.option('--lang', default='en', type=click.Choice(['en', 'pl']), help='Language messages.')
 
-@click.argument('folder', nargs=1, type=click.Path(exists=True))
-@click.argument('matrices', nargs=-1, required=True)
+#@click.argument('folder', nargs=1, type=click.Path(exists=True))
+#@click.argument('matrices', nargs=-1, required=True)
+@click.argument('matrices', nargs=-1, required=True, type=click.Path(exists=True))
 
-def cli(block, ss, tpr, align, prefetch, repeat, pt, ell, sle, see, ert, cpu, pm, conv, multiply, result, time, avrtime, quite, lang, folder, matrices):
+def cli(block, ss, tpr, align, prefetch, repeat, ell, sle, see, ert, cpu, pm, conv, multiply, result, time, avrtime, quite, lang, matrices):
     colors = {
         'success' : 'green',
         'info' : 'blue',
@@ -48,7 +48,8 @@ def cli(block, ss, tpr, align, prefetch, repeat, pt, ell, sle, see, ert, cpu, pm
         'danger' : 'red'
     }    
     for matrixFilename in matrices:
-        matrixPath = str(os.path.join(folder, matrixFilename))
+#        matrixPath = str(os.path.join(folder, matrixFilename))
+        matrixPath = str(matrixFilename)
         matrix = scipy.io.mmread(matrixPath)
         if not quite: click.echo(getMessage('title', lang) + matrixFilename, color=colors['success']) 
         if pm:
@@ -108,7 +109,7 @@ def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lan
         click.echo(('' if quite else getMessage('timeList', lang)) + str(resultMuliply[1]))
     if avrTimePrint:
         click.echo(('' if quite else getMessage('avrTime', lang)) + str(avr(resultMuliply[1])))
-def getMessage(idMessage, lang='pl'):
+def getMessage(idMessage, lang='en'):
     if lang == 'pl':
         return {
             'error' : 'error',
