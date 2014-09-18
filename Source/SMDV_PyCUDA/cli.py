@@ -45,42 +45,42 @@ from numpy import average as avr
 def cli(block, ss, tpr, align, prefetch, repeat, confidence_interval, ell, sle, see, ert, cpu, pm, conv, multiply, result, time, avrtime, test, quite, lang, matrices):
     colors = {
         'success' : 'green',
-        'info' : 'blue',
-        'warning' : 'yelow',
-        'danger' : 'red'
+        'info' : 'cyan',
+        'warning' : 'red',
+        'danger' : 'yellow'
     }    
     for matrixFilename in matrices:
 #        matrixPath = str(os.path.join(folder, matrixFilename))
         matrixPath = str(matrixFilename)
         matrix = scipy.io.mmread(matrixPath)
-        if not quite: click.echo(getMessage('title', lang) + matrixFilename, color=colors['success']) 
+        if not quite: click.secho(getMessage('title', lang) + matrixFilename, fg=colors['success']) 
         if pm:
-            if not quite: click.echo(getMessage('pm', lang), color=colors['info'])
+            if not quite: click.secho(getMessage('pm', lang), fg=colors['info'])
             printMatrix(matrix)
         if conv:
             from matrixUtilites import stringListInList
-            if not quite: click.echo(getMessage('conv', lang), color=colors['info'])
+            if not quite: click.secho(getMessage('conv', lang), fg=colors['info'])
             if ell:
-                if not quite: click.echo(getMessage('convEll', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('convEll', lang), fg=colors['danger'])
                 from matrixFormat import convertToELL
                 click.echo(stringListInList(convertToELL(matrix, array=False)))
             if sle:
-                if not quite: click.echo(getMessage('convSliced', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('convSliced', lang), fg=colors['danger'])
                 from matrixFormat import convertToSlicedELL
                 click.echo(stringListInList(convertToSlicedELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align)))
             if see:
-                if not quite: click.echo(getMessage('convSertilp', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('convSertilp', lang), fg=colors['danger'])
                 from matrixFormat import convertToSertilpELL
                 click.echo(stringListInList(convertToSertilpELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align, prefetch=prefetch)))
             if ert:
-                if not quite: click.echo(getMessage('convErtilp', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('convErtilp', lang), fg=colors['danger'])
                 from matrixFormat import convertToErtilp
                 click.echo(stringListInList(convertToErtilp(matrix, threadPerRow=tpr, prefetch=prefetch, array=False)))
         if multiply:
-            if not quite: click.echo(getMessage('multiply', lang), color=colors['info'])
+            if not quite: click.secho(getMessage('multiply', lang), fg=colors['info'])
             resultNumpy = ''
             if cpu:
-                if not quite: click.echo(getMessage('multiplyCpu', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('multiplyCpu', lang), fg=colors['danger'])
                 from matrixMultiplication import multiplyCPU
                 resultMultiply = multiplyCPU(matrix, repeat=repeat)
                 if test: resultNumpy = resultMultiply[0]
@@ -89,25 +89,25 @@ def cli(block, ss, tpr, align, prefetch, repeat, confidence_interval, ell, sle, 
                 from matrixMultiplication import multiplyCPU
                 resultNumpy = multiplyCPU(matrix, repeat=repeat)[0]
             if ell:
-                if not quite: click.echo(getMessage('multiplyEll', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('multiplyEll', lang), fg=colors['danger'])
                 from matrixMultiplication import multiplyELL
                 resultMultiply = multiplyELL(matrix, repeat=repeat, blockSize=block)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
                 if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
             if sle:
-                if not quite: click.echo(getMessage('multiplySliced', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('multiplySliced', lang), fg=colors['danger'])
                 from matrixMultiplication import multiplySlicedELL
                 resultMultiply = multiplySlicedELL(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
                 if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
             if see:
-                if not quite: click.echo(getMessage('multiplySertilp', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('multiplySertilp', lang), fg=colors['danger'])
                 from matrixMultiplication import multiplySertilp
                 resultMultiply = multiplySertilp(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
                 if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
             if ert:
-                if not quite: click.echo(getMessage('multiplyErtilp', lang), color=colors['danger'])
+                if not quite: click.secho(getMessage('multiplyErtilp', lang), fg=colors['danger'])
                 from matrixMultiplication import multiplyErtilp
                 resultMultiply = multiplyErtilp(matrix, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
