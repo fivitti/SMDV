@@ -18,7 +18,7 @@ from numpy import average as avr
 @click.option('-a', '--align', default=32, help='Align const for Ellpack. Default: 32')
 @click.option('-p', '--prefetch', default=2, help='PreFetch for SlicedEllpack. Default: 2')
 @click.option('-r', '--repeat', default=1, help='Count of repetitions calculations. Deafult: 1')
-@click.option('-ci', '--confidence-interval', default=0.05, help='Confidence interval for test multiplication. Default: 0.05')
+@click.option('-cf', '--confidence-factor', default=0.0005, help='Confidence interval for test multiplication. Default: 0.0005')
 
 @click.option('-ell', '--ellpack', 'ell', is_flag=True, help='Use Ellpack format')
 @click.option('-sle', '--sliced', 'sle', is_flag=True, help='Use Sliced Ellpack format')
@@ -42,7 +42,7 @@ from numpy import average as avr
 #@click.argument('matrices', nargs=-1, required=True)
 @click.argument('matrices', nargs=-1, required=True, type=click.Path(exists=True))
 
-def cli(block, ss, tpr, align, prefetch, repeat, confidence_interval, ell, sle, see, ert, cpu, pm, conv, multiply, result, time, avrtime, test, quite, lang, matrices):
+def cli(block, ss, tpr, align, prefetch, repeat, confidence_factor, ell, sle, see, ert, cpu, pm, conv, multiply, result, time, avrtime, test, quite, lang, matrices):
     colors = {
         'success' : 'green',
         'info' : 'cyan',
@@ -93,25 +93,25 @@ def cli(block, ss, tpr, align, prefetch, repeat, confidence_interval, ell, sle, 
                 from matrixMultiplication import multiplyELL
                 resultMultiply = multiplyELL(matrix, repeat=repeat, blockSize=block)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-                if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
+                if test: testResult(resultNumpy, resultMultiply[0], confidence_factor, quite, lang)
             if sle:
                 if not quite: click.secho(getMessage('multiplySliced', lang), fg=colors['danger'])
                 from matrixMultiplication import multiplySlicedELL
                 resultMultiply = multiplySlicedELL(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-                if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
+                if test: testResult(resultNumpy, resultMultiply[0], confidence_factor, quite, lang)
             if see:
                 if not quite: click.secho(getMessage('multiplySertilp', lang), fg=colors['danger'])
                 from matrixMultiplication import multiplySertilp
                 resultMultiply = multiplySertilp(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-                if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
+                if test: testResult(resultNumpy, resultMultiply[0], confidence_factor, quite, lang)
             if ert:
                 if not quite: click.secho(getMessage('multiplyErtilp', lang), fg=colors['danger'])
                 from matrixMultiplication import multiplyErtilp
                 resultMultiply = multiplyErtilp(matrix, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
                 resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, quite=quite, lang=lang)
-                if test: testResult(resultNumpy, resultMultiply[0], confidence_interval, quite, lang)
+                if test: testResult(resultNumpy, resultMultiply[0], confidence_factor, quite, lang)
                     
 def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lang):
     if resultPrint:
@@ -120,8 +120,8 @@ def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, quite, lan
         click.echo(('' if quite else getMessage('timeList', lang)) + str(resultMuliply[1]))
     if avrTimePrint:
         click.echo(('' if quite else getMessage('avrTime', lang)) + str(avr(resultMuliply[1])))
-def testResult(model, check, confidenceInterval, quite, lang):
-    click.echo(('' if quite else getMessage('test', lang)) + str(resultEquals(model, check, confidenceInterval)))
+def testResult(model, check, confidenceFactor, quite, lang):
+    click.echo(('' if quite else getMessage('test', lang)) + str(resultEquals(model, check, confidenceFactor)))
 def getMessage(idMessage, lang='en'):
     if lang == 'pl':
         return {
@@ -171,12 +171,12 @@ def getMessage(idMessage, lang='en'):
 def printMatrix(matrixFile):
     click.echo(str(matrixFile))
     
-def resultEquals(correct, current, confidenceInterval = 0.05):
+def resultEquals(correct, current, confidenceFactor = 0.05):
     '''
     If the length of the list correct and current are different additional fields should be zero.
     If not as different is "#".
-    If the array contains floating-point numbers, set the appropriate confidence interval.
-    (correct - correct*confidenceInterval : correct + correct*confidenceInterval)
+    If the array contains floating-point numbers, set the appropriate confidence factor.
+    (correct - correct*confidenceFactor : correct + correct*confidenceFactor)
     Returns a list of pairs: the number of fields in the list, and the difference from 
     the correct result [correct - current].
     '''
@@ -192,7 +192,7 @@ def resultEquals(correct, current, confidenceInterval = 0.05):
             if round(abs(current[i]), 8) != 0:
                 result.append((i, current[i]*(-1)))
         else:
-            if current[i] > correct[i]*(1+confidenceInterval) or current[i] < correct[i]*(1-confidenceInterval):
+            if current[i] > correct[i]*(1+confidenceFactor) or current[i] < correct[i]*(1-confidenceFactor):
                 result.append((i, correct[i] - current[i]))
     for i in range(endMin, len(objMax)):
         if objMax[i] != 0:
