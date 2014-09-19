@@ -225,6 +225,7 @@ def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTi
         data.extend(map(str, times))
         output.write(sep.join(data) + eol )
 def testResult(model, check, confidenceFactor, quite, lang):
+    from matrixUtilities import resultEquals
     click.echo(('' if quite else getMessage('test', lang)) + str(resultEquals(model, check, confidenceFactor)))
 def getMessage(idMessage, lang='en'):
     if lang == 'pl':
@@ -277,34 +278,6 @@ def getMessage(idMessage, lang='en'):
         }.get(idMessage, 'error')
     else:
         return 'Not implement language: ' + lang
-  
-def resultEquals(correct, current, confidenceFactor = 0.0005):
-    '''
-    If the length of the list correct and current are different additional fields should be zero.
-    If not as different is "#".
-    If the array contains floating-point numbers, set the appropriate confidence factor.
-    (correct - correct*confidenceFactor : correct + correct*confidenceFactor)
-    Returns a list of pairs: the number of fields in the list, and the difference from 
-    the correct result [correct - current].
-    '''
-    result = []
-    if len(correct) > len(current):
-        endMin = len(current)
-        objMax = correct
-    else:
-        endMin = len(correct)
-        objMax = current
-    for i in range(endMin):
-        if correct[i] == 0:
-            if round(abs(current[i]), 8) != 0:
-                result.append((i, current[i]*(-1)))
-        else:
-            if current[i] > correct[i]*(1+confidenceFactor) or current[i] < correct[i]*(1-confidenceFactor):
-                result.append((i, correct[i] - current[i]))
-    for i in range(endMin, len(objMax)):
-        if objMax[i] != 0:
-            return result.append((i, '#'))
-    return result
           
 if __name__ == '__main__':
     cli(obj={})

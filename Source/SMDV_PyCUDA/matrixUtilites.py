@@ -246,6 +246,35 @@ def rowEqualsIgnoreEndZero(a, b, procentUfnosci = 0.05):
         if objMax[i] != 0:
             return False
     return True
+    
+def resultEquals(correct, current, confidenceFactor = 0.0005):
+    '''
+    If the length of the list correct and current are different additional fields should be zero.
+    If not as different is "#".
+    If the array contains floating-point numbers, set the appropriate confidence factor.
+    (correct - correct*confidenceFactor : correct + correct*confidenceFactor)
+    Returns a list of pairs: the number of fields in the list, and the difference from 
+    the correct result [correct - current].
+    '''
+    result = []
+    if len(correct) > len(current):
+        endMin = len(current)
+        objMax = correct
+    else:
+        endMin = len(correct)
+        objMax = current
+    for i in range(endMin):
+        if correct[i] == 0:
+            if round(abs(current[i]), 8) != 0:
+                result.append((i, current[i]*(-1)))
+        else:
+            if (correct[i] > 0 and (current[i] > correct[i]*(1+confidenceFactor) or current[i] < correct[i]*(1-confidenceFactor))) or \
+               (correct[i] < 0 and (current[i] < correct[i]*(1+confidenceFactor) or current[i] > correct[i]*(1-confidenceFactor))):
+                result.append((i, correct[i] - current[i]))
+    for i in range(endMin, len(objMax)):
+        if objMax[i] != 0:
+            return result.append((i, '#'))
+    return result
         
   
 if __name__ == '__main__':
@@ -253,13 +282,13 @@ if __name__ == '__main__':
 #    B = generujMacierz_Normal(szerokosc=10, wysokosc=10, procentZer=80, array=True)
 #    print 'Macierz A - CSR:\n' + str(A)
 #    print 'Macierz B:\n' + str(B)
-    folder = 'E:\Moje projekty\SMDV\Data\\Generated\\'
-#    folder = '../../Data/Genereted'
-    wymiary = [5, 6]
-    procentZer = 15
-    for i in wymiary:
-        v = generateVector(length=i, procentageOfZeros=procentZer, integers=False)
-        saveVectorToNumpyFile(v, folder, prefix='Vector_float_', suffix='_'+str(procentZer)+'p')
+#    folder = 'E:\Moje projekty\SMDV\Data\\Generated\\'
+#    folder = '../../Data/Generated'
+#    wymiary = [5, 6]
+#    procentZer = 15
+#    for i in wymiary:
+#        v = generateVector(length=i, procentageOfZeros=procentZer, integers=False)
+#        saveVectorToNumpyFile(v, folder, prefix='Vector_float_', suffix='_'+str(procentZer)+'p')
 #    print numpy.load(folder + 'Vector_int_5.npy')
 
 #    A = [3, 2, 1, 0, 3]
@@ -267,7 +296,7 @@ if __name__ == '__main__':
 #    assert rowEqualsIgnoreEndZero(A, B)
            
 #    folder =  'E:\\Slawek\\SMVD\\SMDV\\Macierze\\wygenerowane\\'
-    folder = 'E:\Moje projekty\SMDV\Macierze\\wygenerowane\\'
+#    folder = 'E:\Moje projekty\SMDV\Macierze\\wygenerowane\\'
 #    wymiary = range(5)
 #    for i in wymiary:
 #        zapiszMacierzDoPliku(generujMacierz_Csr(szerokosc=i, wysokosc=1, procentZer=70, calkowite = True), przedrostek="Vector_int_", folder=folder)
@@ -279,7 +308,10 @@ if __name__ == '__main__':
 #        matrix = generujMacierz_Csr(szerokosc=i, wysokosc=i, minimum=minimum, maksimum=maksimum, procentZer=procentZer)
 #        zapiszMacierzDoPliku(matrix, folder=folder)
     
-    
+    A = numpy.array([67, 4, -84, -7, 8, 133], dtype=numpy.int32)
+    B = numpy.array([67.0, 4.0, -84.0, -7.0, 8.0, 133.0], dtype=numpy.float32)
+
+    print resultEquals(A, B)    
     
         
     
