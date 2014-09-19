@@ -203,7 +203,8 @@ def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTi
         eol = ctx.obj['eol']
         avrTime = str(avr(resultMuliply[1]))
         stdTime = str(nstd(resultMuliply[1]))
-        data = [filename, formatName, avrTime, stdTime].extend(map(str, resultMuliply[1]))
+        data = [filename, formatName, avrTime, stdTime]
+        data.extend(map(str, resultMuliply[1]))
         output.write(sep.join(data) + eol )
 def testResult(model, check, confidenceFactor, quite, lang):
     click.echo(('' if quite else getMessage('test', lang)) + str(resultEquals(model, check, confidenceFactor)))
