@@ -137,8 +137,8 @@ def conv(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert):
 @click.option('-t', '--time', is_flag=True, help='Print list of time multiplication')
 @click.option('-avr', '--avrtime', is_flag=True, help='Print average time multiplication')
 @click.option('-std', '--standard-deviation', 'std', is_flag=True, help='Print standard deviation of time multiplication')
-@click.option('--test', flag_value=0.0005, help='Testing result multiplication. Print bad row. Value is confidence factor.')
-@click.option('-com', '--compensate', 'com', flag_value=1, help='N first time are remove (returned times decremented by n). Recommended in testing the speed, because the n first times (e. g. one) are a long delay.' )
+@click.option('--test', default=0.0005, help='Testing result multiplication. Print bad row. Value is confidence factor.')
+@click.option('-com', '--compensate', 'com', default=0, help='N first time are remove (returned times decremented by n). Recommended in testing the speed, because the n first times (e. g. one) are a long delay.' )
 
 @click.option('-o', '--output', type=click.File(mode='a', lazy=True), help='File to save raport. Format CSV. If exist append new data.')
 
