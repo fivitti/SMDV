@@ -17,7 +17,7 @@ import cudaAgregator
 start = cuda.Event()
 end = cuda.Event()
 
-def multiplyCPU(matrix, repeat = 1, wektor):
+def multiplyCPU(matrix, repeat = 1, vector):
 #    wektor = numpy.arange(1, matrix.shape[1]+1, dtype=numpy.float32)
     if wektor.shape[0] != matrix.shape[1]:
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
@@ -25,7 +25,7 @@ def multiplyCPU(matrix, repeat = 1, wektor):
     
     for i in range(repeat):
         start.record()
-        wynik = matrix.dot(wektor)
+        wynik = matrix.dot(vector)
         end.record()
         end.synchronize()
         timeList.append(start.time_till(end))

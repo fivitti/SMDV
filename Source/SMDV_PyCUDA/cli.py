@@ -168,7 +168,7 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
     if cpu:
         if not quite: click.secho(getMessage('multiplyCpu', lang), fg=colors['danger'])
         from matrixMultiplication import multiplyCPU
-        resultMultiply = multiplyCPU(matrix, repeat=repeat, vector)
+        resultMultiply = multiplyCPU(matrix, repeat=repeat, vector=vector)
         if test: resultNumpy = resultMultiply[0]
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='cpu', compensate=com)
     elif test:
