@@ -35,7 +35,8 @@ def rowEqualsIgnoreEndZeroGetRows(a, b, procentUfnosci = 0.05):
 
 if __name__ == '__main__':
     ### Stałe programu ###
-    plikMacierzy = 'Macierz_8x8.mtx'
+#    plikMacierzy = 'Macierz_8x8.mtx'
+    plikMacierzy = 'Macierz_5x5.mtx'
 #    plikMacierzy = 'Macierz_9x9.mtx'
 #    plikMacierzy = 'Macierz_128x128.mtx'
 #    plikMacierzy = 'Macierz_2048x2048_2.mtx'
@@ -60,7 +61,8 @@ if __name__ == '__main__':
     dokladnoscCzasu = 3
     ###
     macierz = scipy.io.mmread(folderMacierzy + plikMacierzy)
-    wektor = numpy.arange(1, macierz.shape[1]+1, dtype=numpy.float32)
+#    wektor = numpy.arange(1, macierz.shape[1]+1, dtype=numpy.float32)
+    wektor = numpy.array([1, -1, 0, -1, 1], dtype=numpy.int32)
 ##    from math import ceil
 ##    conv = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=int(ceil((sliceSize*threadPerRow*1.0)/alignStala)*alignStala), prefetch=prefetch)
 ##    macierz = numpy.array([[0, 0, 3], \
