@@ -225,7 +225,7 @@ def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTi
         data.extend(map(str, times))
         output.write(sep.join(data) + eol )
 def testResult(model, check, confidenceFactor, quite, lang):
-    from matrixUtilities import resultEquals
+    from matrixUtilites import resultEquals
     click.echo(('' if quite else getMessage('test', lang)) + str(resultEquals(model, check, confidenceFactor)))
 def getMessage(idMessage, lang='en'):
     if lang == 'pl':
