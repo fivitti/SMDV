@@ -133,16 +133,17 @@ def conv(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert):
 @click.option('-ert', '--ertilp', 'ert', is_flag=True, help='Use Ertilp format')
 @click.option('-cpu', '--cpu', 'cpu', is_flag=True, help='Use CPU method multiplication (without GPU) on Numpy')
 
-@click.option('-rst', '--result', is_flag=True, help='Print result multiplication')
+@click.option('-rst', '--result', is_flag=True, help='Print result multiplication.')
 @click.option('-t', '--time', is_flag=True, help='Print list of time multiplication')
 @click.option('-avr', '--avrtime', is_flag=True, help='Print average time multiplication')
 @click.option('-std', '--standard-deviation', 'std', is_flag=True, help='Print standard deviation of time multiplication')
 @click.option('--test', flag_value=0.0005, help='Testing result multiplication. Print bad row. Value is confidence factor.')
+@click.option('-com', '--compensate', 'com', is_flag=True, help='First time is remove (returned times decremented by one). Recommended in testing the speed, because the first time is a long delay.' )
 
 @click.option('-o', '--output', type=click.File(mode='a', lazy=True), help='File to save raport. Format CSV. If exist append new data.')
 
 @click.pass_context
-def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, output):
+def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output):
     '''Multiplication matrix in formats...'''    
     matrix = ctx.obj['matrix']
     quite = ctx.obj['quite']
@@ -159,7 +160,7 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
         from matrixMultiplication import multiplyCPU
         resultMultiply = multiplyCPU(matrix, repeat=repeat)
         if test: resultNumpy = resultMultiply[0]
-        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='cpu')
+        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='cpu', compensate=com)
     elif test:
         from matrixMultiplication import multiplyCPU
         resultNumpy = multiplyCPU(matrix, repeat=repeat)[0]
@@ -167,44 +168,45 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
         if not quite: click.secho(getMessage('multiplyEll', lang), fg=colors['danger'])
         from matrixMultiplication import multiplyELL
         resultMultiply = multiplyELL(matrix, repeat=repeat, blockSize=block)
-        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ellpack')
+        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ellpack', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if sle:
         if not quite: click.secho(getMessage('multiplySliced', lang), fg=colors['danger'])
         from matrixMultiplication import multiplySlicedELL
         resultMultiply = multiplySlicedELL(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
-        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='sliced')
+        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='sliced', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if see:
         if not quite: click.secho(getMessage('multiplySertilp', lang), fg=colors['danger'])
         from matrixMultiplication import multiplySertilp
         resultMultiply = multiplySertilp(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
-        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='sertilp')
+        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='sertilp', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if ert:
         if not quite: click.secho(getMessage('multiplyErtilp', lang), fg=colors['danger'])
         from matrixMultiplication import multiplyErtilp
         resultMultiply = multiplyErtilp(matrix, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
-        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ertilp')
+        resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ertilp', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
          
-def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTimePrint, quite, lang, output, formatName):
+def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTimePrint, quite, lang, output, formatName, compensate):
+    times = resultMuliply[1] if not compensate else resultMuliply[1][1:]
     if resultPrint:
         click.echo(('' if quite else getMessage('result', lang)) + str(resultMuliply[0]))
     if timePrint:
-        click.echo(('' if quite else getMessage('timeList', lang)) + str(resultMuliply[1]))
+        click.echo(('' if quite else getMessage('timeList', lang)) + str(times))
     if avrTimePrint:
-        click.echo(('' if quite else getMessage('avrTime', lang)) + str(avr(resultMuliply[1])))
+        click.echo(('' if quite else getMessage('avrTime', lang)) + str(avr(times)))
     if stdTimePrint:
-        click.echo(('' if quite else getMessage('stdTime', lang)) + str(nstd(resultMuliply[1])))
+        click.echo(('' if quite else getMessage('stdTime', lang)) + str(nstd(times)))
     if output:
         filename = ctx.obj['filename']
         sep = ctx.obj['sep']
         eol = ctx.obj['eol']
-        avrTime = str(avr(resultMuliply[1]))
-        stdTime = str(nstd(resultMuliply[1]))
+        avrTime = str(avr(times))
+        stdTime = str(nstd(times))
         data = [filename, formatName, avrTime, stdTime]
-        data.extend(map(str, resultMuliply[1]))
+        data.extend(map(str, times))
         output.write(sep.join(data) + eol )
 def testResult(model, check, confidenceFactor, quite, lang):
     click.echo(('' if quite else getMessage('test', lang)) + str(resultEquals(model, check, confidenceFactor)))

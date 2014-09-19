@@ -25,6 +25,7 @@ def multiplyCPU(matrix, repeat = 1):
         start.record()
         wynik = matrix.dot(wektor)
         end.record()
+        end.synchronize()
         timeList.append(start.time_till(end))
     
     return (wynik, timeList)
@@ -72,6 +73,7 @@ def multiplyELL(macierz, repeat = 1, blockSize = 128):
                 grid=grid, \
                 texrefs=texELL)
         end.record()
+        end.synchronize()
         timeList.append(start.time_till(end))
     
     return (wynik, timeList)
@@ -131,6 +133,7 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
                             grid=grid, \
                             texrefs=texSliced)
         end.record()
+        end.synchronize()
         timeList.append(start.time_till(end))
     ###
     
@@ -198,6 +201,7 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
                             grid=grid, \
                             texrefs=tex)
         end.record()
+        end.synchronize()
         timeList.append(start.time_till(end))
     ###
     
@@ -249,6 +253,7 @@ def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, rep
                 grid=grid, \
                 texrefs=tex)
         end.record()
+        end.synchronize()
         timeList.append(start.time_till(end))
     
     return (wynik, timeList)
