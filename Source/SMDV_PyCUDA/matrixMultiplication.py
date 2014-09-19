@@ -14,19 +14,18 @@ from math import ceil
 from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL, transformToSERTILP, convertToErtilp, transformToERTILPFormat
 import cudaAgregator
 
-import stoper
+start = cuda.Event()
+end = cuda.Event()
 
 def multiplyCPU(matrix, repeat = 1):
     wektor = numpy.arange(1, matrix.shape[1]+1, dtype=numpy.float32)
-    timer = stoper.Timer()
     timeList = []
     
     for i in range(repeat):
-        timer.start()
+        start.record()
         wynik = matrix.dot(wektor)
-        timer.stop()
-        timeList.append(timer.get_elapsed())
-        timer.reset()
+        end.record()
+        timeList.append(start.time_till(end))
     
     return (wynik, timeList)
 
@@ -42,7 +41,6 @@ def multiplyELL(macierz, repeat = 1, blockSize = 128):
     numRows = numpy.int32(wierszeMacierzy)
     
     ### Przygotowanie stałych czasu ###
-    timer = stoper.Timer()
     timeList = []
     ###
     
@@ -64,7 +62,7 @@ def multiplyELL(macierz, repeat = 1, blockSize = 128):
     
     
     for i in range(repeat):
-        timer.start()
+        start.record()
         kernelELL(vals, \
                 colIdx, \
                 rowLength, \
@@ -73,9 +71,8 @@ def multiplyELL(macierz, repeat = 1, blockSize = 128):
                 block=block, \
                 grid=grid, \
                 texrefs=texELL)
-        timer.stop()
-        timeList.append(timer.get_elapsed())
-        timer.reset()
+        end.record()
+        timeList.append(start.time_till(end))
     
     return (wynik, timeList)
     
@@ -100,7 +97,6 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     ###
     
     ### Przygotowanie stałych czasu ###
-    timer = stoper.Timer()
     timeList = []
     ###    
     
@@ -123,7 +119,7 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     
     ### Mnożenie SlicedEllPack ###     
     for i in range(repeat):
-        timer.start()
+        start.record()
         kernelSlicedELL(vals, \
                             colIdx, \
                             rowLength, \
@@ -134,9 +130,8 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
                             block=block, \
                             grid=grid, \
                             texrefs=texSliced)
-        timer.stop()
-        timeList.append(timer.get_elapsed())
-        timer.reset()
+        end.record()
+        timeList.append(start.time_till(end))
     ###
     
     return (wynik, timeList)    
@@ -169,7 +164,6 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     ###
     
     ### Przygotowanie stałych czasu ###
-    timer = stoper.Timer()
     timeList = []
     ###    
     
@@ -192,7 +186,7 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     
     ### Mnożenie ###     
     for i in range(repeat):
-        timer.start()
+        start.record()
         kernel(vals, \
                             colIdx, \
                             rowLength, \
@@ -203,9 +197,8 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
                             block=block, \
                             grid=grid, \
                             texrefs=tex)
-        timer.stop()
-        timeList.append(timer.get_elapsed())
-        timer.reset()
+        end.record()
+        timeList.append(start.time_till(end))
     ###
     
     return (wynik, timeList)
@@ -225,7 +218,6 @@ def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, rep
     numRows = numpy.int32(wierszeMacierzy)
     
     ### Przygotowanie stałych czasu ###
-    timer = stoper.Timer()
     timeList = []
     ###
     
@@ -247,7 +239,7 @@ def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, rep
     
     
     for i in range(repeat):
-        timer.start()
+        start.record()
         kernel(vals, \
                 colIdx, \
                 rowLength, \
@@ -256,9 +248,8 @@ def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, rep
                 block=block, \
                 grid=grid, \
                 texrefs=tex)
-        timer.stop()
-        timeList.append(timer.get_elapsed())
-        timer.reset()
+        end.record()
+        timeList.append(start.time_till(end))
     
     return (wynik, timeList)
 

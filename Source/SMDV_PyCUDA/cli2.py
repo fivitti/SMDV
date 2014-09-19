@@ -259,7 +259,7 @@ def getMessage(idMessage, lang='en'):
     else:
         return 'Not implement language: ' + lang
   
-def resultEquals(correct, current, confidenceFactor = 0.05):
+def resultEquals(correct, current, confidenceFactor = 0.0005):
     '''
     If the length of the list correct and current are different additional fields should be zero.
     If not as different is "#".
