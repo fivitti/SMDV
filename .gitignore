@@ -79,3 +79,4 @@ target/
 Old_SMDV_Backup/
 MatrixMarket/
 *.pyc
+Data/
