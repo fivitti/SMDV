@@ -179,7 +179,8 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
         from matrixMultiplication import multiplyCPU
         resultNumpy = multiplyCPU(matrix, repeat=repeat)[0]
     if ell:
-        if not quite: click.secho(getMessage('multiplyEll', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('multiplyEll', lang), fg=colors['danger']):
+        click.echo(vector)
         from matrixMultiplication import multiplyELL
         resultMultiply = multiplyELL(matrix, vector=vector, repeat=repeat, blockSize=block)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ellpack', compensate=com)
