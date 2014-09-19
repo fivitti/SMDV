@@ -65,9 +65,9 @@ def info(ctx, output):
         output.write(sep.join(data) + eol )
         
 @cli.command()
-@click.argument('inte', nargs=1)
+@click.option('-v', '--vector-path', 'vec', type=click.Path(exists=True))
 @click.pass_context
-def pm(ctx):
+def pm(ctx, vec):
     '''
     Print matrix
     '''
@@ -77,6 +77,10 @@ def pm(ctx):
 
     if not quite: click.secho(getMessage('pm', lang), fg=colors['info'])
     printMatrix(matrix)
+    if vec:
+        if not quite: click.secho(getMessage('vec', lang), fg=colors['info'])
+        from numpy import load
+        click.echo(load(str(vec)))
         
 def printMatrix(matrixFile):
     click.echo(str(matrixFile))
@@ -268,7 +272,8 @@ def getMessage(idMessage, lang='en'):
             'info_cols': 'Cols: ',
             'info_nnz': 'NNZ: ',
             'info_sparse': 'Sparsing: ',
-            'info_title': 'Info about matrix: '
+            'info_title': 'Info about matrix: ',
+            'vec': 'Representation of data vector: '
         }.get(idMessage, 'error')
     else:
         return 'Not implement language: ' + lang
