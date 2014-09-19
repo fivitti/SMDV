@@ -11,71 +11,71 @@ import os
 import scipy.io
 import scipy.sparse
 
-def generujMacierz_Csr(szerokosc = 5, wysokosc = 5, minimum = 1, maksimum = 100, calkowite = True, tryb = 0, procentZer = 40):
+def generateMatrixCsr(rows = 5, cols = 5, minimum = 1, maximum = 100, integers = True, mode = 0, percentageOfZeros = 40, precision=6):
     u'''
     Metoda generuje losową macierz o zadanych parametrach.
     
     Opis parametrów:
-        szerokosc - szerokosc macierzy,
-        wysokosc - wysokosc macierzy,
-        minimum - minimalna wartość niezerowa w macierzy,
-        maksimum - maksymalna wartość niezerowa w macierzy,
-        calkowite - jeżeli prawda wylosowane zostaną tylko liczby całkowite
-        tryb - dla 0 - wyjściowa macierz w formacie CSR, dla 1 - wyjściowa macierz w formacie CSR dense,
+        cols - cols macierzy,
+        rows - rows macierzy,
+        minimum - minimalna wartość niezerowLista w macierzy,
+        maximum - maksymalna wartość niezerowLista w macierzy,
+        integers - jeżeli prawda wylosowane zostaną tylko liczby całkowite
+        mode - dla 0 - wyjściowa macierz w formacie CSR, dla 1 - wyjściowa macierz w formacie CSR dense,
                 dla 2 - wyjściowa macierz w formacie numpy array
         procent zer - procentowa zawartość zer w macierzy
     '''
-    doWylosowania = round(szerokosc*wysokosc - (szerokosc*wysokosc*procentZer)/100)
-    row = []
-    col = []
+    toDraw = int(round(cols*rows - (cols*rows*percentageOfZeros)/100))
+    rowList = []
+    colList = []
     data = []
-    punkty = set([])
-    losujaca = 0
-    if calkowite:
-        losujaca = randint
+    points = set([])
+    randMethod = 0
+    if integers:
+        randMethod = randint
     else:
-        losujaca = uniform
-    while doWylosowania > 0:
-        wiersz = randint(0, wysokosc-1)
-        kolumna = randint(0, szerokosc-1)
-        punkt = (wiersz, kolumna)
-        if not punkt in punkty:
-            punkty.add(punkt)
-            doWylosowania -= 1
-    for i in punkty:
-        row.append(i[0])
-        col.append(i[1])
-        wartosc = losujaca(minimum, maksimum)
-        while wartosc == 0:
-            wartosc = losujaca(minimum, maksimum)
-        data.append(wartosc)
+        randMethod = uniform
+    while toDraw > 0:
+        row = randint(0, rows-1)
+        col = randint(0, cols-1)
+        point = (row, col)
+        if not point in points:
+            points.add(point)
+            toDraw -= 1
+    for i in points:
+        rowList.append(i[0])
+        colList.append(i[1])
+        value = round(randMethod(minimum, maximum), precision)
+        while value == 0:
+            value = round(randMethod(minimum, maximum), precision)
+        data.append(value)
+#    if integers:
+#        matrix = scipy.sparse.csr_matrix( (data,(rowList,colList)), shape=(cols,rows), dtype=numpy.int32 )
+#    else:
+#    print rowList, colList, data
+    matrix = scipy.sparse.csr_matrix( (data,(rowList,colList)), shape=(rows,cols), dtype=numpy.float32 )
         
-    if calkowite:
-        matrix = scipy.sparse.csr_matrix( (data,(row,col)), shape=(szerokosc,wysokosc), dtype=numpy.int32 )
-    else:
-        matrix = scipy.sparse.csr_matrix( (data,(row,col)), shape=(szerokosc,wysokosc), dtype=numpy.float32 )
-        
-    if tryb == 0:
+    if mode == 0:
         return matrix
-    elif tryb == 1:
+    elif mode == 1:
         return matrix.todense()
-    elif tryb == 2:
+    elif mode == 2:
         return matrix.toarray()
     else:
         return matrix
 
-def generateVector(length=5, minimum=-1, maksimum=1, integers=True, procentageOfZeros=40, precision=6, array=True):
-    if procentageOfZeros > 100:
-        procentageOfZeros = 100
-    elif procentageOfZeros < 0:
-        procentageOfZeros = 0
+def generateVector(length=5, minimum=-1, maximum=1, integers=True, percentageOfZeros=40, precision=6, array=True):
+    if percentageOfZeros > 100:
+        percentageOfZeros = 100
+    elif percentageOfZeros < 0:
+        percentageOfZeros = 0
     result = []
-    zeros = round((length * procentageOfZeros * 1.0) / 100)
+    zeros = round((length * percentageOfZeros * 1.0) / 100)
     randMethod = randint if integers else uniform
     for i in range(length):
-        drawn = round(randMethod(minimum, maksimum), precision)
+        drawn = round(randMethod(minimum, maximum), precision)
         while drawn == 0:
-            drawn = round(randMethod(minimum, maksimum), precision)
+            drawn = round(randMethod(minimum, maximum), precision)
         result.append(drawn)
     while zeros > 0:
         place = randint(0, length-1)
@@ -150,41 +150,41 @@ def saveVectorToNumpyFile(vector, folder = 'vectors\\', prefix = 'Vector_', exte
     filePath += extension    
     numpy.save(filePath, vector)
 
-def zapiszMacierzDoPliku(macierz, folder = 'macierze\\', przedrostek = 'Macierz_', rozszerzenie = '.mtx', data=False, wymiary=True, dopisek=''):
+def saveMatrixToFile(matrix, folder = 'macierze\\', prefix = 'Macierz_', extension = '.mtx', date=False, dimensions=True, suffix=''):
     u'''
-    Zapisuje przekazaną macierz do pliku w formacie MatrixMarket.
+    Zapisuje przekazaną matrix do pliku w formacie MatrixMarket.
 
     Opis parametrów:
-        macierz - macierz do zapisania
+        matrix - matrix do zapisania
         folder - folder zapisu
-        przedrostek - przedrostek dodany do nazwy
-        rozszerzenie - rozszerzenie wyjściowego pliku
-        data - jeżeli prawdziwe, na końcu nazwy pliku zostanie dodany ciąg w formacie RokMiesiacDzienGodzinaMinutaSekunda
-        wymiary - jeżeli prawdziwe, po przedrostku dodany zostanie ciąg zawierający kolejne wymiary macierz oddzielone znakiem 'x'
-        dopisek - dodatkowy tekst, który zostanie dodany tuż przed rozszerzeniem
+        prefix - prefix dodany do nazwy
+        extension - extension wyjściowego pliku
+        date - jeżeli prawdziwe, na końcu nazwy pliku zostanie dodany ciąg w formacie RokMiesiacDzienGodzinaMinutaSekunda
+        dimensions - jeżeli prawdziwe, po przedrostku dodany zostanie ciąg zawierający kolejne dimensions matrix oddzielone znakiem 'x'
+        suffix - dodatkowy tekst, który zostanie dodany tuż przed rozszerzeniem
         Jeżeli przed zapisem okaże się, że plik o danej nazwie istnieje dodany zostanie na końcu kolejny nieistniejący numer, począwszy od 1.
     '''
-    nazwa = folder
-    nazwa += przedrostek
-    if wymiary:
-        wymiaryLista = []
-        for i in macierz.shape:
-            wymiaryLista.append(str(i))
-        nazwa += 'x'.join(wymiaryLista)
-    if data:
-        czas = time.localtime()
+    filepath = folder
+    filepath += prefix
+    if dimensions:
+        dimensionsList = []
+        for i in matrix.shape:
+            dimensionsList.append(str(i))
+        filepath += 'x'.join(dimensionsList)
+    if date:
+        now = time.localtime()
         for i in range(6):
-            if czas[i] < 10:
-                nazwa += '0'
-            nazwa += str(czas[i])
-    if os.path.exists(nazwa+rozszerzenie):
-        dodatek = 1
-        while os.path.exists(nazwa+'_'+str(dodatek)+rozszerzenie):
-            dodatek += 1
-        nazwa += '_' + str(dodatek)
-    nazwa += dopisek
-    nazwa += rozszerzenie    
-    scipy.io.mmwrite(nazwa, macierz)
+            if now[i] < 10:
+                filepath += '0'
+            filepath += str(now[i])
+    if os.path.exists(filepath+suffix+extension):
+        addition = 1
+        while os.path.exists(filepath+'_'+str(addition)+suffix+extension):
+            addition += 1
+        filepath += '_' + str(addition)
+    filepath += suffix
+    filepath += extension    
+    scipy.io.mmwrite(filepath, matrix)
 
 def printListInList(listaList):
     for i in listaList:
@@ -308,10 +308,12 @@ if __name__ == '__main__':
 #        matrix = generujMacierz_Csr(szerokosc=i, wysokosc=i, minimum=minimum, maksimum=maksimum, procentZer=procentZer)
 #        zapiszMacierzDoPliku(matrix, folder=folder)
     
-    A = numpy.array([67, 4, -84, -7, 8, 133], dtype=numpy.int32)
-    B = numpy.array([67.0, 4.0, -84.0, -7.0, 8.0, 133.0], dtype=numpy.float32)
+#    A = numpy.array([67, 4, -84, -7, 8, 133], dtype=numpy.int32)
+#    B = numpy.array([67.0, 4.0, -84.0, -7.0, 8.0, 133.0], dtype=numpy.float32)
+    A = generateMatrixCsr(minimum = -10, maximum=10)
+    print A
 
-    print resultEquals(A, B)    
+#    print resultEquals(A, B)    
     
         
     
