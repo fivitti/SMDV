@@ -63,9 +63,28 @@ def generujMacierz_Csr(szerokosc = 5, wysokosc = 5, minimum = 1, maksimum = 100,
         return matrix.toarray()
     else:
         return matrix
-        
-        
-        
+
+def generateVector(length=5, minimum=-1, maksimum=1, integers=True, procentageOfZeros=40, precision=6):
+    if procentageOfZeros > 100:
+        procentageOfZeros = 100
+    elif procentageOfZeros < 0:
+        procentageOfZeros = 0
+    result = []
+    zeros = round((length * procentageOfZeros * 1.0) / 100)
+    randMethod = randint if integers else uniform
+    for i in range(length):
+        drawn = round(randMethod(minimum, maksimum), precision)
+        while drawn == 0:
+            drawn = round(randMethod(minimum, maksimum), precision)
+        result.append(drawn)
+    while zeros > 0:
+        place = randint(0, length-1)
+        if not result[place] == 0:
+            result[place] = 0
+            zeros -= 1
+    return result
+            
+    
 
 def generujMacierz_Normal(szerokosc = 5, wysokosc = 5, minimum = 0, maksimum = 100, calkowite = True, array = False, procentZer = 40):
     macierz = []
@@ -106,7 +125,27 @@ def generujMacierz_Normal(szerokosc = 5, wysokosc = 5, minimum = 0, maksimum = 1
             return numpy.array(macierz, dtype = numpy.float32)
     else:      
         return macierz
-    
+
+def saveVectorToNumpyFile(vector, folder = 'vectors\\', prefix = 'Vector_', extension = '.npy', date=False, length=True, suffix=''):
+    filePath = folder
+    filePath += prefix
+    if length:
+        filePath += str(len(vector))
+    if date:
+        t = time.localtime()
+        for i in range(6):
+            if t[i] < 10:
+                filePath += '0'
+            filePath += str(t[i])
+    if os.path.exists(filePath+suffix+extension):
+        addition = 1
+        while os.path.exists(filePath+'_'+str(addition)+suffix+extension):
+            addition += 1
+        filePath += '_' + str(addition)
+    filePath += suffix
+    filePath += extension    
+    numpy.save(filePath, vector)
+
 def zapiszMacierzDoPliku(macierz, folder = 'macierze\\', przedrostek = 'Macierz_', rozszerzenie = '.mtx', data=False, wymiary=True, dopisek=''):
     u'''
     Zapisuje przekazaną macierz do pliku w formacie MatrixMarket.
@@ -206,20 +245,28 @@ def rowEqualsIgnoreEndZero(a, b, procentUfnosci = 0.05):
         
   
 if __name__ == '__main__':
-    A = generujMacierz_Csr(szerokosc=10, wysokosc=10, procentZer=80, tryb=0)
-    B = generujMacierz_Normal(szerokosc=10, wysokosc=10, procentZer=80, array=True)
-    print 'Macierz A - CSR:\n' + str(A)
-    print 'Macierz B:\n' + str(B)
-
-    A = [3, 2, 1, 0, 3]
-    B = [3, 2, 1, 0, 3, 0, 0, 0, 0, 0]
-    assert rowEqualsIgnoreEndZero(A, B)
-           
-    folder =  'E:\\Slawek\\SMVD\\SMDV\\Macierze\\wygenerowane\\'
-#    folder = 'E:\Moje projekty\SMDV\Macierze\\wygenerowane\\'
-    wymiary = range(128, 256)
+#    A = generujMacierz_Csr(szerokosc=10, wysokosc=1, procentZer=80, tryb=0)
+#    B = generujMacierz_Normal(szerokosc=10, wysokosc=10, procentZer=80, array=True)
+#    print 'Macierz A - CSR:\n' + str(A)
+#    print 'Macierz B:\n' + str(B)
+    folder = 'E:\Moje projekty\SMDV\Data\\Generated\\'
+#    folder = '../../Data/Genereted'
+    wymiary = [5, 6]
+    procentZer = 15
     for i in wymiary:
-        zapiszMacierzDoPliku(generujMacierz_Csr(szerokosc=i, wysokosc=i, procentZer=70, calkowite = False), przedrostek="Macierz_float_", folder=folder)
+        v = generateVector(length=i, procentageOfZeros=procentZer, integers=False)
+        saveVectorToNumpyFile(v, folder, prefix='Vector_float_', suffix='_'+str(procentZer)+'p')
+#    print numpy.load(folder + 'Vector_int_5.npy')
+
+#    A = [3, 2, 1, 0, 3]
+#    B = [3, 2, 1, 0, 3, 0, 0, 0, 0, 0]
+#    assert rowEqualsIgnoreEndZero(A, B)
+           
+#    folder =  'E:\\Slawek\\SMVD\\SMDV\\Macierze\\wygenerowane\\'
+    folder = 'E:\Moje projekty\SMDV\Macierze\\wygenerowane\\'
+#    wymiary = range(5)
+#    for i in wymiary:
+#        zapiszMacierzDoPliku(generujMacierz_Csr(szerokosc=i, wysokosc=1, procentZer=70, calkowite = True), przedrostek="Vector_int_", folder=folder)
            
 #    procentZer = 75
 #    minimum = 1

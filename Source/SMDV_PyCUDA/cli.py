@@ -65,6 +65,7 @@ def info(ctx, output):
         output.write(sep.join(data) + eol )
         
 @cli.command()
+@click.argument('inte', nargs=1)
 @click.pass_context
 def pm(ctx):
     '''
@@ -139,12 +140,13 @@ def conv(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert):
 @click.option('-std', '--standard-deviation', 'std', is_flag=True, help='Print standard deviation of time multiplication')
 @click.option('--test', type=click.INT, help='Testing result multiplication. Print bad row. Value is confidence factor.')
 @click.option('-com', '--compensate', 'com', type=click.INT, help='N first time are remove (returned times decremented by n). Recommended in testing the speed, because the n first times (e. g. one) are a long delay.' )
-
 @click.option('-o', '--output', type=click.File(mode='a', lazy=True), help='File to save raport. Format CSV. If exist append new data.')
 
+@click.argument('vector-path', nargs=1, required=True, type=click.Path(exists=True))
+
 @click.pass_context
-def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output):
-    '''Multiplication matrix in formats...'''
+def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output, vector_path):
+    '''Multiplication matrix in formats...'''   
     if com: 
         repeat += com
     matrix = ctx.obj['matrix']
@@ -152,6 +154,12 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
     lang = ctx.obj['lang']
     sep = ctx.obj['sep']
     eol = ctx.obj['eol']
+    
+    from numpy import load
+    vector = load(str(vector_path))
+    if not len(vector) == matrix.shape[1]:
+        raise click.BadParameter('Length of the vector is not equal to the number of columns of the matrix.')
+        
     if not quite: click.secho(getMessage('multiply', lang), fg=colors['info'])
     if output and not isfile(output.name):
         headers = ['matrix', 'format', 'average time', 'standard deviation time', 'times']
@@ -160,7 +168,7 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
     if cpu:
         if not quite: click.secho(getMessage('multiplyCpu', lang), fg=colors['danger'])
         from matrixMultiplication import multiplyCPU
-        resultMultiply = multiplyCPU(matrix, repeat=repeat)
+        resultMultiply = multiplyCPU(matrix, repeat=repeat, vector)
         if test: resultNumpy = resultMultiply[0]
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='cpu', compensate=com)
     elif test:
