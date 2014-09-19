@@ -181,25 +181,25 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
     if ell:
         if not quite: click.secho(getMessage('multiplyEll', lang), fg=colors['danger'])
         from matrixMultiplication import multiplyELL
-        resultMultiply = multiplyELL(matrix, repeat=repeat, blockSize=block)
+        resultMultiply = multiplyELL(matrix, vector=vector, repeat=repeat, blockSize=block)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ellpack', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if sle:
         if not quite: click.secho(getMessage('multiplySliced', lang), fg=colors['danger'])
         from matrixMultiplication import multiplySlicedELL
-        resultMultiply = multiplySlicedELL(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
+        resultMultiply = multiplySlicedELL(matrix, vector=vector, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='sliced', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if see:
         if not quite: click.secho(getMessage('multiplySertilp', lang), fg=colors['danger'])
         from matrixMultiplication import multiplySertilp
-        resultMultiply = multiplySertilp(matrix, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
+        resultMultiply = multiplySertilp(matrix, vector=vector, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='sertilp', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if ert:
         if not quite: click.secho(getMessage('multiplyErtilp', lang), fg=colors['danger'])
         from matrixMultiplication import multiplyErtilp
-        resultMultiply = multiplyErtilp(matrix, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
+        resultMultiply = multiplyErtilp(matrix, vector=vector, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ertilp', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
          
