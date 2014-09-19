@@ -64,7 +64,7 @@ def generujMacierz_Csr(szerokosc = 5, wysokosc = 5, minimum = 1, maksimum = 100,
     else:
         return matrix
 
-def generateVector(length=5, minimum=-1, maksimum=1, integers=True, procentageOfZeros=40, precision=6, array=False):
+def generateVector(length=5, minimum=-1, maksimum=1, integers=True, procentageOfZeros=40, precision=6, array=True):
     if procentageOfZeros > 100:
         procentageOfZeros = 100
     elif procentageOfZeros < 0:
@@ -83,7 +83,7 @@ def generateVector(length=5, minimum=-1, maksimum=1, integers=True, procentageOf
             result[place] = 0
             zeros -= 1
     if array:
-        typeData = numpy.int32 if integers else numpy.float32
+        typeData = numpy.float32
         return numpy.array(result, dtype=typeData)
     else:
         return result

@@ -62,7 +62,7 @@ if __name__ == '__main__':
     ###
     macierz = scipy.io.mmread(folderMacierzy + plikMacierzy)
 #    wektor = numpy.arange(1, macierz.shape[1]+1, dtype=numpy.float32)
-    wektor = numpy.array([1, -1, 0, -1, 1], dtype=numpy.int32)
+    wektor = numpy.array([1, -1, 0, -1, 1], dtype=numpy.float32)
 ##    from math import ceil
 ##    conv = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=int(ceil((sliceSize*threadPerRow*1.0)/alignStala)*alignStala), prefetch=prefetch)
 ##    macierz = numpy.array([[0, 0, 3], \
