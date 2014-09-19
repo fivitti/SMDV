@@ -144,7 +144,9 @@ def conv(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert):
 
 @click.pass_context
 def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output):
-    '''Multiplication matrix in formats...'''    
+    '''Multiplication matrix in formats...'''
+    if com: 
+        repeat += com
     matrix = ctx.obj['matrix']
     quite = ctx.obj['quite']
     lang = ctx.obj['lang']
