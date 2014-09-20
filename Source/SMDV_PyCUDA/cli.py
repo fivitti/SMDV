@@ -250,7 +250,15 @@ def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTi
         output.write(sep.join(data) + eol )
 def testResult(model, check, confidenceFactor, quite, lang):
     from matrixUtilites import resultEquals, stringVector
-    click.echo(('' if quite else getMessage('test', lang)) + stringVector(map(str, resultEquals(model, check, confidenceFactor)), valueFormat='%s'))
+    click.echo(
+                ('' if quite else getMessage('test', lang)) + \
+                stringVector(
+                    map(str, resultEquals(model, check, confidenceFactor)), \
+                    valueFormat='%s', \
+                    width=100, \
+                    rowFormat='  {0:<7}{1:<}'
+                )
+            )
 def getMessage(idMessage, lang='en'):
     if lang == 'pl':
         return {

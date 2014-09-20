@@ -147,16 +147,16 @@ def printListInList(listaList):
 def stringListInList(listaList):
     return '\n'.join(listaList)
     
-def formatItem(left, right):
+def formatItem(left, right, width=40, rowFormat='  {0:<7}{1:>9}'):
     from textwrap import fill
-    wrapped = fill(right, width=40, subsequent_indent=' '*15)
-    return '  {0:<7}{1:>9}'.format(left, wrapped)
-def stringVector(vector, withoutZeros = False, valueFormat="%.15g"):
+    wrapped = fill(right, width=width, subsequent_indent=' '*15)
+    return rowFormat.format(left, wrapped)
+def stringVector(vector, withoutZeros = False, valueFormat="%.15g", width=40, rowFormat='  {0:<7}{1:>9}'):
     result = []
     for idx, val in enumerate(vector):
         if withoutZeros and val == 0:
             continue
-        result.append(formatItem('(%s)' % str(idx),  valueFormat % val))
+        result.append(formatItem('(%s)' % str(idx),  valueFormat % val, width=width, rowFormat=rowFormat))
     return '\n'.join(result)
     
 def getShapeEll(macierz):
