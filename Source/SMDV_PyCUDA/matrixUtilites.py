@@ -151,12 +151,12 @@ def formatItem(left, right):
     from textwrap import fill
     wrapped = fill(right, width=40, subsequent_indent=' '*15)
     return '  {0:<7}{1:>9}'.format(left, wrapped)
-def stringVector(vector, withoutZeros = False):
+def stringVector(vector, withoutZeros = False, valueFormat="%.15g"):
     result = []
     for idx, val in enumerate(vector):
         if withoutZeros and val == 0:
             continue
-        result.append(formatItem('(%s)' % str(idx),  "%.15g" % val))
+        result.append(formatItem('(%s)' % str(idx),  valueFormat % val))
     return '\n'.join(result)
     
 def getShapeEll(macierz):
@@ -201,5 +201,6 @@ def resultEquals(correct, current, confidenceFactor = 0.0005):
         
   
 if __name__ == '__main__':
-    pass
+    l = [(1, 2, 3), (2, 2, 3), (0, 9, 8)]
+    print stringVector(map(str, l), valueFormat="%s")
     
