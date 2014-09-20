@@ -145,8 +145,8 @@ def conv(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert):
 @click.option('-std', '--standard-deviation', 'std', is_flag=True, help='Print standard deviation of time multiplication')
 @click.option('--test', type=click.FLOAT, help='Testing result multiplication. Print bad row. Value is confidence factor.')
 @click.option('-com', '--compensate', 'com', type=click.INT, help='N first time are remove (returned times decremented by n). Recommended in testing the speed, because the n first times (e. g. one) are a long delay.' )
-@click.option('-o', '--output', type=click.File(mode='a', lazy=True), help='File to save raport. Format CSV. If exist append new data.')
-@click.option('-param', '--parameters', is_flag=True, help='Print value of parameters. Added  to the file it info only when it is created')
+@click.option('-o', '--output', type=click.File(mode='a', lazy=True), help='File to save raport. Format CSV. If exist append new data. Added to the file it info if it is created.')
+@click.option('-param', '--parameters', is_flag=True, help='Print value of parameters.')
 
 @click.argument('vector-path', nargs=1, required=True, type=click.Path(exists=True))
 
@@ -172,7 +172,7 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
     if parameters:
         if not quite: click.secho(getMessage('paramInfo', lang), fg=colors['info'])
         result = []
-        for k, v in param:
+        for k, v in param.items():
             result.append('  {0:<7}{1:>9}'.format(k, v))
         click.echo('\n'.join(result))
             
