@@ -2,7 +2,7 @@
 """
 Created on Wed Jun 25 12:35:44 2014
 
-@author: HP
+@author: Sławomir Figiel
 """
 import pycuda.autoinit
 import pycuda.driver as cuda

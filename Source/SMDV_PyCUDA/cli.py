@@ -2,7 +2,7 @@
 """
 Created on Wed Sep 17 13:47:34 2014
 
-@author: HP
+@author: Sławomir Figiel
 """
 
 import click
@@ -13,8 +13,8 @@ from numpy import average as avr, std as nstd
 colors = {
         'success' : 'green',
         'info' : 'cyan',
-        'warning' : 'red',
-        'danger' : 'yellow'
+        'danger' : 'red',
+        'warning' : 'yellow'
     }
  
 @click.group(chain=True)
@@ -80,7 +80,8 @@ def pm(ctx, vec):
     if vec:
         if not quite: click.secho(getMessage('vec', lang), fg=colors['info'])
         from numpy import load
-        click.echo(load(str(vec)))
+        from matrixUtilites import stringVector
+        click.echo(stringVector(load(str(vec))))
         
 def printMatrix(matrixFile):
     click.echo(str(matrixFile))
@@ -108,19 +109,19 @@ def conv(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert):
     from matrixUtilites import stringListInList
     if not quite: click.secho(getMessage('conv', lang), fg=colors['info'])
     if ell:
-        if not quite: click.secho(getMessage('convEll', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('convEll', lang), fg=colors['warning'])
         from matrixFormat import convertToELL
         click.echo(stringListInList(convertToELL(matrix, array=False)))
     if sle:
-        if not quite: click.secho(getMessage('convSliced', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('convSliced', lang), fg=colors['warning'])
         from matrixFormat import convertToSlicedELL
         click.echo(stringListInList(convertToSlicedELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align)))
     if see:
-        if not quite: click.secho(getMessage('convSertilp', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('convSertilp', lang), fg=colors['warning'])
         from matrixFormat import convertToSertilpELL
         click.echo(stringListInList(convertToSertilpELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align, prefetch=prefetch)))
     if ert:
-        if not quite: click.secho(getMessage('convErtilp', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('convErtilp', lang), fg=colors['warning'])
         from matrixFormat import convertToErtilp
         click.echo(stringListInList(convertToErtilp(matrix, threadPerRow=tpr, prefetch=prefetch, array=False)))
 
@@ -170,7 +171,7 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
         output.write(sep.join(headers) + eol)
     resultNumpy = ''
     if cpu:
-        if not quite: click.secho(getMessage('multiplyCpu', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('multiplyCpu', lang), fg=colors['warning'])
         from matrixMultiplication import multiplyCPU
         resultMultiply = multiplyCPU(matrix, repeat=repeat, vector=vector)
         if test: resultNumpy = resultMultiply[0]
@@ -179,25 +180,25 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
         from matrixMultiplication import multiplyCPU
         resultNumpy = multiplyCPU(matrix, repeat=repeat)[0]
     if ell:
-        if not quite: click.secho(getMessage('multiplyEll', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('multiplyEll', lang), fg=colors['warning'])
         from matrixMultiplication import multiplyELL
         resultMultiply = multiplyELL(matrix, vector=vector, repeat=repeat, blockSize=block)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ellpack', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if sle:
-        if not quite: click.secho(getMessage('multiplySliced', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('multiplySliced', lang), fg=colors['warning'])
         from matrixMultiplication import multiplySlicedELL
         resultMultiply = multiplySlicedELL(matrix, vector=vector, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='sliced', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if see:
-        if not quite: click.secho(getMessage('multiplySertilp', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('multiplySertilp', lang), fg=colors['warning'])
         from matrixMultiplication import multiplySertilp
         resultMultiply = multiplySertilp(matrix, vector=vector, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='sertilp', compensate=com)
         if test: testResult(resultNumpy, resultMultiply[0], test, quite, lang)
     if ert:
-        if not quite: click.secho(getMessage('multiplyErtilp', lang), fg=colors['danger'])
+        if not quite: click.secho(getMessage('multiplyErtilp', lang), fg=colors['warning'])
         from matrixMultiplication import multiplyErtilp
         resultMultiply = multiplyErtilp(matrix, vector=vector, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
         resumeResult(ctx=ctx, resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, lang=lang, output=output, formatName='ertilp', compensate=com)
@@ -208,7 +209,8 @@ def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTi
     if compensate:
         times = times[compensate:]
     if resultPrint:
-        click.echo(('' if quite else getMessage('result', lang)) + str(resultMuliply[0]))
+        from matrixUtilites import stringVector
+        click.echo(('' if quite else getMessage('result', lang)) + stringVector(resultMuliply[0]))
     if timePrint:
         click.echo(('' if quite else getMessage('timeList', lang)) + str(times))
     if avrTimePrint:

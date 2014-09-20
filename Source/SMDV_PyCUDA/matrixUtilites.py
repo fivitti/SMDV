@@ -2,7 +2,7 @@
 """
 Created on Sun May 04 20:45:18 2014
 
-@author: HP
+@author: Sławomir Figiel
 """
 from random import randint, uniform
 import numpy
@@ -49,10 +49,7 @@ def generateMatrixCsr(rows = 5, cols = 5, minimum = 1, maximum = 100, integers =
         while value == 0:
             value = round(randMethod(minimum, maximum), precision)
         data.append(value)
-#    if integers:
-#        matrix = scipy.sparse.csr_matrix( (data,(rowList,colList)), shape=(cols,rows), dtype=numpy.int32 )
-#    else:
-#    print rowList, colList, data
+
     matrix = scipy.sparse.csr_matrix( (data,(rowList,colList)), shape=(rows,cols), dtype=numpy.float32 )
         
     if mode == 0:
@@ -88,48 +85,6 @@ def generateVector(length=5, minimum=-1, maximum=1, integers=True, percentageOfZ
     else:
         return result
             
-    
-
-def generujMacierz_Normal(szerokosc = 5, wysokosc = 5, minimum = 0, maksimum = 100, calkowite = True, array = False, procentZer = 40):
-    macierz = []
-    for i in range(wysokosc):
-        wiersz = []
-        for j in range(szerokosc):
-            if calkowite:
-                wiersz.append(randint(minimum, maksimum))
-            else:
-                wiersz.append(uniform(minimum, maksimum))
-        macierz.append(wiersz)
-        
-    if procentZer > 0 and procentZer <= 100:
-        zeraDoWylosowania = round((szerokosc*wysokosc*procentZer)/100)
-        for i in macierz:
-            for j in i:
-                if j == 0:
-                    if zeraDoWylosowania > 0:
-                        zeraDoWylosowania -= 1
-                    else:
-                        while j == 0:
-                            if calkowite:
-                                j = randint(minimum, maksimum)
-                            else:
-                                j = uniform(minimum, maksimum)
-        while zeraDoWylosowania > 0:
-            x = randint(1, szerokosc) - 1
-            y = randint(1, wysokosc) - 1
-            if macierz[y][x] == 0:
-                continue
-            else:
-                macierz[y][x] = 0
-                zeraDoWylosowania -= 1      
-    if array:
-        if calkowite:
-            return numpy.array(macierz, dtype = numpy.int32)
-        else:
-            return numpy.array(macierz, dtype = numpy.float32)
-    else:      
-        return macierz
-
 def saveVectorToNumpyFile(vector, folder = 'vectors\\', prefix = 'Vector_', extension = '.npy', date=False, length=True, suffix=''):
     filePath = folder
     filePath += prefix
@@ -190,63 +145,25 @@ def printListInList(listaList):
     for i in listaList:
         print i
 def stringListInList(listaList):
-    s = ''
-    for i in listaList:
-        s += str(i) + "\n"
-    return s
+    return '\n'.join(listaList)
+    
+def formatItem(left, right):
+    from textwrap import fill
+    wrapped = fill(right, width=40, subsequent_indent=' '*15)
+    return '  {0:<7}{1:>9}'.format(left, wrapped)
+def stringVector(vector, withoutZeros = False):
+    result = []
+    for idx, val in enumerate(vector):
+        if withoutZeros and val == 0:
+            continue
+        result.append(formatItem('(%s)' % str(idx),  "%.15g" % val))
+    return '\n'.join(result)
     
 def getShapeEll(macierz):
     wiersze = len(macierz[2])
     kolumny = max(macierz[1])+1
     return (wiersze, kolumny)
-    
-def rowEqualsIgnoreEndZero(a, b, procentUfnosci = 0.05):
-    '''
-    Metoda przyjmuje dwie listy i sprawdza, czy posiadają takie same odpowiadające elementy.
-    Zwróci prawdę, gdy listy są identyczne.
-    W przypadku, gdy jedna z list jest dłuższa niż długa prawda zostanie zwrócona jeżeli
-    nadmiarowe elementy są zerami.
-    
-    Parametr "procentUfnosci" określa jakim procentem średniej wartości na listach a i b (dla odpowiadających
-    sobie indeksów) może być różnica jednej z tych wartości i średniej.
-    
-    Przykład:
-        a = [x_1, x_2, x_3, x_4, ...]
-        b = [y_1, y_2, y_3, y_4, ...]
-        Jeżeli dla i = 1, 2, 3, 4, ...
-            avr_i = | (a_i + _ib) / 2 |
-            var_i = | avr_i - a_i |
-            par_i = var_i / avr_i = | avr_i - a_i | / | (a_i + b_i) / 2 | =
-                  = | (a_i + b_i) / 2 - a_i | / | (a_i + b_i) / 2 | =
-                  = | (a_i + b_i - 2 * a_i) / 2 | / | (a_i + b_i) / 2 | =
-                  = | b_i - a_i | / | a_i + b_i |
-        par_i * 100 > procentUfnosci zwraca fałsz,
-        jeżeli nie kontynuuje obliczenia dla kolejnego i.
-        W przypadku, gdy średnia będzie równa zero, odchylenie (czyli a_i, lub b_i)
-        zostaje zaokrąglone do ósmego miejsca po przecinku. Jeżeli tak zaookrąglona wartość
-        nie będzie równa zero to zwrócony zostanie fałsz.
-    '''
-    
-    if len(a) > len(b):
-        endMin = len(b)
-        objMax = a
-    else:
-        endMin = len(a)
-        objMax = b
-    for i in range(endMin):
-        average = abs(a[i] + b[i])
-        variation = abs(a[i] - b[i])
-        if average == 0:
-            if round(abs(a[i]), 8) != 0:
-                return False
-        else:
-            if (variation / average)*100 > procentUfnosci:
-                return False
-    for i in range(endMin, len(objMax)):
-        if objMax[i] != 0:
-            return False
-    return True
-    
+        
 def resultEquals(correct, current, confidenceFactor = 0.0005):
     '''
     If the length of the list correct and current are different additional fields should be zero.
@@ -278,42 +195,5 @@ def resultEquals(correct, current, confidenceFactor = 0.0005):
         
   
 if __name__ == '__main__':
-#    A = generujMacierz_Csr(szerokosc=10, wysokosc=1, procentZer=80, tryb=0)
-#    B = generujMacierz_Normal(szerokosc=10, wysokosc=10, procentZer=80, array=True)
-#    print 'Macierz A - CSR:\n' + str(A)
-#    print 'Macierz B:\n' + str(B)
-#    folder = 'E:\Moje projekty\SMDV\Data\\Generated\\'
-#    folder = '../../Data/Generated'
-#    wymiary = [5, 6]
-#    procentZer = 15
-#    for i in wymiary:
-#        v = generateVector(length=i, procentageOfZeros=procentZer, integers=False)
-#        saveVectorToNumpyFile(v, folder, prefix='Vector_float_', suffix='_'+str(procentZer)+'p')
-#    print numpy.load(folder + 'Vector_int_5.npy')
-
-#    A = [3, 2, 1, 0, 3]
-#    B = [3, 2, 1, 0, 3, 0, 0, 0, 0, 0]
-#    assert rowEqualsIgnoreEndZero(A, B)
-           
-#    folder =  'E:\\Slawek\\SMVD\\SMDV\\Macierze\\wygenerowane\\'
-#    folder = 'E:\Moje projekty\SMDV\Macierze\\wygenerowane\\'
-#    wymiary = range(5)
-#    for i in wymiary:
-#        zapiszMacierzDoPliku(generujMacierz_Csr(szerokosc=i, wysokosc=1, procentZer=70, calkowite = True), przedrostek="Vector_int_", folder=folder)
-           
-#    procentZer = 75
-#    minimum = 1
-#    maksimum = 9
-#    for i in wymiary:
-#        matrix = generujMacierz_Csr(szerokosc=i, wysokosc=i, minimum=minimum, maksimum=maksimum, procentZer=procentZer)
-#        zapiszMacierzDoPliku(matrix, folder=folder)
-    
-#    A = numpy.array([67, 4, -84, -7, 8, 133], dtype=numpy.int32)
-#    B = numpy.array([67.0, 4.0, -84.0, -7.0, 8.0, 133.0], dtype=numpy.float32)
-    A = generateMatrixCsr(minimum = -10, maximum=10)
-    print A
-
-#    print resultEquals(A, B)    
-    
-        
+    pass
     
