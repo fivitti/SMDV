@@ -2,7 +2,7 @@
 """
 Created on Wed Jun 25 12:35:44 2014
 
-@author: HP
+@author: Sławomir Figiel
 """
 import pycuda.autoinit
 import pycuda.driver as cuda
@@ -17,29 +17,31 @@ import cudaAgregator
 start = cuda.Event()
 end = cuda.Event()
 
-def multiplyCPU(matrix, repeat = 1, wektor):
+def multiplyCPU(matrix, vector, repeat = 1):
 #    wektor = numpy.arange(1, matrix.shape[1]+1, dtype=numpy.float32)
-    if wektor.shape[0] != matrix.shape[1]:
+    if len(vector) != matrix.shape[1]:
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
     timeList = []
     
     for i in range(repeat):
         start.record()
-        wynik = matrix.dot(wektor)
+        wynik = matrix.dot(vector)
         end.record()
         end.synchronize()
         timeList.append(start.time_till(end))
     
     return (wynik, timeList)
 
-def multiplyELL(macierz, repeat = 1, blockSize = 128): 
+def multiplyELL(macierz, vector, repeat = 1, blockSize = 128): 
+    if len(vector) != macierz.shape[1]:
+        raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
     mac = convertToELL(macierz)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     rowLength = cuda.to_device(mac[2])
     
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
-    wektor = numpy.arange(1, kolumnyMacierzy+1, dtype=numpy.float32)      
+    wektor = vector
     wynik = numpy.zeros(wierszeMacierzy, dtype=numpy.float32)
     numRows = numpy.int32(wierszeMacierzy)
     
@@ -80,7 +82,9 @@ def multiplyELL(macierz, repeat = 1, blockSize = 128):
     
     return (wynik, timeList)
     
-def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):    
+def multiplySlicedELL(macierz, vector, alignConst, sliceSize, threadPerRow, repeat = 1):   
+    if len(vector) != macierz.shape[1]:
+        raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
     ### Przygotowanie macierzy SlicedEllPack ###
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
     mac = convertToSlicedELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align)
@@ -90,7 +94,7 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     sliceStart = cuda.to_device(mac[3])
     
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
-    wektor = numpy.arange(1, kolumnyMacierzy+1, dtype=numpy.float32)      
+    wektor = vector  
     wynik = numpy.zeros(wierszeMacierzy, dtype=numpy.float32)
     numRows = numpy.int32(wierszeMacierzy)
     ###
@@ -141,7 +145,9 @@ def multiplySlicedELL(macierz, alignConst, sliceSize, threadPerRow, repeat = 1):
     
     return (wynik, timeList)    
     
-def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, repeat = 1, convertMethod = "new"):    
+def multiplySertilp(macierz, vector, alignConst, sliceSize, threadPerRow, prefetch = 2, repeat = 1, convertMethod = "new"):    
+    if len(vector) != macierz.shape[1]:
+        raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')    
     ### Przygotowanie macierzy###
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
     if convertMethod == 'new':
@@ -159,7 +165,7 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     sliceStart = cuda.to_device(mac[3])
     
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
-    wektor = numpy.arange(1, kolumnyMacierzy+1, dtype=numpy.float32)      
+    wektor = vector     
     wynik = numpy.zeros(wierszeMacierzy, dtype=numpy.float32)
     numRows = numpy.int32(wierszeMacierzy)
     ###
@@ -209,7 +215,9 @@ def multiplySertilp(macierz, alignConst, sliceSize, threadPerRow, prefetch = 2, 
     
     return (wynik, timeList)
 
-def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1, convertMethod = 'new'):
+def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1, convertMethod = 'new'):
+    if len(vector) != macierz.shape[1]:
+        raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')    
     if convertMethod == 'new':
         mac = transformToERTILPFormat(macierz, align = prefetch*threadPerRow, ThreadsPerRow=threadPerRow)
         rowLength = cuda.to_device(mac[2])
@@ -219,7 +227,7 @@ def multiplyErtilp(macierz, threadPerRow = 2, prefetch = 2, blockSize = 128, rep
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])  
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
-    wektor = numpy.arange(1, kolumnyMacierzy+1, dtype=numpy.float32)      
+    wektor = vector    
     wynik = numpy.zeros(wierszeMacierzy, dtype=numpy.float32)
     numRows = numpy.int32(wierszeMacierzy)
     
