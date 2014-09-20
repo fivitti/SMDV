@@ -154,7 +154,7 @@ def formatItem(left, right, width=40, rowFormat='  {0:<7}{1:>9}'):
 def stringVector(vector, withoutZeros = False, valueFormat="%.15g", width=40, rowFormat='  {0:<7}{1:>9}'):
     result = []
     for idx, val in enumerate(vector):
-        if withoutZeros and val == 0:
+        if withoutZeros and not val:
             continue
         result.append(formatItem('(%s)' % str(idx),  valueFormat % val, width=width, rowFormat=rowFormat))
     return '\n'.join(result)
