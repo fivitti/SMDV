@@ -173,7 +173,7 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
         if not quite: click.secho(getMessage('paramInfo', lang), fg=colors['info'])
         paramRows = []
         for k, v in param.items():
-            paramRows.append('  {0:<7}{1:>9}'.format(k, v))
+            paramRows.append('  {0:<12}{1:>13}'.format(k, v))
         click.echo('\n'.join(paramRows))
             
     if com: 
@@ -292,7 +292,7 @@ def getMessage(idMessage, lang='en'):
             'result' : u'Result: ',
             'timeList' : u'List of times multiplication [ms]: ',
             'avrTime' : u'Average time [ms]: ',
-            'test': 'Errors (position, different): ',
+            'test': 'Errors (position, different, relative error): ',
             'info_rows': 'Rows: ',
             'info_cols': 'Cols: ',
             'info_nnz': 'NNZ: ',

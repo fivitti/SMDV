@@ -166,12 +166,17 @@ def getShapeEll(macierz):
         
 def resultEquals(correct, current, confidenceFactor = 0.0005):
     '''
+    Return list tuple if errors:
+        (index, different, relative error)
+    
     If the length of the list correct and current are different additional fields should be zero.
-    If not as different is "#".
+    If not as different is "#". (index, #, #)
     If the array contains floating-point numbers, set the appropriate confidence factor.
     (correct - correct*confidenceFactor : correct + correct*confidenceFactor)
     Returns a list of pairs: the number of fields in the list, and the difference from 
     the correct result [correct - current].
+    The third value is the relative error. 
+    If the correct value is 0 instead it is given the character '#' (index, difference, #)
     '''
     result = []
     if len(correct) > len(current):
@@ -183,14 +188,15 @@ def resultEquals(correct, current, confidenceFactor = 0.0005):
     for i in range(endMin):
         if correct[i] == 0:
             if round(abs(current[i]), 8) != 0:
-                result.append((i, current[i]*(-1)))
+                result.append((i, current[i]*(-1), '#'))
         else:
             if (correct[i] > 0 and (current[i] > correct[i]*(1+confidenceFactor) or current[i] < correct[i]*(1-confidenceFactor))) or \
                (correct[i] < 0 and (current[i] < correct[i]*(1+confidenceFactor) or current[i] > correct[i]*(1-confidenceFactor))):
-                result.append((i, correct[i] - current[i]))
+                different = correct[i] - current[i]
+                result.append((i, different, different/correct[i]))
     for i in range(endMin, len(objMax)):
         if objMax[i] != 0:
-            return result.append((i, '#'))
+            return result.append((i, '#', '#'))
     return result
         
   
