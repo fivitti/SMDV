@@ -171,10 +171,10 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
     
     if parameters:
         if not quite: click.secho(getMessage('paramInfo', lang), fg=colors['info'])
-        result = []
+        paramRows = []
         for k, v in param.items():
-            result.append('  {0:<7}{1:>9}'.format(k, v))
-        click.echo('\n'.join(result))
+            paramRows.append('  {0:<7}{1:>9}'.format(k, v))
+        click.echo('\n'.join(paramRows))
             
     if com: 
         repeat += com
