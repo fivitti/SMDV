@@ -173,7 +173,7 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
         if not quite: click.secho(getMessage('paramInfo', lang), fg=colors['info'])
         paramRows = []
         for k, v in param.items():
-            paramRows.append('  {0:<12}{1:>13}'.format(k, v))
+            paramRows.append('  {0:<15}{1}'.format(k, v))
         click.echo('\n'.join(paramRows))
             
     if com: 
@@ -251,7 +251,7 @@ def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTi
 def testResult(model, check, confidenceFactor, quite, lang):
     from matrixUtilites import resultEquals, stringVector
     click.echo(
-                ('' if quite else getMessage('test', lang)) + \
+                ('' if quite else getMessage('test', lang)) + '\n' +\
                 stringVector(
                     map(str, resultEquals(model, check, confidenceFactor)), \
                     valueFormat='%s', \
