@@ -156,27 +156,35 @@ def load(ctx, vector, matrix, all_in_folder):
             elif f.endswith('.npy'):
                 vector.append(f)
             else:
+                continue
                 from numpy import load as npLoad
                 try:
                     npLoad(str(f))
                     vector.append(f)
                 except IOError:
-                    matrix.append(f)
+                    pass
+                    
     if len(matrix) > 0:
         import scipy.io
         if not 'matrices' in ctx.obj:
             ctx.obj['matrices'] = [] 
     for mat in matrix:
-        m = scipy.io.mmread(str(mat))
-        ctx.obj['matrices'].append(m)
+        try:
+            m = scipy.io.mmread(str(mat))
+            ctx.obj['matrices'].append(m)
+        except IOError:
+            click.secho("Matrix %s open failed." % mat, fg=colors['danger'])
         
     if len(vector) > 0:
         from numpy import load as npLoad
         if not 'vectors' in ctx.obj:
             ctx.obj['vectors'] = [] 
     for vec in vector:
-        v = npLoad(str(vec))
-        ctx.obj['vectors'].append(v)
+        try:
+            v = npLoad(str(vec))
+            ctx.obj['vectors'].append(v)
+        except IOError:
+            click.secho("Vector %s open failed." % mat, fg=colors['danger'])
 
 if __name__ == '__main__':
     cli(obj={})

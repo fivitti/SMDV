@@ -145,20 +145,39 @@ def conv(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert):
 @click.option('-std', '--standard-deviation', 'std', is_flag=True, help='Print standard deviation of time multiplication')
 @click.option('--test', type=click.FLOAT, help='Testing result multiplication. Print bad row. Value is confidence factor.')
 @click.option('-com', '--compensate', 'com', type=click.INT, help='N first time are remove (returned times decremented by n). Recommended in testing the speed, because the n first times (e. g. one) are a long delay.' )
-@click.option('-o', '--output', type=click.File(mode='a', lazy=True), help='File to save raport. Format CSV. If exist append new data.')
+@click.option('-o', '--output', type=click.File(mode='a', lazy=True), help='File to save raport. Format CSV. If exist append new data. Added to the file it info if it is created.')
+@click.option('-param', '--parameters', is_flag=True, help='Print value of parameters.')
 
 @click.argument('vector-path', nargs=1, required=True, type=click.Path(exists=True))
 
 @click.pass_context
-def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output, vector_path):
-    '''Multiplication matrix in formats...'''   
-    if com: 
-        repeat += com
+def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output, parameters, vector_path):
+    '''Multiplication matrix in formats...'''
+    
     matrix = ctx.obj['matrix']
     quite = ctx.obj['quite']
     lang = ctx.obj['lang']
     sep = ctx.obj['sep']
     eol = ctx.obj['eol']
+    param = {
+            'Block' : str(block),
+            'Slice size' : str(ss),
+            'Threads per row' : str(tpr),
+            'Align' : str(align),
+            'Prefetch' : str(prefetch),
+            'Repeat' : str(repeat),
+            'Compensate' : str(com) if com else '0'
+        }
+    
+    if parameters:
+        if not quite: click.secho(getMessage('paramInfo', lang), fg=colors['info'])
+        paramRows = []
+        for k, v in param.items():
+            paramRows.append('  {0:<20}{1}'.format(k, v))
+        click.echo('\n'.join(paramRows))
+            
+    if com: 
+        repeat += com
     
     from numpy import load
     vector = load(str(vector_path))
@@ -167,6 +186,9 @@ def multiply(ctx, block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repe
         
     if not quite: click.secho(getMessage('multiply', lang), fg=colors['info'])
     if output and not isfile(output.name):
+        output.write(sep.join(param.keys()) + eol)
+        output.write(sep.join(param.values()) + eol)
+        output.write(eol)
         headers = ['matrix', 'format', 'average time', 'standard deviation time', 'times']
         output.write(sep.join(headers) + eol)
     resultNumpy = ''
@@ -227,8 +249,16 @@ def resumeResult(ctx, resultMuliply, resultPrint, timePrint, avrTimePrint, stdTi
         data.extend(map(str, times))
         output.write(sep.join(data) + eol )
 def testResult(model, check, confidenceFactor, quite, lang):
-    from matrixUtilites import resultEquals
-    click.echo(('' if quite else getMessage('test', lang)) + str(resultEquals(model, check, confidenceFactor)))
+    from matrixUtilites import resultEquals, stringVector
+    string = [('' if quite else getMessage('test', lang)) ]
+    vectorString = stringVector(
+                        map(str, resultEquals(model, check, confidenceFactor)), \
+                        valueFormat='%s', \
+                        width=100, \
+                        rowFormat='  {0:<7}{1:<}'
+                    )
+    if vectorString: string.append(vectorString)
+    click.echo('\n'.join(string))
 def getMessage(idMessage, lang='en'):
     if lang == 'pl':
         return {
@@ -270,13 +300,14 @@ def getMessage(idMessage, lang='en'):
             'result' : u'Result: ',
             'timeList' : u'List of times multiplication [ms]: ',
             'avrTime' : u'Average time [ms]: ',
-            'test': 'Errors (position, different): ',
+            'test': 'Errors (position, different, relative error): ',
             'info_rows': 'Rows: ',
             'info_cols': 'Cols: ',
             'info_nnz': 'NNZ: ',
             'info_sparse': 'Sparsing: ',
             'info_title': 'Info about matrix: ',
-            'vec': 'Representation of data vector: '
+            'vec': 'Representation of data vector: ',
+            'paramInfo': 'Parameters for multiplication: '
         }.get(idMessage, 'error')
     else:
         return 'Not implement language: ' + lang
