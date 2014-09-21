@@ -28,8 +28,8 @@ colors = {
 def cli(info_print, representation, sparse, sep, output, paths):
     eol = '\n'
     paths = map(str, paths)
-    headersMatrix = ['matrix', 'rows', 'cols', 'nnz', 'sparsing']
-    headersVector = ['vector', 'length', 'nnz', 'sparsing']
+    headersMatrix = ['matrix', 'rows', 'cols', 'nnz', 'sparsing [%]']
+    headersVector = ['vector', 'length', 'nnz', 'sparsing [%]']
     dictFile = sortPaths(pathReduction(paths), '.mtx', '.npy')
     matrices = dictFile['.mtx']
     vectors = dictFile['.npy']

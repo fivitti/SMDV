@@ -49,7 +49,6 @@ colors = {
 
 @click.argument('vector-path', nargs=1, required=True, type=click.Path(exists=True))
 @click.argument('matrix-path', nargs=1, required=True, type=click.Path(exists=True))
-@click.pass_context
 def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output, parameters, vector_path, quite, sep, matrix_path):
     eol = '\n'
     param = {
@@ -123,18 +122,18 @@ def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='ertilp', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
              
-def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, stdTimePrint, quite, lang, output, formatName, compensate, matrixName, sep, eol):
+def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, stdTimePrint, quite, output, formatName, compensate, matrixName, sep, eol):
     times = resultMuliply[1]
     if compensate:
         times = times[compensate:]
     if resultPrint:
-        click.echo(('' if quite else getMessage('result', lang)) + stringVector(resultMuliply[0]))
+        click.echo(('' if quite else getMessage('result')) + stringVector(resultMuliply[0]))
     if timePrint:
-        click.echo(('' if quite else getMessage('timeList', lang)) + str(times))
+        click.echo(('' if quite else getMessage('timeList')) + str(times))
     if avrTimePrint:
-        click.echo(('' if quite else getMessage('avrTime', lang)) + str(avr(times)))
+        click.echo(('' if quite else getMessage('avrTime')) + str(avr(times)))
     if stdTimePrint:
-        click.echo(('' if quite else getMessage('stdTime', lang)) + str(nstd(times)))
+        click.echo(('' if quite else getMessage('stdTime')) + str(nstd(times)))
     if output:
         avrTime = str(avr(times))
         stdTime = str(nstd(times))
@@ -150,8 +149,9 @@ def testResult(model, check, confidenceFactor, quite):
                         width=100, \
                         rowFormat='  {0:<7}{1:<}'
                     )
-    if vectorString: string.append(vectorString)
-    click.echo('\n'.join(string))
+    if vectorString.lstrip(): 
+        string.append(vectorString)
+        click.echo('\n'.join(string))
 def getMessage(idMessage):
     return {
         'error' : 'error',
