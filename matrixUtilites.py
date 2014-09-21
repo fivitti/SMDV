@@ -157,9 +157,6 @@ def twoColumnString(leftList, rightList, rightWidth=80, rowFormat='  {0:<5}{1:>1
     for left, right in zip(leftList, rightList):
         result.append(formatItem('%s' % left,  '%s' % right, width=rightWidth, rowFormat=rowFormat))
     return '\n'.join(result)
-
-def infoMatrixCsr(matrixCsr):
-    pass
     
 def getShapeEll(matrixEll):
     rows = len(matrixEll[2])
