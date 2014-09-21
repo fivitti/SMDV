@@ -180,7 +180,8 @@ def getMessage(idMessage):
         'vec': 'Representation of data vector: ',
         'paramInfo': 'Parameters for multiplication: ',
         'open_failed': "File %s open failed.",
-        'bad_length': 'Does not exist a vector with length equal to number of columns of matrix: %s.'
+        'bad_length': 'Does not exist a vector with length equal to number of columns of matrix: %s.',
+        'stdTime': 'Standard deviation'
     }.get(idMessage, 'error')
           
 if __name__ == '__main__':
