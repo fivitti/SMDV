@@ -2,7 +2,7 @@
 """
 Created on Sun Mar 23 20:16:06 2014
 
-@author: HP
+@author: Sławomir Figiel
 """
 import numpy
 from itertools import izip
@@ -425,31 +425,6 @@ if __name__ == "__main__":
                      [41, 0, 0, 0, 0, 37, 4, 0, 70],
                      [0, 0, 0, 79, 11, 0, 5, 0, 0],
                      [0, 24, 40, 0, 0, 83, 30, 0, 0]])
-                     
-#    macierze = [A, B, C]
-    macierze = [E, ] 
-    sliceSize = 4 # 64 128 
-    threadPerRow = 2# 2 4 
-    
-    prefetch = 2
-    alignStala = prefetch*threadPerRow
-    
-    from matrixUtilites import stringListInList
-    
-    for macierz in macierze:
-#        mELL = convertToELL(macierz, array=False)
-#        mSlicedELL = convertToSlicedELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala)
-#        mSertilpELL = convertToSertilpELL(macierz, array=False, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=alignStala, prefetch=prefetch)
-#        mSertilpELLTransform = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam=alignStala)
-        eT = transformToERTILPFormat(macierz, align=alignStala, ThreadsPerRow=threadPerRow)
-        eC = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)        
-        print "Macierz:\n" + str(macierz) 
-#        print "ELL:\n" + stringListInList(mELL)
-#        print "SlicedELL:\n" + stringListInList(mSlicedELL)
-#        print "SertilpELL:\n" + stringListInList(mSertilpELL)
-#        print "SertilpELL:\n" + stringListInList(mSertilpELLTransform)
-
-        
         
 
     
