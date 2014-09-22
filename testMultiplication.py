@@ -6,7 +6,7 @@ Created on Wed Jun 25 12:42:14 2014
 """
 
 import scipy.io
-from matrixUtilites import resultEquals, twoColumnString, stringVector
+from matrixUtilites import resultEquals, stringVector
 from matrixMultiplication import multiplyCPU, multiplyErtilp
 import numpy
 
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     rEr =resultErtilp[0]
     bledneWiersze = resultEquals(rC, rEr, wspolczynnikUfnosci)
     print 'Błędy: '
-    print twoColumnString(bledneWiersze)
+    print stringVector(map(str, bledneWiersze))
     print '\nWynik Ertilp:'
     print stringVector(rEr)
             
