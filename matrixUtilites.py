@@ -139,13 +139,7 @@ def saveMatrixToFile(matrix, folder = 'macierze\\', prefix = 'Macierz_', extensi
         filepath += '_' + str(addition)
     filepath += suffix
     filepath += extension    
-    scipy.io.mmwrite(filepath, matrix)
-
-def printListInList(listaList):
-    for i in listaList:
-        print i
-def stringListInList(listaList):
-    return '\n'.join(listaList)
+    scipy.io.mmwrite(str(filepath), matrix)
     
 def formatItem(left, right, width=40, rowFormat='  {0:<7}{1:>9}'):
     from textwrap import fill
@@ -158,11 +152,28 @@ def stringVector(vector, withoutZeros = False, valueFormat="%.15g", width=40, ro
             continue
         result.append(formatItem('(%s)' % str(idx),  valueFormat % val, width=width, rowFormat=rowFormat))
     return '\n'.join(result)
+def twoColumnString(leftList, rightList, rightWidth=80, rowFormat='  {0:<5}{1:>10}'):
+    result = []
+    for left, right in zip(leftList, rightList):
+        result.append(formatItem('%s' % left,  '%s' % right, width=rightWidth, rowFormat=rowFormat))
+    return '\n'.join(result)
     
-def getShapeEll(macierz):
-    wiersze = len(macierz[2])
-    kolumny = max(macierz[1])+1
-    return (wiersze, kolumny)
+def getShapeEll(matrixEll):
+    rows = len(matrixEll[2])
+    cols = max(matrixEll[1])+1
+    return (rows, cols)
+
+def getInfoMatrix(matrix):
+    shape = matrix.shape
+    nnz = matrix.nnz
+    sparsing = round( ( (nnz+0.0)/ ( (shape[0] * shape[1]) ) ) * 100, 4)
+    return (shape[0], shape[1], nnz, sparsing)
+    
+def getInfoVector(vector):           
+    length = len(vector)
+    nnz = sum(1 for i in vector if not i)
+    sparsing = round( ( (nnz+0.0)/ ( (length) ) ) * 100, 4) 
+    return (length, nnz, sparsing)  
         
 def resultEquals(correct, current, confidenceFactor = 0.0005):
     '''
@@ -198,7 +209,20 @@ def resultEquals(correct, current, confidenceFactor = 0.0005):
         if objMax[i] != 0:
             return result.append((i, '#', '#'))
     return result
-        
+
+def dictVectorPaths(vectorPaths):
+    '''
+    Method return dict where key is length of vector and value is path to vector.
+        dict[len(vector)] = pathVector
+    '''
+    result = {}
+    for path in vectorPaths:
+        try:
+            vector = numpy.load(path)
+        except:
+            continue
+        result[len(vector)] = path
+    return result
   
 if __name__ == '__main__':
     l = [(1, 2, 3), (2, 2, 3), (0, 9, 8)]

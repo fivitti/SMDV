@@ -2,7 +2,7 @@
 """
 Created on Thu Feb 20 15:02:08 2014
 
-@author: HP
+@author: Sławomir Figiel
 """
 def convertString(string, **kwargs):
     s = string
