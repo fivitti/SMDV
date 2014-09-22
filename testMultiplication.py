@@ -39,7 +39,7 @@ if __name__ == '__main__':
     rEr =resultErtilp[0]
     bledneWiersze = resultEquals(rC, rEr, wspolczynnikUfnosci)
     print 'Błędy: '
-    print stringVector(map(str, bledneWiersze))
+    print stringVector(map(str, bledneWiersze), valueFormat='%s', rowFormat='{0:<7}{1:<}')
     print '\nWynik Ertilp:'
     print stringVector(rEr)
             
