@@ -139,7 +139,7 @@ def saveMatrixToFile(matrix, folder = 'macierze\\', prefix = 'Macierz_', extensi
         filepath += '_' + str(addition)
     filepath += suffix
     filepath += extension    
-    scipy.io.mmwrite(filepath, matrix)
+    scipy.io.mmwrite(str(filepath), matrix)
     
 def formatItem(left, right, width=40, rowFormat='  {0:<7}{1:>9}'):
     from textwrap import fill

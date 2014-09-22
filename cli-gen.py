@@ -109,7 +109,7 @@ def save(ctx, \
             path = join(folder, '')
         for mat in ctx.obj['matrices']:
             saveMatrixToFile(matrix=mat, \
-                             folder=str(path), \
+                             folder=path, \
                              prefix=prefix_matrices, \
                              extension=extension_matrices, \
                              date=(True if addition == 'date' else False), \
