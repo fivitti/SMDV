@@ -18,7 +18,6 @@ colors = {
     }
  
 @click.command()
-@click.option('-q', '--quite', is_flag=True, help='Without messages, only effects functions.')
 
 @click.option('-b', '--block', default=128, help='Block size for CUDA. Default: 128')
 @click.option('-ss', '--slice-size', 'ss', default=64, help='Slice size for ...Ellpack. Default: 64')
@@ -31,27 +30,27 @@ colors = {
 @click.option('-see', '--sertilp', 'see', is_flag=True, help='Use Sertilp Ellpack format')
 @click.option('-ert', '--ertilp', 'ert', is_flag=True, help='Use Ertilp format')
 @click.argument('matrix-paths', nargs=-1, required=True, type=click.Path(exists=True))
-def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, quite, matrix_paths):
+def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, matrix_paths):
     paths = map(str, matrix_paths)
     matrices = sortPaths(pathReduction(paths), '.mtx')['.mtx']
     for matrixPath in matrices:
-        if not quite: click.secho(getMessage('conv'), fg=colors['success'])
+        click.secho(getMessage('conv'), fg=colors['success'])
         try:
             matrix = scipy.io.mmread(matrixPath)
         except:
             click.secho(getMessage('open_failed') % matrixPath, fg=colors['danger'])
             continue
         if ell:
-            if not quite: click.secho(getMessage('convEll'), fg=colors['warning'])
+            click.secho(getMessage('convEll'), fg=colors['warning'])
             printFormat(convertToELL(matrix, array=False))
         if sle:
-            if not quite: click.secho(getMessage('convSliced'), fg=colors['warning'])
+            click.secho(getMessage('convSliced'), fg=colors['warning'])
             printFormat(convertToSlicedELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align))
         if see:
-            if not quite: click.secho(getMessage('convSertilp'), fg=colors['warning'])
+            click.secho(getMessage('convSertilp'), fg=colors['warning'])
             printFormat(convertToSertilpELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align, prefetch=prefetch))
         if ert:
-            if not quite: click.secho(getMessage('convErtilp'), fg=colors['warning'])
+            click.secho(getMessage('convErtilp'), fg=colors['warning'])
             printFormat(convertToErtilp(matrix, threadPerRow=tpr, prefetch=prefetch, array=False))
 
 def printFormat(convertedMatrix):
