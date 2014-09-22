@@ -102,6 +102,7 @@ def save(ctx, \
     Matrices will be saved to format MatrixMarketFile (.mtx).
     Vectors will be saved to format NumpyBinaryFile (.npy).
     '''
+    folder = str(folder)
     if 'matrices' in ctx.obj:
         path = join(folder, subfolder_matrices, '')
         if not isdir(path):
