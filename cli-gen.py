@@ -5,6 +5,8 @@ Created on Fri Sep 19 21:01:14 2014
 @author: Sławomir Figiel
 """
 import click
+from matrixUtilites import generateVector, generateMatrixCsr, stringVector, saveMatrixToFile, saveVectorToNumpyFile
+from os.path import join, isdir
 
 colors = {
         'success' : 'green',
@@ -15,21 +17,22 @@ colors = {
     
 @click.group(chain=True)
 def cli():
+    '''
+    '''
     pass
 
 @cli.command()
 @click.option('-l', '--length', type=click.INT, multiple=True, help='The length of the vector. Each call will generate a vector.')
 @click.option('-min', '--minimum', default=-10, help='Minimal value. Default: -10.')
 @click.option('-max', '--maximum', default=10, help='Maximum value. Default: 10.' )
-@click.option('-i/-f', '--integer/--float', default=True, help='The draw integers or floating point. Default: floating.')
-@click.option('-pc', '--percent', default=40.0, help='Percentage of zeroes in the vector.')
-@click.option('-prec', '--precision', default=6, help='Precision float number.')
+@click.option('-i/-f', '--integer/--float', default=False, help='The draw integers or floating point. Default: floating.')
+@click.option('-pc', '--percent', default=40.0, help='Percentage of zeroes in the vector. Default: 40%')
+@click.option('-prec', '--precision', default=6, help='Precision float number. Default: 6')
 @click.pass_context
 def vector(ctx, length, minimum, maximum, integer, percent, precision):
     '''
     The command to generate vectors.
     '''
-    from matrixUtilites import generateVector
     vectors = []
     for l in length:   
         vec = generateVector(length=l, minimum=minimum, maximum=maximum, integers=integer, percentageOfZeros=percent, precision=precision, array=True)
@@ -48,7 +51,6 @@ def matrix(ctx, shape, minimum, maximum, integer, percent, precision):
     '''
     The command to generate a matrix.
     '''
-    from matrixUtilites import generateMatrixCsr
     matrices = []
     for s in shape:
         mat = generateMatrixCsr(rows=s[0], cols=s[1], minimum=minimum, maximum=maximum, integers=integer, percentageOfZeros=percent, precision=precision, mode=0)
@@ -66,7 +68,6 @@ def echo(ctx, quite, dense, without_zeros):
     Displays all objects stored in memory.
     '''
     if 'vectors' in ctx.obj:
-        from matrixUtilites import stringVector
         for vec in ctx.obj['vectors']:
             click.echo(click.style(('' if quite else 'Vector (len: %s): \n' % len(vec)), fg=colors['warning']) + stringVector(vec, withoutZeros=without_zeros))
     if 'matrices' in ctx.obj:
@@ -101,9 +102,7 @@ def save(ctx, \
     Matrices will be saved to format MatrixMarketFile (.mtx).
     Vectors will be saved to format NumpyBinaryFile (.npy).
     '''
-    from os.path import join, isdir
     if 'matrices' in ctx.obj:
-        from matrixUtilites import saveMatrixToFile
         path = join(folder, subfolder_matrices, '')
         if not isdir(path):
             click.secho("Subfolder matrices don't exist. Save in FOLDER.", fg=colors['danger'])
@@ -117,7 +116,6 @@ def save(ctx, \
                              dimensions=(True if addition == 'dim' else False), \
                              suffix=suffix_matrices)
     if 'vectors' in ctx.obj:
-        from matrixUtilites import saveVectorToNumpyFile
         path = join(folder, subfolder_vectors, '')
         if not isdir(path):
             click.secho("Subfolder vectors don't exist. Save in FOLDER.", fg=colors['danger'])
@@ -130,61 +128,6 @@ def save(ctx, \
                                   date=(True if addition == 'date' else False), \
                                   length=(True if addition == 'dim' else False), \
                                   suffix=suffix_vectors)        
-        
-@cli.command()
-@click.option('-v', '--vector', type=click.Path(exists=True), multiple=True, help='Path to the vector. Path to the vector. Can be called repeatedly.')
-@click.option('-m', '--matrix', type=click.Path(exists=True), multiple=True, help='Path to the matrix. Can be called repeatedly.')
-@click.option('-all', '--all-in-folder', type=click.Path(exists=True), help='The path to the folder from which all matrices and vectors are loaded.')
-@click.pass_context
-def load(ctx, vector, matrix, all_in_folder):
-    '''
-    The command loads the matrices and vectors of files. 
-    Matrix supported formats: MatrixMarketFile (.mtx) 
-    Vectors supported formats: NumpyBinaryFile (.npy) and other Numpy (experimental).
-    '''
-    matrix = list(matrix)
-    vector = list(vector)
-    if all_in_folder:
-        from os import listdir
-        from os.path import isfile, join
-        for f in listdir(all_in_folder):
-            f = join(all_in_folder, f)
-            if not isfile(f):
-                continue
-            if f.endswith(".mtx"):
-                matrix.append(f)
-            elif f.endswith('.npy'):
-                vector.append(f)
-            else:
-                continue
-                from numpy import load as npLoad
-                try:
-                    npLoad(str(f))
-                    vector.append(f)
-                except IOError:
-                    pass
-                    
-    if len(matrix) > 0:
-        import scipy.io
-        if not 'matrices' in ctx.obj:
-            ctx.obj['matrices'] = [] 
-    for mat in matrix:
-        try:
-            m = scipy.io.mmread(str(mat))
-            ctx.obj['matrices'].append(m)
-        except IOError:
-            click.secho("Matrix %s open failed." % mat, fg=colors['danger'])
-        
-    if len(vector) > 0:
-        from numpy import load as npLoad
-        if not 'vectors' in ctx.obj:
-            ctx.obj['vectors'] = [] 
-    for vec in vector:
-        try:
-            v = npLoad(str(vec))
-            ctx.obj['vectors'].append(v)
-        except IOError:
-            click.secho("Vector %s open failed." % mat, fg=colors['danger'])
 
 if __name__ == '__main__':
     cli(obj={})

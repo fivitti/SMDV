@@ -225,6 +225,5 @@ def dictVectorPaths(vectorPaths):
     return result
   
 if __name__ == '__main__':
-    l = [(1, 2, 3), (2, 2, 3), (0, 9, 8)]
-    print stringVector(map(str, l), valueFormat="%s")
+    pass
     
