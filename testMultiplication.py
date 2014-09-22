@@ -12,9 +12,9 @@ import numpy
 
 if __name__ == '__main__':
     ### Stałe programu ###
-    plikMacierzy = 'Macierz_int_65x65.mtx'
-#    plikMacierzy = 'Macierz_int_66x66.mtx'
-#    plikMacierzy = 'Macierz_int_67x67.mtx'
+    plikMacierzy = 'Matrix_65x65.mtx'
+#    plikMacierzy = 'Matrix_66x66.mtx'
+#    plikMacierzy = 'Matrix_67x67.mtx'
     plikWektora = 'Vector_65.npy'
 #    plikWektora = 'Vector_66.npy'
 #    plikWektora = 'Vector_67.npy'
