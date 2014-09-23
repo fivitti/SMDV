@@ -374,7 +374,7 @@ def getErtilpCudaCode(block_sice, threadPerRow, prefetch):
 				float preVals[{{ PREFETCH_SIZE }}];
 				int preColls[{{ PREFETCH_SIZE }}];
 			
-				float dot[{{ PREFETCH_SIZE }}]={0};
+				float dot[{{ PREFETCH_SIZE }}]={{ PREFETCH_INIT_TAB }};
 			
 				int maxEl = rowLength[row]; //original row length divided by T*PREFETCH
 
@@ -431,7 +431,10 @@ def getErtilpCudaCode(block_sice, threadPerRow, prefetch):
         
         }
         '''
-    tpl = convertString(tpl, BLOCK_SIZE = block_sice, THREADS_ROW = threadPerRow, PREFETCH_SIZE = prefetch)
+    prefetch_init_tab = '[' + \
+                        ', '.join('0' for i in range(prefetch)) + \
+                        ']'
+    tpl = convertString(tpl, BLOCK_SIZE = block_sice, THREADS_ROW = threadPerRow, PREFETCH_SIZE = prefetch, PREFETCH_INIT_TAB = prefetch_init_tab)
     return tpl
 if __name__ == "__main__":
     p = getSertilpCudaCode()

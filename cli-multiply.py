@@ -100,7 +100,7 @@ def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result
             if test: resultNumpy = resultMultiply[0]
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='cpu', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
         elif test:
-            resultNumpy = multiplyCPU(matrix, repeat=repeat)[0]
+            resultNumpy = multiplyCPU(matrix, vector=vector, repeat=repeat)[0]
         if ell:
             if not quite: click.secho(getMessage('multiplyEll'), fg=colors['warning'])
             resultMultiply = multiplyELL(matrix, vector=vector, repeat=repeat, blockSize=block)
