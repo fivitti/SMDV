@@ -431,11 +431,11 @@ def getErtilpCudaCode(block_sice, threadPerRow, prefetch):
         
         }
         '''
-    prefetch_init_tab = '[' + \
+    prefetch_init_tab = '{' + \
                         ', '.join('0' for i in range(prefetch)) + \
-                        ']'
+                        '}'
     tpl = convertString(tpl, BLOCK_SIZE = block_sice, THREADS_ROW = threadPerRow, PREFETCH_SIZE = prefetch, PREFETCH_INIT_TAB = prefetch_init_tab)
     return tpl
 if __name__ == "__main__":
-    p = getSertilpCudaCode()
+    p = getErtilpCudaCode(block_sice=128, threadPerRow=2, prefetch=2)
     print p
