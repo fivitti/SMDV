@@ -8,7 +8,7 @@ import numpy
 from itertools import izip
 import scipy.sparse
 
-def normalizujDlugosci(listaList, podstawaWielokrotnosci = 1):
+def normalizeLength(list_of_list, multiple = 1):
     u'''
     Normalizuje długość wszystkich list przekazanych jako argument.
     
@@ -16,22 +16,15 @@ def normalizujDlugosci(listaList, podstawaWielokrotnosci = 1):
     wszystkich pozostałych, aby były jej równe. W tym celu dopisuje do nich
     na koniec zera.
 
-    Metoda pracuje "w miejscu". Nie zwraca wyniku.
     '''
-    dlugosc = 0
-    for l in listaList:
-        if len(l) > dlugosc:
-            dlugosc = len(l)
-            
-    reszta = dlugosc % podstawaWielokrotnosci
-    if reszta == 0:
-        pass
-    else:
-        dlugosc += podstawaWielokrotnosci - reszta
     
-    for l in listaList:
-        while len(l) < dlugosc:
-            l.append(0)
+    lengthMax = max([len(i) for i in list_of_list])
+            
+    rest = lengthMax % multiple
+    if rest:
+        lengthMax += multiple - rest
+        
+    return [l + [0, ] * (lengthMax - len(l)) for l in list_of_list]
                 
 def kolumnyDoListy(listaList, grupuj = 1):
     u'''
@@ -116,10 +109,7 @@ def preconvertToELL(macierzDoKonwersji):
     
     return (vals, indexCols, nonZeroVal)
     '''
-    try:
-        macierzDoKonwersji = macierzDoKonwersji.tocsr()
-    except AttributeError:
-        macierzDoKonwersji = scipy.sparse.csr_matrix(macierzDoKonwersji)
+    macierzDoKonwersji = transformToScipyCsr(macierzDoKonwersji)
         
     dlugosciWierszy = []
     licznikDlugosciWiersza = 0
@@ -158,8 +148,8 @@ def convertToELL(macierzDoKonwersji, array = True):
     kolumnySurowe = mdp[1]
     dlugosciWierszy = mdp[2]
         
-    normalizujDlugosci(wartosciSurowe)
-    normalizujDlugosci(kolumnySurowe)
+    wartosciSurowe = normalizeLength(wartosciSurowe)
+    kolumnySurowe = normalizeLength(kolumnySurowe)
     
     wartosci = kolumnyDoListy(wartosciSurowe)
     indeksyKolumn = kolumnyDoListy(kolumnySurowe)
@@ -198,11 +188,11 @@ def convertToSlicedELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, slic
     sliceStart = [0, ]
     
     for grupaWierszy in grouped(macierz[0], sliceSize):
-       normalizujDlugosci(grupaWierszy, watkiNaWiersz)
+       grupaWierszy = normalizeLength(grupaWierszy, watkiNaWiersz)
        wartosci.extend(kolumnyDoListy(grupaWierszy, watkiNaWiersz))
        sliceStart.append(len(wartosci))
     for grupaWierszy in grouped(macierz[1], sliceSize):
-        normalizujDlugosci(grupaWierszy, watkiNaWiersz)
+        grupaWierszy = normalizeLength(grupaWierszy, watkiNaWiersz)
         indeksyKolumn.extend(kolumnyDoListy(grupaWierszy, watkiNaWiersz))
         
     ustawAlign((wartosci, indeksyKolumn, dlugosciWierszy, sliceStart), align)
@@ -242,11 +232,11 @@ def convertToSertilpELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sli
     sliceStart = [0, ]
     
     for grupaWierszy in grouped(macierz[0], sliceSize):
-       normalizujDlugosci(grupaWierszy, watkiNaWiersz*prefetch)
+       grupaWierszy = normalizeLength(grupaWierszy, watkiNaWiersz*prefetch)
        wartosci.extend(kolumnyDoListy(grupaWierszy, watkiNaWiersz))
        sliceStart.append(len(wartosci))
     for grupaWierszy in grouped(macierz[1], sliceSize):
-        normalizujDlugosci(grupaWierszy, watkiNaWiersz*prefetch)
+        grupaWierszy = normalizeLength(grupaWierszy, watkiNaWiersz*prefetch)
         indeksyKolumn.extend(kolumnyDoListy(grupaWierszy, watkiNaWiersz))
         
     ustawAlign((wartosci, indeksyKolumn, dlugosciWierszy, sliceStart), align)
@@ -260,10 +250,8 @@ def convertToSertilpELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sli
         return (wartosci, indeksyKolumn, dlugosciWierszy, sliceStart)
 
 def transformToSERTILP(matrix, threadsPerRow, sliceSize, preFetch, alignParam = 64, array = True):
-    try:
-        matrix = matrix.tocsr()
-    except AttributeError:
-        matrix = scipy.sparse.csr_matrix(matrix)
+    matrix = transformToScipyCsr(matrix)
+    
     from math import ceil
     align = int(ceil(1.0 * sliceSize * threadsPerRow / alignParam) * alignParam)
     numRows = matrix.shape[0]
@@ -338,8 +326,8 @@ def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
     kolumnySurowe = mdp[1]
     dlugosciWierszy = mdp[2]
         
-    normalizujDlugosci(wartosciSurowe, threadPerRow*prefetch)
-    normalizujDlugosci(kolumnySurowe, threadPerRow*prefetch)
+    wartosciSurowe = normalizeLength(wartosciSurowe, threadPerRow*prefetch)
+    kolumnySurowe = normalizeLength(kolumnySurowe, threadPerRow*prefetch)
     
     wartosci = kolumnyDoListy(wartosciSurowe, threadPerRow)
     indeksyKolumn = kolumnyDoListy(kolumnySurowe, threadPerRow)
@@ -355,10 +343,8 @@ def transformToERTILPFormat(matrix, align, ThreadsPerRow, array = True):
     '''
         align - ThreadsPerRow * prefetch
     '''
-    try:
-        matrix = matrix.tocsr()
-    except AttributeError:
-        matrix = scipy.sparse.csr_matrix(matrix)
+    matrix = transformToScipyCsr(matrix)
+    
     from math import ceil#, mean
     
     maxEl = 1
@@ -389,6 +375,16 @@ def transformToERTILPFormat(matrix, align, ThreadsPerRow, array = True):
             numpy.array(rowLength, dtype=numpy.int32))
     else:
         return (vecVals, vecCols, rowLength)
+
+def transformToScipyCsr(matrix):
+    if scipy.sparse.isspmatrix_csr(matrix):
+        return matrix
+    elif scipy.sparse.isspmatrix(matrix):
+        return matrix.tocsr()
+    elif type(matrix) is numpy.ndarray:
+        return scipy.sparse.csr_matrix(matrix)
+    else:
+        raise NotImplementedError('This matrix type is not supported. Only support numpy.ndarray and scipy.sparse matrix.')
         
 if __name__ == "__main__":
     A = numpy.array([[3, 0, 5, 0, 2],
