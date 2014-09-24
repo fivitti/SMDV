@@ -58,7 +58,7 @@ def multiplyCsr(matrix, vector, block_size, repeat=1):
         mod = SourceModule(cudaAgregator.getCsrCudaCode(block_size=block_size))
         kernel = mod.get_function("rbfCsrFormatKernel")
         texref = mod.get_texref("mainVecTexRef")
-        texref.set_adress(g_wektor, vector.nbytes)
+        texref.set_address(g_wektor, vector.nbytes)
         tex = [texref]
         
         for i in range(repeat):

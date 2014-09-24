@@ -482,7 +482,7 @@ def getCsrCudaCode(block_size = 128, warp_size = 32):
     
     		// first thread writes warp result
     		if (thread_lane == 0){
-    			results[row]=expf((-2*smem[threadIdx.x]));
+    			results[row]=smem[threadIdx.x];
     		}
     	}
     }

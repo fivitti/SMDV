@@ -174,6 +174,7 @@ def getMessage(idMessage):
         'multiplySertilp' : u'Multiplication with SERTILP',
         'multiplySliced' : u'Multiplication with SLICED',
         'multiplyErtilp' : u'Multiplication with ERTILP',
+        'multiplyCsr' : 'Multiplication with CSR',
         'result' : u'Result: ',
         'timeList' : u'List of times multiplication [ms]: ',
         'avrTime' : u'Average time [ms]: ',
