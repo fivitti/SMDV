@@ -11,7 +11,10 @@ from pycuda.compiler import SourceModule
 import numpy
 from math import ceil
  
-from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL, transformToSERTILP, convertToErtilp, transformToERTILPFormat
+from matrixFormat import convertToELL, convertToSlicedELL, \
+                         convertToSertilpELL, transformToSERTILP, \
+                         convertToErtilp, transformToERTILPFormat, \
+                         transformToScipyCsr
 import cudaAgregator
 
 start = cuda.Event()
@@ -31,7 +34,49 @@ def multiplyCPU(matrix, vector, repeat = 1):
         timeList.append(start.time_till(end))
     
     return (wynik, timeList)
-
+    
+def multiplyCsr(matrix, vector, block_size, repeat=1):
+        if len(vector) != matrix.shape[1]:
+            raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
+        matrix = transformToScipyCsr(matrix)
+        data = numpy.array(matrix.data, dtype=numpy.float32)
+        indices = numpy.array(matrix.indices, dtype=numpy.int32)
+        indptr = numpy.array(matrix.indptr, dtype=numpy.int32)
+        data = cuda.to_device(data)
+        indices = cuda.to_device(indices)
+        indptr = cuda.to_device(indptr)
+        num_rows = matrix.shape[0]
+        result = numpy.zeros(num_rows, dtype=numpy.float32)
+        time_list = []
+        
+        gridSize = int(numpy.ceil((num_rows+0.0)/block_size))  
+        block=(block_size,1,1)
+        grid=(gridSize,1)                    
+        g_wektor = cuda.to_device(vector)
+        num_rows = numpy.int32(num_rows)
+        
+        mod = SourceModule(cudaAgregator.getCsrCudaCode(block_size=block_size))
+        kernel = mod.get_function("rbfCsrFormatKernel")
+        texref = mod.get_texref("mainVecTexRef")
+        texref.set_adress(g_wektor, vector.nbytes)
+        tex = [texref]
+        
+        for i in range(repeat):
+            start.record()
+            kernel(data, \
+                    indices, \
+                    indptr, \
+                    cuda.Out(result), \
+                    num_rows, \
+                    block=block, \
+                    grid=grid, \
+                    texrefs=tex)
+            end.record()
+            end.synchronize()
+            time_list.append(start.time_till(end))
+        
+        return (result, time_list)
+        
 def multiplyELL(macierz, vector, repeat = 1, blockSize = 128): 
     if len(vector) != macierz.shape[1]:
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')

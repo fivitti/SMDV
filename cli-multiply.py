@@ -9,7 +9,7 @@ import click
 import scipy.io
 from os.path import isfile
 from numpy import average as avr, std as nstd, load
-from matrixMultiplication import multiplyCPU, multiplyELL, multiplySlicedELL, multiplySertilp, multiplyErtilp
+from matrixMultiplication import multiplyCPU, multiplyELL, multiplySlicedELL, multiplySertilp, multiplyErtilp, multiplyCsr
 from matrixUtilites import stringVector, resultEquals, dictVectorPaths
 from filesUtilites import pathReduction, sortPaths
 
@@ -28,6 +28,7 @@ colors = {
 @click.option('-p', '--prefetch', default=2, help='PreFetch for SlicedEllpack. Default: 2')
 @click.option('-r', '--repeat', default=1, help='Count of repetitions calculations. Deafult: 1')
 
+@click.option('-csr', '--csr', 'csr', is_flag=True, help='Use CSR format')
 @click.option('-ell', '--ellpack', 'ell', is_flag=True, help='Use Ellpack format')
 @click.option('-sle', '--sliced', 'sle', is_flag=True, help='Use Sliced Ellpack format')
 @click.option('-see', '--sertilp', 'see', is_flag=True, help='Use Sertilp Ellpack format')
@@ -49,7 +50,7 @@ colors = {
 
 @click.argument('vector-path', nargs=1, required=True, type=click.Path(exists=True))
 @click.argument('matrix-path', nargs=1, required=True, type=click.Path(exists=True))
-def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output, parameters, vector_path, quite, sep, matrix_path):
+def cli(block, ss, tpr, align, prefetch, csr, ell, sle, see, ert, cpu, repeat, result, time, avrtime, std, test, com, output, parameters, vector_path, quite, sep, matrix_path):
     eol = '\n'
     param = {
             'Block' : str(block),
@@ -101,6 +102,11 @@ def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, cpu, repeat, result
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='cpu', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
         elif test:
             resultNumpy = multiplyCPU(matrix, vector=vector, repeat=repeat)[0]
+        if csr:
+            if not quite: click.secho(getMessage('multiplyCsr'), fg=colors['warning'])
+            resultMultiply = multiplyCsr(matrix, vector=vector, repeat=repeat, block_size=block)
+            resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='csr', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
+            if test: testResult(resultNumpy, resultMultiply[0], test, quite)            
         if ell:
             if not quite: click.secho(getMessage('multiplyEll'), fg=colors['warning'])
             resultMultiply = multiplyELL(matrix, vector=vector, repeat=repeat, blockSize=block)
