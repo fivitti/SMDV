@@ -5,68 +5,53 @@ Created on Sun Mar 23 20:16:06 2014
 @author: Sławomir Figiel
 """
 import numpy
-from itertools import izip
 import scipy.sparse
+from listutilites import normalize_length, columns_to_list, grouped
 
-def normalizeLength(list_of_list, multiple = 1):
-    u'''
-    Normalizuje długość wszystkich list przekazanych jako argument.
-    
-    Metoda wyszukuje najdłuższą listę w zestawie. Następnie zwiększa długość 
-    wszystkich pozostałych, aby były jej równe. W tym celu dopisuje do nich
-    na koniec zera.
-
+def reshape_to_multiple_ell(matrix_to_extension, multiple_row):
     '''
-    
-    lengthMax = max([len(i) for i in list_of_list])
-            
-    rest = lengthMax % multiple
-    if rest:
-        lengthMax += multiple - rest
+    Method extends matrix preconvert Ellpack. Adds empty list to the 
+    list of rows and columns and zero to the list length of rows.
+    Adds many elements that the total number in each list
+    (rows, columns, length of lines) be a multiple parameter multiple_row.
+
+    Parameters
+    ==========
+    matrix_to_extension : list of list
+        Represents matrix preconvert Ellpack. Should have three parts: 
+        list of values​​, list of columns and list of row length.
+        List of values and columns are list of list with rows. List of
+        row length is list of integers.
+    multiple_row : integer > 0
+        The length of each list the resulting matrix is a multiple of 
+        this number.
         
-    return [l + [0, ] * (lengthMax - len(l)) for l in list_of_list]
-                
-def kolumnyDoListy(listaList, grupuj = 1):
-    u'''
-    Metoda przekształca macierz przekazaną jako listę list w płaską listę
-    sczytując wartości macierzy kolumnami.
-    Metoda przyjmuje parametr "grupuj", który określa ile elementów sczytać przy
-    każdym przejściu.
-    '''
-    wynik = []
-    count = 0 
-    while count < len(listaList):
-        count = 0
-        for w in listaList:
-            for element in range(grupuj):
-                if len(w) > 0:
-                    wynik.append(w[0])
-                    w.remove(w[0])
-                else:
-                    count += 1
-    return wynik
-
-
-def reshapeDoWielokrotnosciELL(macierzDoRozszerzenia, podstawaWielokrotnosciWierszy):
-    u'''
-    Metoda rozszerza macierz ELL. Dodaje do przekazanej metody zerowe wiersze.
-    Dodawanych jest tyle wierszy, aby ich ilość była wielokrotności przekazanej liczby.
+    Returns
+    =======
+    Nothing. Method works in place.
     
-    Metoda działa w miejscu, nadpisuje przekazaną macierz.
+    Notes
+    =====
+    If the length of the lists are already multiple multiple_row method
+    does not change anything.
+    
+    Examples
+    ========
+    >>> pre_ell = [[[1], [3, 1], [7]], [[1], [0, 2], [2]], [1, 2, 1]]
+    >>> reshape_to_multiple_ell(pre_ell, 4)
+    >>> pre_ell
+        [[[1], [3, 1], [7], []], [[1], [0, 2], [2], []], [1, 2, 1, 0]]
     '''
-    wiersze = len(macierzDoRozszerzenia[2])  
-#    doDodania = ((wiersze / podstawaWielokrotnosciWierszy) + 1) * (podstawaWielokrotnosciWierszy - wiersze)
-    modulo = wiersze % podstawaWielokrotnosciWierszy
+    rows = len(matrix_to_extension[2])  
+    modulo = rows % multiple_row
     if modulo == 0:
         return
-    else:
-        doDodania = podstawaWielokrotnosciWierszy - modulo
-    for i in range(doDodania):
-        macierzDoRozszerzenia[0].append([])
-        macierzDoRozszerzenia[1].append([])
-        macierzDoRozszerzenia[2].append(0)
+    to_add = multiple_row - modulo
+    matrix_to_extension[0].extend([ [] ]*to_add)
+    matrix_to_extension[1].extend([ [] ]*to_add)
+    matrix_to_extension[2].extend([0,]*to_add)
 
-def ustawAlign(macierzSlicedELL, align=64):
+def set_align(matrix_sliced_ell, align=64):
     u'''
     Metoda ustawia odpowiedni 'align' dla macierzy go nie posiadającej. Macierz wejściowa musi
     być w formacie: (vals, colIdx, rowLength, sliceStart). Jeżeli 'align' jest mniejszy
@@ -74,30 +59,23 @@ def ustawAlign(macierzSlicedELL, align=64):
     
     Metoda działa w miejscu.
     '''
-    licznik = 0
-    koniec = macierzSlicedELL[3][licznik]
-    wiersze = len(macierzSlicedELL[3]) - 1
-    przesuniecie = 0
-    while (wiersze > licznik):
-        licznik += 1
-        macierzSlicedELL[3][licznik] += przesuniecie
-        start = macierzSlicedELL[3][licznik-1]
-        koniec = macierzSlicedELL[3][licznik]
-        roznica = align - (koniec - start)
-        if roznica < 0:
+    counter = 0
+    end = matrix_sliced_ell[3][counter]
+    rows = len(matrix_sliced_ell[3]) - 1
+    shift = 0
+    while (rows > counter):
+        counter += 1
+        matrix_sliced_ell[3][counter] += shift
+        start = matrix_sliced_ell[3][counter-1]
+        end = matrix_sliced_ell[3][counter]
+        different = align - (end - start)
+        if different < 0:
             continue
-        przesuniecie += roznica
-        for i in range(roznica):
-            macierzSlicedELL[0].insert(koniec, 0)
-            macierzSlicedELL[1].insert(koniec, 0)
-            macierzSlicedELL[3][licznik] += 1
-            
-            
-        
-        
-def grouped(iterable, n):
-    "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,s2n+1,s2n+2,...s3n-1), ..."
-    return izip(*[iter(iterable)]*n)
+        shift += different
+        for i in range(different):
+            matrix_sliced_ell[0].insert(end, 0)
+            matrix_sliced_ell[1].insert(end, 0)
+            matrix_sliced_ell[3][counter] += 1     
     
 def preconvertToELL(macierzDoKonwersji):
     '''    
@@ -148,11 +126,11 @@ def convertToELL(macierzDoKonwersji, array = True):
     kolumnySurowe = mdp[1]
     dlugosciWierszy = mdp[2]
         
-    wartosciSurowe = normalizeLength(wartosciSurowe)
-    kolumnySurowe = normalizeLength(kolumnySurowe)
+    wartosciSurowe = normalize_length(wartosciSurowe)
+    kolumnySurowe = normalize_length(kolumnySurowe)
     
-    wartosci = kolumnyDoListy(wartosciSurowe)
-    indeksyKolumn = kolumnyDoListy(kolumnySurowe)
+    wartosci = columns_to_list(wartosciSurowe)
+    indeksyKolumn = columns_to_list(kolumnySurowe)
     
     if array == True:
         return (numpy.array(wartosci, dtype=numpy.float32), \
@@ -181,21 +159,21 @@ def convertToSlicedELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, slic
     return (vals, colIdx, rowLength, sliceStart)
     '''
     macierz = preconvertToELL(macierzDoKonwersji)
-    reshapeDoWielokrotnosciELL(macierz, sliceSize)
+    reshape_to_multiple_ell(macierz, sliceSize)
     wartosci = []
     indeksyKolumn = []
     dlugosciWierszy = macierz[2]
     sliceStart = [0, ]
     
     for grupaWierszy in grouped(macierz[0], sliceSize):
-       grupaWierszy = normalizeLength(grupaWierszy, watkiNaWiersz)
-       wartosci.extend(kolumnyDoListy(grupaWierszy, watkiNaWiersz))
+       grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz)
+       wartosci.extend(columns_to_list(grupaWierszy, watkiNaWiersz))
        sliceStart.append(len(wartosci))
     for grupaWierszy in grouped(macierz[1], sliceSize):
-        grupaWierszy = normalizeLength(grupaWierszy, watkiNaWiersz)
-        indeksyKolumn.extend(kolumnyDoListy(grupaWierszy, watkiNaWiersz))
+        grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz)
+        indeksyKolumn.extend(columns_to_list(grupaWierszy, watkiNaWiersz))
         
-    ustawAlign((wartosci, indeksyKolumn, dlugosciWierszy, sliceStart), align)
+    set_align((wartosci, indeksyKolumn, dlugosciWierszy, sliceStart), align)
    
     if array == True:
         return (numpy.array(wartosci, dtype=numpy.float32), \
@@ -225,21 +203,21 @@ def convertToSertilpELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sli
     return (vals, colIdx, rowLength, sliceStart)
     '''
     macierz = preconvertToELL(macierzDoKonwersji)
-    reshapeDoWielokrotnosciELL(macierz, sliceSize)
+    reshape_to_multiple_ell(macierz, sliceSize)
     wartosci = []
     indeksyKolumn = []
     dlugosciWierszy = macierz[2]
     sliceStart = [0, ]
     
     for grupaWierszy in grouped(macierz[0], sliceSize):
-       grupaWierszy = normalizeLength(grupaWierszy, watkiNaWiersz*prefetch)
-       wartosci.extend(kolumnyDoListy(grupaWierszy, watkiNaWiersz))
+       grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz*prefetch)
+       wartosci.extend(columns_to_list(grupaWierszy, watkiNaWiersz))
        sliceStart.append(len(wartosci))
     for grupaWierszy in grouped(macierz[1], sliceSize):
-        grupaWierszy = normalizeLength(grupaWierszy, watkiNaWiersz*prefetch)
-        indeksyKolumn.extend(kolumnyDoListy(grupaWierszy, watkiNaWiersz))
+        grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz*prefetch)
+        indeksyKolumn.extend(columns_to_list(grupaWierszy, watkiNaWiersz))
         
-    ustawAlign((wartosci, indeksyKolumn, dlugosciWierszy, sliceStart), align)
+    set_align((wartosci, indeksyKolumn, dlugosciWierszy, sliceStart), align)
    
     if array == True:
         return (numpy.array(wartosci, dtype=numpy.float32), \
@@ -326,11 +304,11 @@ def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
     kolumnySurowe = mdp[1]
     dlugosciWierszy = mdp[2]
         
-    wartosciSurowe = normalizeLength(wartosciSurowe, threadPerRow*prefetch)
-    kolumnySurowe = normalizeLength(kolumnySurowe, threadPerRow*prefetch)
+    wartosciSurowe = normalize_length(wartosciSurowe, threadPerRow*prefetch)
+    kolumnySurowe = normalize_length(kolumnySurowe, threadPerRow*prefetch)
     
-    wartosci = kolumnyDoListy(wartosciSurowe, threadPerRow)
-    indeksyKolumn = kolumnyDoListy(kolumnySurowe, threadPerRow)
+    wartosci = columns_to_list(wartosciSurowe, threadPerRow)
+    indeksyKolumn = columns_to_list(kolumnySurowe, threadPerRow)
     
     if array == True:
         return (numpy.array(wartosci, dtype=numpy.float32), \
@@ -381,7 +359,7 @@ def transformToScipyCsr(matrix):
         return matrix
     elif scipy.sparse.isspmatrix(matrix):
         return matrix.tocsr()
-    elif type(matrix) is numpy.ndarray:
+    elif isinstance(matrix, numpy.ndarray):
         return scipy.sparse.csr_matrix(matrix)
     else:
         raise NotImplementedError('This matrix type is not supported. Only support numpy.ndarray and scipy.sparse matrix.')
@@ -421,6 +399,7 @@ if __name__ == "__main__":
                      [41, 0, 0, 0, 0, 37, 4, 0, 70],
                      [0, 0, 0, 79, 11, 0, 5, 0, 0],
                      [0, 24, 40, 0, 0, 83, 30, 0, 0]])
+                     
         
 
     
