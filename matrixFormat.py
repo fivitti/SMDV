@@ -52,12 +52,43 @@ def reshape_to_multiple_ell(matrix_to_extension, multiple_row):
     matrix_to_extension[2].extend([0,]*to_add)
 
 def set_align(matrix_sliced_ell, align=64):
-    u'''
-    Metoda ustawia odpowiedni 'align' dla macierzy go nie posiadającej. Macierz wejściowa musi
-    być w formacie: (vals, colIdx, rowLength, sliceStart). Jeżeli 'align' jest mniejszy
-    niż rozpiętość  obsługiwana przez jeden wątek metoda nie wprowadza zmian.
+    '''
+    Sets align for matix Sertilp or Sliced. Increases the slices by 
+    adding zeroes to the end, so that their size is not less than 
+    the align parameter.
+    The method works in a place.
     
-    Metoda działa w miejscu.
+    Parameters
+    ==========
+    matrix_sliced_ell : matrix-type sliced
+        List of list: [values, columns, row_lenghts, slice_starts].
+    align : integer > 0
+        A single slice will be not less than that number.
+
+    Returns
+    =======
+    Nothing. Method works in a place. Processed array slice will 
+    be not less than "align".
+    
+    Examples
+    ========
+    >>> vals = [1, 0, 2, 0, 3, 4, 0, 0]
+    >>> cols = [0, 0, 1, 0, 0, 2, 0, 0]
+    >>> row_lengths = [1, 1, 2, 0]
+    >>> slice_starts = [0, 4, 8]
+    >>> matrix = [vals, cols, row_lengths, slice_starts]
+    >>> set_align(matrix, 8)
+    >>> matrix[0]
+        [1, 0, 2, 0, 0, 0, 0, 0, 3, 4, 0, 0, 0, 0, 0, 0]
+    >>> matrix[1]
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0]
+    >>> matrix[2]
+        [1, 1, 2, 0]
+    >>> matrix[3]
+        [0, 8, 16]
+          
+    For threads per row = 2, slice size = 2,
+    matrix = [[1, 0, 0], [0, 2, 0], [3, 0, 4]]
     '''
     counter = 0
     end = matrix_sliced_ell[3][counter]
@@ -77,32 +108,50 @@ def set_align(matrix_sliced_ell, align=64):
             matrix_sliced_ell[1].insert(end, 0)
             matrix_sliced_ell[3][counter] += 1     
     
-def preconvertToELL(macierzDoKonwersji):
+def preconvert_to_ell(matrix):
     '''    
-    Metoda wykonuje początkowe czynności do przekonwertowania macierzy na format ELL.
+    Performs basic steps in the conversion matrix type ellpack and derivatives.
+    Returns a tuple of lists containing the sequence: values of matrix
+    without zeros, column indices corresponding to values​​, length of the rows.
     
-    Zwraca listę zawierającą wartości w poszczególnych wierszach pozbawione zer,
-    listę indeksów kolumn zawierających niezerowe wartości,
-    a także listę zawierającą liczbę niezerowych wartości w każdym wierszu.
+    Parameters
+    ==========
+    matrix : numpy array or scipy matrix
     
-    return (vals, indexCols, nonZeroVal)
+    Returns
+    =======
+    preconverted matrix : tuple
+        Tuple has three lists. First is list (of list) of row of matrix
+        without zeros.
+        Second is list of list of indices columns coresponding to values.
+        Third is normal integer list of row length.
+    
+    Examples
+    ========
+    >>> import numpy 
+    >>> matrix = numpy.array([[1, 0, 0, 0],
+    ...                       [0, 2, 3, 0],
+    ...                       [0, 0, 0, 0],
+    ...                       [4, 0, 0, 5]])
+    >>> preconvert_to_ell(matrix)
+        ([[1], [2,3], [], [4, 5]], [[0], [1, 2], [], [0, 3]], [1, 2, 0, 2])
     '''
-    macierzDoKonwersji = transformToScipyCsr(macierzDoKonwersji)
+    matrix = transformToScipyCsr(matrix)
         
-    dlugosciWierszy = []
-    licznikDlugosciWiersza = 0
-    wartosciSurowe = []
-    kolumnySurowe = []
-    for indWiersza in xrange(macierzDoKonwersji.shape[0]):
-        wiersz = macierzDoKonwersji.getrow(indWiersza)
-        wartosciWiersza = wiersz.data.tolist()
-        indeksyWartosciWiersza = wiersz.indices.tolist()
-        licznikDlugosciWiersza = len(wartosciWiersza)
+    row_length = []
+    count_row_length = 0
+    values = []
+    columns = []
+    for indWiersza in xrange(matrix.shape[0]):
+        row = matrix.getrow(indWiersza)
+        row_values = row.data.tolist()
+        row_columns = row.indices.tolist()
+        count_row_length = len(row_values)
 
-        wartosciSurowe.append(wartosciWiersza)
-        kolumnySurowe.append(indeksyWartosciWiersza)
-        dlugosciWierszy.append(licznikDlugosciWiersza)
-    return (wartosciSurowe, kolumnySurowe, dlugosciWierszy)
+        values.append(row_values)
+        columns.append(row_columns)
+        row_length.append(count_row_length)
+    return (values, columns, row_length)
             
 
 def convertToELL(macierzDoKonwersji, array = True):
@@ -121,7 +170,7 @@ def convertToELL(macierzDoKonwersji, array = True):
     '''
     wartosci = []
     indeksyKolumn = []
-    mdp = preconvertToELL(macierzDoKonwersji)
+    mdp = preconvert_to_ell(macierzDoKonwersji)
     wartosciSurowe = mdp[0]
     kolumnySurowe = mdp[1]
     dlugosciWierszy = mdp[2]
@@ -158,7 +207,7 @@ def convertToSlicedELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, slic
     
     return (vals, colIdx, rowLength, sliceStart)
     '''
-    macierz = preconvertToELL(macierzDoKonwersji)
+    macierz = preconvert_to_ell(macierzDoKonwersji)
     reshape_to_multiple_ell(macierz, sliceSize)
     wartosci = []
     indeksyKolumn = []
@@ -202,7 +251,7 @@ def convertToSertilpELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sli
     
     return (vals, colIdx, rowLength, sliceStart)
     '''
-    macierz = preconvertToELL(macierzDoKonwersji)
+    macierz = preconvert_to_ell(macierzDoKonwersji)
     reshape_to_multiple_ell(macierz, sliceSize)
     wartosci = []
     indeksyKolumn = []
@@ -299,7 +348,7 @@ def convertToErtilp(macierzDoKonwersji, threadPerRow, prefetch, array = True):
     '''
     wartosci = []
     indeksyKolumn = []
-    mdp = preconvertToELL(macierzDoKonwersji)
+    mdp = preconvert_to_ell(macierzDoKonwersji)
     wartosciSurowe = mdp[0]
     kolumnySurowe = mdp[1]
     dlugosciWierszy = mdp[2]
@@ -399,6 +448,10 @@ if __name__ == "__main__":
                      [41, 0, 0, 0, 0, 37, 4, 0, 70],
                      [0, 0, 0, 79, 11, 0, 5, 0, 0],
                      [0, 24, 40, 0, 0, 83, 30, 0, 0]])
+    F = numpy.array([
+                     [1, 0, 0],
+                     [0, 2, 0],
+                     [3, 0 ,4]])
                      
         
 
