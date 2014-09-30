@@ -263,12 +263,13 @@ def multiplySertilp(macierz, vector, alignConst, sliceSize, threadPerRow, prefet
 def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1, convertMethod = 'new'):
     if len(vector) != macierz.shape[1]:
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')    
-    if convertMethod == 'new':
+#    if convertMethod == 'new':
+    if True:
         mac = transformToERTILPFormat(macierz, align = prefetch*threadPerRow, ThreadsPerRow=threadPerRow)
         rowLength = cuda.to_device(mac[2])
-    else:
-        mac = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)
-        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
+#    else:
+#        mac = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)
+#        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])  
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
