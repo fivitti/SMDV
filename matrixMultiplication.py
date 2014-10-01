@@ -282,7 +282,7 @@ def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 
     ###
     
     ### Przygotowanie stałych CUDA ###
-    gridSize = int(numpy.ceil((wierszeMacierzy+0.0)/blockSize))  
+    gridSize = int(numpy.ceil((wierszeMacierzy*threadPerRow+0.0)/blockSize))  
     block=(blockSize,1,1)
     grid=(gridSize,1)                    
     g_wektor = cuda.to_device(wektor)
