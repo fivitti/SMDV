@@ -7,7 +7,7 @@ Created on Sun Sep 21 19:03:24 2014
 
 import click
 import scipy.io
-from matrixFormat import convertToELL, convertToErtilp, transformToERTILPFormat, convertToSertilpELL, convertToSlicedELL
+from matrixFormat import convert_to_ellpack, convertToErtilp, transformToERTILPFormat, convertToSertilpELL, convert_to_sliced
 from filesUtilites import sortPaths, pathReduction
 
 colors = {
@@ -42,10 +42,10 @@ def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, matrix_paths):
             continue
         if ell:
             click.secho(getMessage('convEll'), fg=colors['warning'])
-            printFormat(convertToELL(matrix, array=False))
+            printFormat(convert_to_ellpack(matrix, array=False))
         if sle:
             click.secho(getMessage('convSliced'), fg=colors['warning'])
-            printFormat(convertToSlicedELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align))
+            printFormat(convert_to_sliced(matrix, threads_per_row=tpr, slice_size=ss, align=align, array=False))
         if see:
             click.secho(getMessage('convSertilp'), fg=colors['warning'])
             printFormat(convertToSertilpELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align, prefetch=prefetch))

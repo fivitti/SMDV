@@ -8,7 +8,7 @@ import numpy
 import scipy.sparse
 from listutilites import normalize_length, columns_to_list, grouped
 
-def reshape_to_multiple_ell(matrix_to_extension, multiple_row):
+def reshape_ell_to_multiple(matrix_to_extension, multiple_row):
     '''
     Method extends matrix preconvert Ellpack. Adds empty list to the 
     list of rows and columns and zero to the list length of rows.
@@ -38,7 +38,7 @@ def reshape_to_multiple_ell(matrix_to_extension, multiple_row):
     Examples
     ========
     >>> pre_ell = [[[1], [3, 1], [7]], [[1], [0, 2], [2]], [1, 2, 1]]
-    >>> reshape_to_multiple_ell(pre_ell, 4)
+    >>> reshape_ell_to_multiple(pre_ell, 4)
     >>> pre_ell
         [[[1], [3, 1], [7], []], [[1], [0, 2], [2], []], [1, 2, 1, 0]]
     '''
@@ -110,13 +110,15 @@ def set_align(matrix_sliced_ell, align=64):
     
 def preconvert_to_ell(matrix):
     '''    
-    Performs basic steps in the conversion matrix type ellpack and derivatives.
+    Performs basic steps in the conversion matrix type ellpack and 
+    derivatives.
     Returns a tuple of lists containing the sequence: values of matrix
     without zeros, column indices corresponding to values​​, length of the rows.
     
     Parameters
     ==========
     matrix : numpy array or scipy matrix
+        Input matrix
     
     Returns
     =======
@@ -124,7 +126,7 @@ def preconvert_to_ell(matrix):
         Tuple has three lists. First is list (of list) of row of matrix
         without zeros.
         Second is list of list of indices columns coresponding to values.
-        Third is normal integer list of row length.
+        Third is normal integer list of rows length.
     
     Examples
     ========
@@ -138,99 +140,132 @@ def preconvert_to_ell(matrix):
     '''
     matrix = transformToScipyCsr(matrix)
         
-    row_length = []
+    rows_length = []
     count_row_length = 0
     values = []
     columns = []
-    for indWiersza in xrange(matrix.shape[0]):
-        row = matrix.getrow(indWiersza)
+    for idx_row in xrange(matrix.shape[0]):
+        row = matrix.getrow(idx_row)
         row_values = row.data.tolist()
         row_columns = row.indices.tolist()
         count_row_length = len(row_values)
 
         values.append(row_values)
         columns.append(row_columns)
-        row_length.append(count_row_length)
-    return (values, columns, row_length)
+        rows_length.append(count_row_length)
+    return (values, columns, rows_length)
             
 
-def convertToELL(macierzDoKonwersji, array = True):
+def convert_to_ellpack(matrix, array=True):
     '''
-    Metoda przekształca numpy.array w macierz w formacie ELLpack.
+    Method converts a matrix to a format ELLPACK-R.
+    For more information about format see article F. Vazquez and other
+    entitled: "The sparse matrix vector product on GPUs" [14.06.2009].
     
-    Jeżeli parametr array = True to metoda zwraca krotkę, ktrórej pierwszym elementem jest numpy.array typu float32 zawierająca niezerowe wartości,
-    drugim numpy.array typu int32 zawierająca indeksy kolumn, gdzie znajdują się niezerowe wartości,
-    trzecim numpy.array typu int32 zawierająca długości poszczególnych wierszy.
+    Parameters
+    ==========
+    matrix : numpy array or scipy matrix
+        Input matrix
+    array : boolean
+        If true, each list in return will be packaged in a numpy array. 
+        Else will be returned to the normal python list
     
-    Jeżeli parametr array = False to metoda zwraca krotkę, której pierwszym elementem jest lista zawierająca niezerowe wartości,
-    drugim lista zawierająca indeksy kolumn, gdzie znajdują się niezerowe wartości,
-    trzecim lista zawierająca długości poszczególnych wierszy.
-    
-    return (vals, colIdx, rowLength)
-    '''
-    wartosci = []
-    indeksyKolumn = []
-    mdp = preconvert_to_ell(macierzDoKonwersji)
-    wartosciSurowe = mdp[0]
-    kolumnySurowe = mdp[1]
-    dlugosciWierszy = mdp[2]
+    Returns
+    =======
+    converted matrix : tuple of list or tuple of numpy array
+        First list is list of values, list of float or numpy.float32.
+        Second is list of columns indices, list of integers or numpy.int32.
+        Third is list of rows length, list of integers or numpy.int32.
         
-    wartosciSurowe = normalize_length(wartosciSurowe)
-    kolumnySurowe = normalize_length(kolumnySurowe)
-    
-    wartosci = columns_to_list(wartosciSurowe)
-    indeksyKolumn = columns_to_list(kolumnySurowe)
+    Examples
+    ========
+    >>> import numpy 
+    >>> matrix = numpy.array([[1, 0, 0, 0],
+    ...                       [0, 2, 3, 0],
+    ...                       [0, 0, 0, 0],
+    ...                       [4, 0, 0, 5]])
+    >>> convert_to_ellpack(matrix, array=False)
+        ([1, 2, 4, 3, 5], [0, 1, 0, 2, 3], [1, 2, 0, 2])
+    '''
+    matrix = preconvert_to_ell(matrix)
+    rows_length = matrix[2]
+        
+    values = columns_to_list(normalize_length(matrix[0]))
+    cols_indices = columns_to_list(normalize_length(matrix[1]))
     
     if array == True:
-        return (numpy.array(wartosci, dtype=numpy.float32), \
-                numpy.array(indeksyKolumn, dtype=numpy.int32), \
-                numpy.array(dlugosciWierszy, dtype=numpy.int32))
+        return (numpy.array(values, dtype=numpy.float32), \
+                numpy.array(cols_indices, dtype=numpy.int32), \
+                numpy.array(rows_length, dtype=numpy.int32))
     else:
-        return (wartosci, indeksyKolumn, dlugosciWierszy)
+        return (values, cols_indices, rows_length)
                     
-def convertToSlicedELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sliceSize = 2, align=8):
-    u'''
-    Metoda przekształca numpy.array w macierz w formacie SlicedELLpack.
-    
-    Jeżeli parametr array = True to metoda zwraca krotkę, ktrórej pierwszym elementem jest numpy.array typu float32 zawierająca niezerowe wartości,
-    drugim numpy.array typu int32 zawierająca indeksy kolumn, gdzie znajdują się niezerowe wartości,
-    trzecim numpy.array typu int32 zawierająca długości poszczególnych wierszy, czwartym numpy.array typu int 32 zawierająca
-    początkowe indeksy każdej z grup na wątek w wartościach i kolumnach.
-    
-    Jeżeli parametr array = False to metoda zwraca krotkę, której pierwszym elementem jest lista zawierająca niezerowe wartości,
-    drugim lista zawierająca indeksy kolumn, gdzie znajdują się niezerowe wartości,
-    trzecim lista zawierająca długości poszczególnych wierszy.
-    
-    Parametr "watkiNaWiersz" określa ile wątków będzie przetwarzało jeden wiersz.
-    
-    Paramentr "sliceSize" określa ile wierszy będzie składało się na jeden slice.
-    
-    return (vals, colIdx, rowLength, sliceStart)
+def convert_to_sliced(matrix, threads_per_row=2, slice_size=2,
+                      align=8, array=True):
     '''
-    macierz = preconvert_to_ell(macierzDoKonwersji)
-    reshape_to_multiple_ell(macierz, sliceSize)
-    wartosci = []
-    indeksyKolumn = []
-    dlugosciWierszy = macierz[2]
-    sliceStart = [0, ]
+    Method converts a matrix to a format SLICED ELLPACK.
+    For more information about format see article A. Dziekonski and other
+    entitled: "A memory efficient and fast sparse matrix vector product on
+    a gpu" [2011].
     
-    for grupaWierszy in grouped(macierz[0], sliceSize):
-       grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz)
-       wartosci.extend(columns_to_list(grupaWierszy, watkiNaWiersz))
-       sliceStart.append(len(wartosci))
-    for grupaWierszy in grouped(macierz[1], sliceSize):
-        grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz)
-        indeksyKolumn.extend(columns_to_list(grupaWierszy, watkiNaWiersz))
+    Parameters
+    ==========
+    matrix : numpy array or scipy matrix
+        Input matrix
+    array : boolean
+        If true, each list in return will be packaged in a numpy array. 
+        Else will be returned to the normal python list
+    threads_per_row : integer
+        Threads per row.
+    slice_size : integer
+        Size of a single slice.
+    align : integer
+        Constant to calculation and set align of the matrix
+    
+    Returns
+    =======
+    converted matrix : tuple of list or tuple of numpy array
+        First list is list of values, list of float or numpy.float32.
+        Second is list of columns indices, list of integers or numpy.int32.
+        Third is list of rows length, list of integers or numpy.int32.
+        Fourth is list of index slices start, list of integers or numpy.int32.
+    
+    Examples
+    ========
+    >>> import numpy 
+    >>> matrix = numpy.array([[1, 0, 0, 0],
+    ...                       [0, 2, 3, 0],
+    ...                       [0, 0, 0, 0],
+    ...                       [4, 0, 0, 5]])
+    >>> convert_to_sliced(matrix, threads_per_row=2, slice_size=2,
+    ...                   align=2, array=False)
+    ([1, 0, 2, 3, 0, 0, 4, 5], [0, 0, 1, 2, 0, 0, 0, 3], [1, 2, 0, 2], 
+    [0, 4, 8])
+    '''
+    matrix = preconvert_to_ell(matrix)
+    reshape_ell_to_multiple(matrix, slice_size)
+    values = []
+    columns_indices = []
+    rows_length = matrix[2]
+    slices_start = [0, ]
+    
+    for group_rows in grouped(matrix[0], slice_size):
+        group_rows = normalize_length(group_rows, threads_per_row)
+        values.extend(columns_to_list(group_rows, threads_per_row))
+        slices_start.append(len(values))
+    for group_rows in grouped(matrix[1], slice_size):
+        group_rows = normalize_length(group_rows, threads_per_row)
+        columns_indices.extend(columns_to_list(group_rows, threads_per_row))
         
-    set_align((wartosci, indeksyKolumn, dlugosciWierszy, sliceStart), align)
+    set_align((values, columns_indices, rows_length, slices_start), align)
    
     if array == True:
-        return (numpy.array(wartosci, dtype=numpy.float32), \
-                numpy.array(indeksyKolumn, dtype=numpy.int32), \
-                numpy.array(dlugosciWierszy, dtype=numpy.int32), \
-                numpy.array(sliceStart, dtype=numpy.int32))
+        return (numpy.array(values, dtype=numpy.float32), \
+                numpy.array(columns_indices, dtype=numpy.int32), \
+                numpy.array(rows_length, dtype=numpy.int32), \
+                numpy.array(slices_start, dtype=numpy.int32))
     else:
-        return (wartosci, indeksyKolumn, dlugosciWierszy, sliceStart)
+        return (values, columns_indices, rows_length, slices_start)
         
 def convertToSertilpELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sliceSize = 2, align=8, prefetch = 2):
     u'''
@@ -252,16 +287,16 @@ def convertToSertilpELL(macierzDoKonwersji, array = True, watkiNaWiersz = 2, sli
     return (vals, colIdx, rowLength, sliceStart)
     '''
     macierz = preconvert_to_ell(macierzDoKonwersji)
-    reshape_to_multiple_ell(macierz, sliceSize)
+    reshape_ell_to_multiple(macierz, sliceSize)
     wartosci = []
     indeksyKolumn = []
     dlugosciWierszy = macierz[2]
     sliceStart = [0, ]
     
     for grupaWierszy in grouped(macierz[0], sliceSize):
-       grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz*prefetch)
-       wartosci.extend(columns_to_list(grupaWierszy, watkiNaWiersz))
-       sliceStart.append(len(wartosci))
+        grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz*prefetch)
+        wartosci.extend(columns_to_list(grupaWierszy, watkiNaWiersz))
+        sliceStart.append(len(wartosci))
     for grupaWierszy in grouped(macierz[1], sliceSize):
         grupaWierszy = normalize_length(grupaWierszy, watkiNaWiersz*prefetch)
         indeksyKolumn.extend(columns_to_list(grupaWierszy, watkiNaWiersz))

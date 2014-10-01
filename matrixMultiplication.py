@@ -11,7 +11,7 @@ from pycuda.compiler import SourceModule
 import numpy
 from math import ceil
  
-from matrixFormat import convertToELL, convertToSlicedELL, \
+from matrixFormat import convert_to_ellpack, convert_to_sliced, \
                          convertToSertilpELL, transformToSERTILP, \
                          convertToErtilp, transformToERTILPFormat, \
                          transformToScipyCsr
@@ -80,7 +80,7 @@ def multiplyCsr(matrix, vector, block_size, repeat=1):
 def multiplyELL(macierz, vector, repeat = 1, blockSize = 128): 
     if len(vector) != macierz.shape[1]:
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
-    mac = convertToELL(macierz)
+    mac = convert_to_ellpack(macierz)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     rowLength = cuda.to_device(mac[2])
@@ -132,7 +132,7 @@ def multiplySlicedELL(macierz, vector, alignConst, sliceSize, threadPerRow, repe
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
     ### Przygotowanie macierzy SlicedEllPack ###
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
-    mac = convertToSlicedELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align)
+    mac = convert_to_sliced(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, align=align)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     rowLength = cuda.to_device(mac[2])
