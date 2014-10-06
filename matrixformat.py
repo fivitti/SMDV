@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Mar 23 20:16:06 2014
-
 @author: Sławomir Figiel
+
+Module provides the methods for converting matrix to formats:
+    * CSR (Scipy)
+    * Ellpack
+    * Sliced Ellpack
+    * SERTILP
+    * ERTILP
+There are also specific, support method for the conversion.
 """
 from listutilites import normalize_length, columns_to_list, grouped
 import scipy.sparse
@@ -269,7 +276,7 @@ def convert_to_sliced(matrix, threads_per_row=2, slice_size=2,
         return (values, columns_indices, rows_length, slices_start)
 
 def convert_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
-                         align=64, array=True):
+                       align=64, array=True):
     '''
     Method converts a matrix to a format SERTILP. Sertilp is
     a format derived from Sliced ​​Ellpack.
@@ -471,49 +478,9 @@ def convert_to_scipy_csr(matrix):
         return scipy.sparse.csr_matrix(matrix)
     else:
         raise NotImplementedError('This matrix type is not supported.'
-                    'Only support numpy.ndarray and scipy.sparse matrix.')
+                                  'Only support numpy.ndarray and'
+                                  'scipy.sparse matrix.')
 
 if __name__ == "__main__":
-    A = numpy.array([[3, 0, 5, 0, 2],
-                     [0, 1, 0, 3, 2],
-                     [0, 2, 3, 0, 0],
-                     [0, 0, 1, 0, 9]])
-    B = numpy.array([[1, 0, 0, 3, 4],
-                     [0, 0, 12, 13, 0],
-                     [0, 21, 0, 0, 0],
-                     [30, 31, 0, 0, 0],
-                     [40, 41, 42, 43, 0],
-                     [0, 0, 0, 0, 54]])
-    C = numpy.array([[1, 0, 2, 0, 3, 0],
-                     [4, 0, 5, 0, 0, 0],
-                     [0, 0, 0, 6, 7, 0],
-                     [0, 0, 0, 0, 0, 8],
-                     [21, 0, 22, 0, 23, 0],
-                     [24, 0, 25, 0, 0, 0],
-                     [0, 0, 0, 26, 27, 0],
-                     [0, 0, 0, 0, 0, 28]])
-    D = numpy.array([[0, 1, 0, 2, 0, 0],
-                      [1, 0, 0, 0, 0, 0],
-                      [1, 2, 0, 3, 4, 5],
-                      [0, 1, 0, 0, 0, 2],
-                      [1, 2, 0, 0, 0, 0],
-                      [0, 1, 2, 0, 3, 0]])
-    E = numpy.array([
-                     [0, 0, 0, 0, 0, 0, 0, 0, 18],
-                     [0, 30, 0, 0, 0, 0, 49, 0, 0],
-                     [0, 0, 30, 0, 0, 0, 0, 0, 0],
-                     [0, 35, 85, 0, 27, 0, 45, 0, 0],
-                     [52, 42, 0, 0, 0, 0, 44, 14, 69],
-                     [0, 0, 0, 0, 0, 0, 0, 14, 0],
-                     [41, 0, 0, 0, 0, 37, 4, 0, 70],
-                     [0, 0, 0, 79, 11, 0, 5, 0, 0],
-                     [0, 24, 40, 0, 0, 83, 30, 0, 0]])
-    F = numpy.array([
-                     [1, 0, 0],
-                     [0, 2, 0],
-                     [3, 0, 4]])
-    G = numpy.array([[1, 0, 0, 0],
-                     [0, 2, 3, 0],
-                     [0, 0, 0, 0],
-                     [4, 0, 0, 5]])
+    pass
                      
