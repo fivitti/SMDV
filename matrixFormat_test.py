@@ -7,7 +7,7 @@ Created on Wed Sep 24 20:23:11 2014
 
 import unittest
 import copy
-import matrixFormat
+import matrixformat
 
 class helpersMethod(unittest.TestCase):
     def testReshape(self):
@@ -32,7 +32,7 @@ class helpersMethod(unittest.TestCase):
                         (right_result_4, 4), (right_result_5, 5)]
         for right_matrix, mult in right_result:
             temp_matrix = copy.deepcopy(matrix)
-            matrixFormat.reshape_to_multiple_ell(temp_matrix, mult)
+            matrixformat.reshape_to_multiple_ell(temp_matrix, mult)
             self.assertEqual(
                 temp_matrix,
                 right_matrix

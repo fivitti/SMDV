@@ -11,7 +11,7 @@ from pycuda.compiler import SourceModule
 import numpy
 from math import ceil
  
-from matrixFormat import convert_to_ellpack, convert_to_sliced, \
+from matrixformat import convert_to_ellpack, convert_to_sliced, \
                          convert_to_sertilp, \
                          convert_to_ertilp, \
                          convert_to_scipy_csr
