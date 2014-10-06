@@ -268,8 +268,8 @@ def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 
         mac = transform_to_ertilp(macierz, prefetch=prefetch, threads_per_row=threadPerRow)
 #        rowLength = cuda.to_device(mac[2])
 #        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
-        mac[2] = numpy.ceil(mac[2] / (threadPerRow*prefetch))
-        rowLength = cuda.to_device(mac[2])
+        rowLengthTemp = numpy.ceil(mac[2] / (threadPerRow*prefetch))
+        rowLength = cuda.to_device(rowLengthTemp)
 #    else:
 #        mac = convert_to_ertilp(macierz, threads_per_row=threadPerRow, prefetch=prefetch)
 #        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
