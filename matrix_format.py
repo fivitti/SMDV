@@ -4,9 +4,9 @@ Created on Sun Mar 23 20:16:06 2014
 
 @author: Sławomir Figiel
 """
-import numpy
-import scipy.sparse
 from listutilites import normalize_length, columns_to_list, grouped
+import scipy.sparse
+import numpy
 from math import ceil
 
 def reshape_ell_to_multiple(matrix_to_extension, multiple_row):
@@ -104,7 +104,7 @@ def set_align(matrix_sliced_ell, align=64):
         if different < 0:
             continue
         shift += different
-        for i in range(different):
+        for _ in range(different):
             matrix_sliced_ell[0].insert(end, 0)
             matrix_sliced_ell[1].insert(end, 0)
             matrix_sliced_ell[3][counter] += 1
@@ -417,7 +417,6 @@ def convert_to_ertilp(matrix, prefetch, threads_per_row, array=True):
     '''
     matrix = convert_to_scipy_csr(matrix)
     align = threads_per_row * prefetch
-    from math import ceil#, mean
 
     max_el = 1
     max_el = max([m.getnnz() for m in matrix])
