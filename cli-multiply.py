@@ -9,7 +9,7 @@ import click
 import scipy.io
 from os.path import isfile
 from numpy import average as avr, std as nstd, load
-from matrixMultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiplyErtilp, multiply_csr
+from matrixMultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiply_ertilp, multiply_csr
 from matrixUtilites import stringVector, resultEquals, dictVectorPaths
 from filesUtilites import pathReduction, sortPaths
 
@@ -123,8 +123,8 @@ def cli(block, ss, tpr, align, prefetch, csr, ell, sle, see, ert, cpu, repeat, r
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='sertilp', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
         if ert:
-            if not quite: click.secho(getMessage('multiplyErtilp'), fg=colors['warning'])
-            resultMultiply = multiplyErtilp(matrix, vector=vector, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
+            if not quite: click.secho(getMessage('multiply_ertilp'), fg=colors['warning'])
+            resultMultiply = multiply_ertilp(matrix, vector=vector, block_size=block, threads_per_row=tpr, prefetch=prefetch, repeat=repeat)
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='ertilp', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
              
@@ -173,7 +173,7 @@ def getMessage(idMessage):
         'multiplyEll' : u'Multiplication with ELLPACK',
         'multiply_sertilp' : u'Multiplication with SERTILP',
         'multiplySliced' : u'Multiplication with SLICED',
-        'multiplyErtilp' : u'Multiplication with ERTILP',
+        'multiply_ertilp' : u'Multiplication with ERTILP',
         'multiply_csr' : 'Multiplication with CSR',
         'result' : u'Result: ',
         'timeList' : u'List of times multiplication [ms]: ',

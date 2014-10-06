@@ -288,7 +288,11 @@ def multiply_sertilp(matrix, vector, align, slice_size,
     grid=(grid_size,1)                    
     g_vector = cuda.to_device(vector)
 
-    mod = SourceModule(cudaAgregator.getSertilpCudaCode(threads_per_row=threads_per_row, slice_size=slice_size, prefetch=prefetch))
+    mod = SourceModule(
+            cudaAgregator.getSertilpCudaCode(
+                threadPerRow=threads_per_row,
+                sliceSize=slice_size,
+                prefetch=prefetch))
     kernel = mod.get_function("rbfSERTILP_old")
     texref = mod.get_texref("mainVecTexRef")   
     texref.set_address(g_vector, vector.nbytes)
@@ -311,67 +315,54 @@ def multiply_sertilp(matrix, vector, align, slice_size,
         time_list.append(start.time_till(end))
     return (result, time_list)
 
-def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1, convertMethod = 'new'):
-    if len(vector) != macierz.shape[1]:
-        raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')    
-#    if convertMethod == 'new':
-    if True:
-        mac = convert_to_ertilp(macierz, prefetch=prefetch, threads_per_row=threadPerRow)
-#        rowLength = cuda.to_device(mac[2])
-#        print mac[2]
-#        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
-#        print numpy.ceil(numpy.float32(mac[2]) / (4))
-        rowLengthTemp = numpy.array(numpy.ceil(numpy.float32(mac[2]) / (threadPerRow*prefetch)), dtype=numpy.int32)
-#        print rowLengthTemp
-        rowLength = cuda.to_device(rowLengthTemp)
-#    else:
-#        mac = convert_to_ertilp(macierz, threads_per_row=threadPerRow, prefetch=prefetch)
-#        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
-    vals = cuda.to_device(mac[0])
-    colIdx = cuda.to_device(mac[1])  
-    wierszeMacierzy, kolumnyMacierzy = macierz.shape
-    wektor = vector    
-    wynik = numpy.zeros(wierszeMacierzy, dtype=numpy.float32)
-    numRows = numpy.int32(wierszeMacierzy)
-    
-    ### Przygotowanie stałych czasu ###
-    timeList = []
-    ###
-    
-    ### Przygotowanie stałych CUDA ###
-    gridSize = int(numpy.ceil((wierszeMacierzy*threadPerRow+0.0)/blockSize))  
-    block=(blockSize,1,1)
-    grid=(gridSize,1)                    
-    g_wektor = cuda.to_device(wektor)
-    ###
-    
-    ### Przygotowanie funkcji i tekstury dla EllPack ###
-    mod = SourceModule(cudaAgregator.getErtilpCudaCode(block_sice=blockSize, threadPerRow=threadPerRow, prefetch=prefetch)) 
+def multiply_ertilp(matrix, vector, threads_per_row=2, 
+                   prefetch=2, block_size=128, repeat=1):
+    num_rows, num_cols = matrix.shape
+    if len(vector) != num_cols:
+        raise ArithmeticError('Length of the vector is not equal to '
+                              'the number of columns of the matrix.')    
+    matrix = convert_to_ertilp(matrix, prefetch=prefetch,
+                               threads_per_row=threads_per_row)
+    # Array matrix[2] is converted explicitly to an array of float,
+    # because it is element of a tuple. Without this
+    # function "ceil" does not work properly.
+    rows_length = numpy.array(
+                    numpy.ceil(
+                        numpy.float32(matrix[2]) \
+                        / (threads_per_row*prefetch)),
+                    dtype=numpy.int32)
+    rows_length = cuda.to_device(rows_length)
+    vals = cuda.to_device(matrix[0])
+    col_idx = cuda.to_device(matrix[1])  
+    result = numpy.zeros(num_rows, dtype=numpy.float32)
+    num_rows = numpy.int32(num_rows)
+    time_list = []
+
+    grid_size = int(numpy.ceil((num_rows*threads_per_row+0.0)/block_size))  
+    block=(block_size,1,1)
+    grid=(grid_size,1)                    
+    g_vector = cuda.to_device(vector)
+
+    mod = SourceModule(cudaAgregator.getErtilpCudaCode(block_sice=block_size,
+                                                threadPerRow=threads_per_row, 
+                                                prefetch=prefetch)) 
     kernel = mod.get_function("rbfERTILP")
-    texref = mod.get_texref("labelsTexRef")    
-    
-    texref.set_address(g_wektor, wektor.nbytes)
+    texref = mod.get_texref("labelsTexRef")      
+    texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
-    ###
-    
-    
+
     for i in range(repeat):
         start.record()
-        kernel(vals, \
-                colIdx, \
-                rowLength, \
-                cuda.Out(wynik), \
-                numRows, \
-                block=block, \
-                grid=grid, \
-                texrefs=tex)
+        kernel(vals,
+               col_idx,
+               rows_length,
+               cuda.Out(result),
+               num_rows,
+               block=block,
+               grid=grid,
+               texrefs=tex)
         end.record()
         end.synchronize()
-        timeList.append(start.time_till(end))
+        time_list.append(start.time_till(end))
     
-    return (wynik, timeList)
-
-    
-    
-    
-    
+    return (result, time_list)
