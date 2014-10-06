@@ -177,7 +177,7 @@ def multiply_ellpack(matrix, vector, block_size=128, repeat=1):
     return (result, time_list)
     
 def multiply_sliced(matrix, vector, align,
-                      slice_size, threads_per_row, repeat = 1):
+                      slice_size, threads_per_row, repeat=1):
     '''
     Method multiply matrix by vector using CUDA module for SLICED ELLPACK
     Format.
@@ -208,9 +208,11 @@ def multiply_sliced(matrix, vector, align,
     '''
     num_rows, num_cols = matrix.shape
     if len(vector) != num_cols:
-        raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
+        raise ArithmeticError('Length of the vector is not equal to'
+                              'the number of columns of the matrix.')
     align = int(ceil((slice_size*threads_per_row*1.0)/align)*align)
-    matrix = convert_to_sliced(matrix, threads_per_row=threads_per_row, slice_size=slice_size, align=align)
+    matrix = convert_to_sliced(matrix, threads_per_row=threads_per_row,
+                               slice_size=slice_size, align=align)
     vals = cuda.to_device(matrix[0])
     col_idx = cuda.to_device(matrix[1])
     rows_length = cuda.to_device(matrix[2])
@@ -227,7 +229,10 @@ def multiply_sliced(matrix, vector, align,
     grid=(grid_size,1)                    
     g_vector = cuda.to_device(vector)
 
-    mod = SourceModule(cudaAgregator.getSlicedELLCudaCode(sh_cache_size=threads_per_row*slice_size, threadPerRow=threads_per_row))
+    mod = SourceModule(
+            cudaAgregator.getSlicedELLCudaCode(
+                sh_cache_size=threads_per_row*slice_size,
+                threadPerRow=threads_per_row))
     kernel = mod.get_function("SlicedEllpackFormatKernel")
     texref = mod.get_texref("mainVecTexRef")
     texref.set_address(g_vector, vector.nbytes)
@@ -236,90 +241,75 @@ def multiply_sliced(matrix, vector, align,
     for i in range(repeat):
         start.record()
         kernel(vals,
-               col_idx, \
-               rows_length, \
-               slices_start, \
-               cuda.Out(result), \
-               num_rows, \
-               align, \
-               block=block, \
-               grid=grid, \
+               col_idx,
+               rows_length,
+               slices_start,
+               cuda.Out(result),
+               num_rows,
+               align,
+               block=block,
+               grid=grid,
                texrefs=tex)
         end.record()
         end.synchronize()
         time_list.append(start.time_till(end))
     return (result, time_list)    
     
-def multiplySertilp(macierz, vector, alignConst, sliceSize, threadPerRow, prefetch = 2, repeat = 1, convertMethod = "new"):    
-    if len(vector) != macierz.shape[1]:
-        raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')    
-    ### Przygotowanie macierzy###
-    align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
-    if convertMethod == 'new':
-        mac = convert_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, prefetch=prefetch, align = alignConst)
-#        rowLength = mac[2]
-        rowLength = numpy.array(numpy.ceil(numpy.float32(mac[2]) / (threadPerRow*prefetch)), dtype=numpy.int32)
-#    else: #elif convertMethod == 'old':
-#        mac = convert_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, align=align, prefetch=prefetch)
-#        rowLengthTemp = numpy.array([int(ceil((1.0 * i) / (threadPerRow * prefetch))) for i in mac[2]])
-#        rowLength = rowLengthTemp
-    vals = cuda.to_device(mac[0])
-    colIdx = cuda.to_device(mac[1])
-    #(int)Math.Ceiling(1.0 * rowLenght[idx] / (threadsPerRow * preFetch))
-    
-    rowLength = cuda.to_device(rowLength)
-    sliceStart = cuda.to_device(mac[3])
-    
-    wierszeMacierzy, kolumnyMacierzy = macierz.shape
-    wektor = vector     
-    wynik = numpy.zeros(wierszeMacierzy, dtype=numpy.float32)
-    numRows = numpy.int32(wierszeMacierzy)
-    ###
-    
-    ### Przygotowanie stalych wlasciwych ###
+def multiplySertilp(matrix, vector, align, slice_size,
+                    threads_per_row, prefetch=2, repeat=1):   
+    num_rows, num_cols = matrix.shape 
+    if len(vector) != num_cols:
+        raise ArithmeticError('Length of the vector is not equal to'
+                              'the number of columns of the matrix.')    
+    align = int(ceil((slice_size*threads_per_row*1.0)/align)*align)
+    matrix = convert_to_sertilp(matrix, threads_per_row=threads_per_row,
+                             slice_size=slice_size, prefetch=prefetch,
+                             align = align)
+    # Array matrix[2] is converted explicitly to an array of float,
+    # because it is element of a tuple. Without this
+    # function "ceil" does not work properly.
+    rows_length = numpy.array(
+                    numpy.ceil(
+                        numpy.float32(matrix[2]) \
+                        / (threads_per_row*prefetch)), 
+                    dtype=numpy.int32)
+    vals = cuda.to_device(matrix[0])
+    col_idx = cuda.to_device(matrix[1])
+    rows_length = cuda.to_device(rows_length)
+    slices_start = cuda.to_device(matrix[3])    
+    result = numpy.zeros(num_rows, dtype=numpy.float32)
+    num_rows = numpy.int32(num_rows)
     align = numpy.int32(align)
-    ###
-    
-    ### Przygotowanie stałych czasu ###
-    timeList = []
-    ###    
-    
-    ### Przygotowanie stałych CUDA ###
-    blockSize = threadPerRow * sliceSize;
-    gridSize = int(numpy.ceil((wierszeMacierzy*threadPerRow+0.0)/blockSize)) 
-    block=(blockSize,1,1)
-    grid=(gridSize,1)                    
-    g_wektor = cuda.to_device(wektor)
-    ###
-    
-    ### Przygotowanie funkcji i tekstury ###
-    mod = SourceModule(cudaAgregator.getSertilpCudaCode(threadPerRow=threadPerRow, sliceSize=sliceSize, prefetch=prefetch))
+    time_list = []
+
+    block_size = threads_per_row * slice_size;
+    grid_size = int(numpy.ceil((num_rows*threads_per_row+0.0)/block_size)) 
+    block=(block_size,1,1)
+    grid=(grid_size,1)                    
+    g_vector = cuda.to_device(vector)
+
+    mod = SourceModule(cudaAgregator.getSertilpCudaCode(threads_per_row=threads_per_row, slice_size=slice_size, prefetch=prefetch))
     kernel = mod.get_function("rbfSERTILP_old")
-    texref = mod.get_texref("mainVecTexRef")
-    
-    texref.set_address(g_wektor, wektor.nbytes)
+    texref = mod.get_texref("mainVecTexRef")   
+    texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
-    ###
-    
-    ### Mnożenie ###     
+
     for i in range(repeat):
         start.record()
-        kernel(vals, \
-                            colIdx, \
-                            rowLength, \
-                            sliceStart, \
-                            cuda.Out(wynik), \
-                            numRows, \
-                            align, \
-                            block=block, \
-                            grid=grid, \
-                            texrefs=tex)
+        kernel(vals,
+               col_idx,
+               rows_length,
+               slices_start,
+               cuda.Out(result),
+               num_rows,
+               align,
+               block=block,
+               grid=grid,
+               texrefs=tex)
         end.record()
         end.synchronize()
-        timeList.append(start.time_till(end))
-    ###
-    
-    return (wynik, timeList)
+        time_list.append(start.time_till(end))
+    return (result, time_list)
 
 def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1, convertMethod = 'new'):
     if len(vector) != macierz.shape[1]:
