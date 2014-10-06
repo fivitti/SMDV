@@ -4,8 +4,8 @@ Created on Wed Jun 25 12:35:44 2014
 
 @author: Sławomir Figiel
 """
-from matrixformat import convert_to_ellpack, convert_to_sliced,
-                         convert_to_sertilp, convert_to_ertilp,
+from matrixformat import convert_to_ellpack, convert_to_sliced, \
+                         convert_to_sertilp, convert_to_ertilp, \
                          convert_to_scipy_csr
 import cudaAgregator
 
