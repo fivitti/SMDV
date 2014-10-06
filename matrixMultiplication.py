@@ -255,7 +255,7 @@ def multiply_sliced(matrix, vector, align,
         time_list.append(start.time_till(end))
     return (result, time_list)    
     
-def multiplySertilp(matrix, vector, align, slice_size,
+def multiply_sertilp(matrix, vector, align, slice_size,
                     threads_per_row, prefetch=2, repeat=1):   
     num_rows, num_cols = matrix.shape 
     if len(vector) != num_cols:

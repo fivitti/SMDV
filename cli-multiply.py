@@ -9,7 +9,7 @@ import click
 import scipy.io
 from os.path import isfile
 from numpy import average as avr, std as nstd, load
-from matrixMultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiplySertilp, multiplyErtilp, multiply_csr
+from matrixMultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiplyErtilp, multiply_csr
 from matrixUtilites import stringVector, resultEquals, dictVectorPaths
 from filesUtilites import pathReduction, sortPaths
 
@@ -118,8 +118,8 @@ def cli(block, ss, tpr, align, prefetch, csr, ell, sle, see, ert, cpu, repeat, r
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='sliced', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
         if see:
-            if not quite: click.secho(getMessage('multiplySertilp'), fg=colors['warning'])
-            resultMultiply = multiplySertilp(matrix, vector=vector, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
+            if not quite: click.secho(getMessage('multiply_sertilp'), fg=colors['warning'])
+            resultMultiply = multiply_sertilp(matrix, vector=vector, align=align, slice_size=ss, threads_per_row=tpr, prefetch=prefetch, repeat=repeat)
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='sertilp', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
         if ert:
@@ -171,7 +171,7 @@ def getMessage(idMessage):
         'multiply' : u'Multiply matrix %s by the vector %s',
         'multiplyCpu' : u'Multiplication with Numpy (only CPU)',
         'multiplyEll' : u'Multiplication with ELLPACK',
-        'multiplySertilp' : u'Multiplication with SERTILP',
+        'multiply_sertilp' : u'Multiplication with SERTILP',
         'multiplySliced' : u'Multiplication with SLICED',
         'multiplyErtilp' : u'Multiplication with ERTILP',
         'multiply_csr' : 'Multiplication with CSR',
