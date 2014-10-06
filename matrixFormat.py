@@ -268,7 +268,7 @@ def convert_to_sliced(matrix, threads_per_row=2, slice_size=2,
     else:
         return (values, columns_indices, rows_length, slices_start)
 
-def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
+def convert_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
                          align=64, array=True):
     '''
     Method converts a matrix to a format SERTILP. Sertilp is
@@ -300,7 +300,7 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
 
     Notes
     =====
-    Method authored Krzysztof Sopyła form KMLib:
+    Method authored Krzysztof Sopyła from KMLib:
     https://github.com/ksirg/KMLib . Own translation into Python.
 
     Examples
@@ -310,7 +310,7 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
     ...                       [0, 2, 3, 0],
     ...                       [0, 0, 0, 0],
     ...                       [4, 0, 0, 5]])
-    >>> transform_to_sertilp(matrix, threads_per_row=2, slice_size=2,
+    >>> convert_to_sertilp(matrix, threads_per_row=2, slice_size=2,
     ...                   align=2, prefetch=2, array=False)
     ([1, 0, 2, 3, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0],
      [0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
@@ -336,8 +336,6 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
                 row_length[idx] = matrix.getrow(idx).getnnz()
                 if slice_max[i] < row_length[idx]:
                     slice_max[i] = row_length[idx]
-#                row_length[idx] = int(ceil(1.0 * row_length[idx] \
-#                                    / (threads_per_row * prefetch)))
         slices_start[i+1] = slices_start[i] + int(ceil(1.0*slice_max[i] \
                             / (prefetch * threads_per_row)) \
                             * prefetch * align)
@@ -375,7 +373,7 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
     else:
         return (vec_vals, vec_cols, row_length, slices_start)
 
-def transform_to_ertilp(matrix, prefetch, threads_per_row, array=True):
+def convert_to_ertilp(matrix, prefetch, threads_per_row, array=True):
     '''
     Method converts a matrix to a format ERTILP. Sertilp is
     a format derived from ​​Ellpack.
@@ -401,7 +399,7 @@ def transform_to_ertilp(matrix, prefetch, threads_per_row, array=True):
 
     Notes
     =====
-    Method authored Krzysztof Sopyła form KMLib:
+    Method authored Krzysztof Sopyła from KMLib:
     https://github.com/ksirg/KMLib . Own translation into Python.
 
     Examples
@@ -411,7 +409,7 @@ def transform_to_ertilp(matrix, prefetch, threads_per_row, array=True):
     ...                       [0, 2, 3, 0],
     ...                       [0, 0, 0, 0],
     ...                       [4, 0, 0, 5]])
-    >>> transform_to_ertilp(matrix, threads_per_row=2, prefetch=2,
+    >>> convert_to_ertilp(matrix, threads_per_row=2, prefetch=2,
         array=False)
     ([1, 0, 2, 3, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0],
      [0, 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -443,7 +441,6 @@ def transform_to_ertilp(matrix, prefetch, threads_per_row, array=True):
                      + i * threads_per_row + t] = vec.data[j]
             vec_cols[k * num_rows * threads_per_row \
                      + i * threads_per_row + t] = vec.indices[j]
-#        row_length[i] = int(ceil((vec.getnnz() + 0.0) / align))
         row_length[i] = int(vec.getnnz())
 
     if array == True:

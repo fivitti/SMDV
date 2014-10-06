@@ -12,8 +12,8 @@ import numpy
 from math import ceil
  
 from matrixFormat import convert_to_ellpack, convert_to_sliced, \
-                         transform_to_sertilp, \
-                         transform_to_ertilp, \
+                         convert_to_sertilp, \
+                         convert_to_ertilp, \
                          convert_to_scipy_csr
 import cudaAgregator
 
@@ -196,7 +196,7 @@ def multiplySertilp(macierz, vector, alignConst, sliceSize, threadPerRow, prefet
     ### Przygotowanie macierzy###
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
     if convertMethod == 'new':
-        mac = transform_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, prefetch=prefetch, align = alignConst)
+        mac = convert_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, prefetch=prefetch, align = alignConst)
 #        rowLength = mac[2]
         rowLength = numpy.array(numpy.ceil(numpy.float32(mac[2]) / (threadPerRow*prefetch)), dtype=numpy.int32)
 #    else: #elif convertMethod == 'old':
@@ -266,7 +266,7 @@ def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')    
 #    if convertMethod == 'new':
     if True:
-        mac = transform_to_ertilp(macierz, prefetch=prefetch, threads_per_row=threadPerRow)
+        mac = convert_to_ertilp(macierz, prefetch=prefetch, threads_per_row=threadPerRow)
 #        rowLength = cuda.to_device(mac[2])
 #        print mac[2]
 #        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
