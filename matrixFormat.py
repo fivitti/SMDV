@@ -268,130 +268,6 @@ def convert_to_sliced(matrix, threads_per_row=2, slice_size=2,
     else:
         return (values, columns_indices, rows_length, slices_start)
 
-def convert_to_sertilp(matrix, threads_per_row=2,
-                       slice_size=2, align=8, prefetch=2, array=True):
-    '''
-    Method converts a matrix to a format SERTILP. Sertilp is
-    a format derived from Sliced ​​Ellpack.
-
-    Parameters
-    ==========
-    matrix : numpy array or scipy matrix
-        Input matrix
-    threads_per_row : integer
-        Threads per row.
-    slice_size : integer
-        Size of a single slice.
-    align : integer
-        Constant to calculation and set align of the matrix
-    prefetch : integer
-        Number of requests for access to data notified in advance.
-    array : boolean
-        If true, each list in return will be packaged in a numpy array.
-        Else will be returned to the normal python list
-
-    Returns
-    =======
-    converted matrix : tuple of list or tuple of numpy array
-        First list is list of values, list of float or numpy.float32.
-        Second is list of columns indices, list of integers or numpy.int32.
-        Third is list of rows length, list of integers or numpy.int32.
-        Fourth is list of index slices start, list of integers or numpy.int32.
-
-    Examples
-    ========
-    >>> import numpy
-    >>> matrix = numpy.array([[1, 0, 0, 0],
-    ...                       [0, 2, 3, 0],
-    ...                       [0, 0, 0, 0],
-    ...                       [4, 0, 0, 5]])
-    >>> convert_to_sertilp(matrix, threads_per_row=2, slice_size=2,
-    ...                   align=2, prefetch=2, array=False)
-    ([1, 0, 2, 3, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0],
-     [0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
-     [1, 2, 0, 2],
-     [0, 8, 16])
-    '''
-
-    matrix = preconvert_to_ell(matrix)
-    reshape_ell_to_multiple(matrix, slice_size)
-    values = []
-    columns_indices = []
-    rows_length = matrix[2]
-    slices_start = [0, ]
-
-    for group_rows in grouped(matrix[0], slice_size):
-        group_rows = normalize_length(group_rows, threads_per_row*prefetch)
-        values.extend(columns_to_list(group_rows, threads_per_row))
-        slices_start.append(len(values))
-    for group_rows in grouped(matrix[1], slice_size):
-        group_rows = normalize_length(group_rows, threads_per_row*prefetch)
-        columns_indices.extend(columns_to_list(group_rows, threads_per_row))
-
-    set_align((values, columns_indices, rows_length, slices_start), align)
-
-    if array == True:
-        return (numpy.array(values, dtype=numpy.float32), \
-                numpy.array(columns_indices, dtype=numpy.int32), \
-                numpy.array(rows_length, dtype=numpy.int32), \
-                numpy.array(slices_start, dtype=numpy.int32))
-    else:
-        return (values, columns_indices, rows_length, slices_start)
-
-def convert_to_ertilp(matrix, threads_per_row=2, prefetch=2, array=True):
-    '''
-    Method converts a matrix to a format ERTILP. Sertilp is
-    a format derived from ​​Ellpack.
-
-    Parameters
-    ==========
-    matrix : numpy array or scipy matrix
-        Input matrix
-    threads_per_row : integer
-        Threads per row.
-    prefetch : integer
-        Number of requests for access to data notified in advance.
-    array : boolean
-        If true, each list in return will be packaged in a numpy array.
-        Else will be returned to the normal python list
-
-    Returns
-    =======
-    converted matrix : tuple of list or tuple of numpy array
-        First list is list of values, list of float or numpy.float32.
-        Second is list of columns indices, list of integers or numpy.int32.
-        Third is list of rows length, list of integers or numpy.int32.
-
-    Examples
-    ========
-    >>> import numpy
-    >>> matrix = numpy.array([[1, 0, 0, 0],
-    ...                       [0, 2, 3, 0],
-    ...                       [0, 0, 0, 0],
-    ...                       [4, 0, 0, 5]])
-    >>> convert_to_ertilp(matrix, threads_per_row=2, prefetch=2, array=False)
-    ([1, 0, 2, 3, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0],
-     [1, 2, 0, 2])
-    '''
-    matrix = preconvert_to_ell(matrix)
-    values = matrix[0]
-    columns_indices = matrix[1]
-    rows_length = matrix[2]
-
-    values = normalize_length(values, threads_per_row*prefetch)
-    values = columns_to_list(values, threads_per_row)
-    columns_indices = normalize_length(columns_indices,
-                                       threads_per_row*prefetch)
-    columns_indices = columns_to_list(columns_indices, threads_per_row)
-
-    if array == True:
-        return (numpy.array(values, dtype=numpy.float32), \
-                numpy.array(columns_indices, dtype=numpy.int32), \
-                numpy.array(rows_length, dtype=numpy.int32))
-    else:
-        return (values, columns_indices, rows_length)
-
 def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
                          align=64, array=True):
     '''
@@ -437,7 +313,7 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
     ...                       [0, 2, 3, 0],
     ...                       [0, 0, 0, 0],
     ...                       [4, 0, 0, 5]])
-    >>> convert_to_sertilp(matrix, threads_per_row=2, slice_size=2,
+    >>> transform_to_sertilp(matrix, threads_per_row=2, slice_size=2,
     ...                   align=2, prefetch=2, array=False)
     ([1, 0, 2, 3, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0],
      [0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],

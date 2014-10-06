@@ -12,8 +12,8 @@ import numpy
 from math import ceil
  
 from matrixFormat import convert_to_ellpack, convert_to_sliced, \
-                         convert_to_sertilp, transform_to_sertilp, \
-                         convert_to_ertilp, transform_to_ertilp, \
+                         transform_to_sertilp, \
+                         transform_to_ertilp, \
                          convert_to_scipy_csr
 import cudaAgregator
 
@@ -198,10 +198,10 @@ def multiplySertilp(macierz, vector, alignConst, sliceSize, threadPerRow, prefet
     if convertMethod == 'new':
         mac = transform_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, prefetch=prefetch, align = alignConst)
         rowLength = mac[2]
-    else: #elif convertMethod == 'old':
-        mac = convert_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, align=align, prefetch=prefetch)
-        rowLengthTemp = numpy.array([int(ceil((1.0 * i) / (threadPerRow * prefetch))) for i in mac[2]])
-        rowLength = rowLengthTemp
+#    else: #elif convertMethod == 'old':
+#        mac = convert_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, align=align, prefetch=prefetch)
+#        rowLengthTemp = numpy.array([int(ceil((1.0 * i) / (threadPerRow * prefetch))) for i in mac[2]])
+#        rowLength = rowLengthTemp
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     #(int)Math.Ceiling(1.0 * rowLenght[idx] / (threadsPerRow * preFetch))

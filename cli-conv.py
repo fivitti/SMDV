@@ -48,7 +48,7 @@ def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, matrix_paths):
             printFormat(convert_to_sliced(matrix, threads_per_row=tpr, slice_size=ss, align=align, array=False))
         if see:
             click.secho(getMessage('convSertilp'), fg=colors['warning'])
-            printFormat(convert_to_sertilp(matrix, array=False, threads_per_row=tpr, slice_size=ss, align=align, prefetch=prefetch))
+            printFormat(transform_to_sertilp(matrix, array=False, threads_per_row=tpr, slice_size=ss, align=align, prefetch=prefetch))
         if ert:
             click.secho(getMessage('convErtilp'), fg=colors['warning'])
 #            printFormat(convert_to_ertilp(matrix, threads_per_row=tpr, prefetch=prefetch, array=False))
