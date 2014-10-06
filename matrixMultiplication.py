@@ -11,7 +11,10 @@ from pycuda.compiler import SourceModule
 import numpy
 from math import ceil
  
-from matrixFormat import convertToELL, convertToSlicedELL, convertToSertilpELL, transformToSERTILP, convertToErtilp, transformToERTILPFormat
+from matrixformat import convert_to_ellpack, convert_to_sliced, \
+                         convert_to_sertilp, \
+                         convert_to_ertilp, \
+                         convert_to_scipy_csr
 import cudaAgregator
 
 start = cuda.Event()
@@ -31,11 +34,53 @@ def multiplyCPU(matrix, vector, repeat = 1):
         timeList.append(start.time_till(end))
     
     return (wynik, timeList)
-
+    
+def multiplyCsr(matrix, vector, block_size, repeat=1):
+        if len(vector) != matrix.shape[1]:
+            raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
+        matrix = convert_to_scipy_csr(matrix)
+        data = numpy.array(matrix.data, dtype=numpy.float32)
+        indices = numpy.array(matrix.indices, dtype=numpy.int32)
+        indptr = numpy.array(matrix.indptr, dtype=numpy.int32)
+        data = cuda.to_device(data)
+        indices = cuda.to_device(indices)
+        indptr = cuda.to_device(indptr)
+        num_rows = matrix.shape[0]
+        result = numpy.zeros(num_rows, dtype=numpy.float32)
+        time_list = []
+        
+        gridSize = int(numpy.ceil((num_rows+0.0)/block_size))  
+        block=(block_size,1,1)
+        grid=(gridSize,1)                    
+        g_wektor = cuda.to_device(vector)
+        num_rows = numpy.int32(num_rows)
+        
+        mod = SourceModule(cudaAgregator.getCsrCudaCode(block_size=block_size))
+        kernel = mod.get_function("rbfCsrFormatKernel")
+        texref = mod.get_texref("mainVecTexRef")
+        texref.set_address(g_wektor, vector.nbytes)
+        tex = [texref]
+        
+        for i in range(repeat):
+            start.record()
+            kernel(data, \
+                    indices, \
+                    indptr, \
+                    cuda.Out(result), \
+                    num_rows, \
+                    block=block, \
+                    grid=grid, \
+                    texrefs=tex)
+            end.record()
+            end.synchronize()
+            time_list.append(start.time_till(end))
+        
+        return (result, time_list)
+        
 def multiplyELL(macierz, vector, repeat = 1, blockSize = 128): 
     if len(vector) != macierz.shape[1]:
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
-    mac = convertToELL(macierz)
+    mac = convert_to_ellpack(macierz)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     rowLength = cuda.to_device(mac[2])
@@ -87,7 +132,7 @@ def multiplySlicedELL(macierz, vector, alignConst, sliceSize, threadPerRow, repe
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')
     ### Przygotowanie macierzy SlicedEllPack ###
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
-    mac = convertToSlicedELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align)
+    mac = convert_to_sliced(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, align=align)
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     rowLength = cuda.to_device(mac[2])
@@ -151,12 +196,13 @@ def multiplySertilp(macierz, vector, alignConst, sliceSize, threadPerRow, prefet
     ### Przygotowanie macierzy###
     align = int(ceil((sliceSize*threadPerRow*1.0)/alignConst)*alignConst)
     if convertMethod == 'new':
-        mac = transformToSERTILP(macierz, threadsPerRow=threadPerRow, sliceSize=sliceSize, preFetch=prefetch, alignParam = alignConst)
-        rowLength = mac[2]
-    else: #elif convertMethod == 'old':
-        mac = convertToSertilpELL(macierz, watkiNaWiersz=threadPerRow, sliceSize=sliceSize, align=align, prefetch=prefetch)
-        rowLengthTemp = numpy.array([int(ceil((1.0 * i) / (threadPerRow * prefetch))) for i in mac[2]])
-        rowLength = rowLengthTemp
+        mac = convert_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, prefetch=prefetch, align = alignConst)
+#        rowLength = mac[2]
+        rowLength = numpy.array(numpy.ceil(numpy.float32(mac[2]) / (threadPerRow*prefetch)), dtype=numpy.int32)
+#    else: #elif convertMethod == 'old':
+#        mac = convert_to_sertilp(macierz, threads_per_row=threadPerRow, slice_size=sliceSize, align=align, prefetch=prefetch)
+#        rowLengthTemp = numpy.array([int(ceil((1.0 * i) / (threadPerRow * prefetch))) for i in mac[2]])
+#        rowLength = rowLengthTemp
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])
     #(int)Math.Ceiling(1.0 * rowLenght[idx] / (threadsPerRow * preFetch))
@@ -218,12 +264,19 @@ def multiplySertilp(macierz, vector, alignConst, sliceSize, threadPerRow, prefet
 def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 128, repeat = 1, convertMethod = 'new'):
     if len(vector) != macierz.shape[1]:
         raise ArithmeticError('Length of the vector is not equal to the number of columns of the matrix.')    
-    if convertMethod == 'new':
-        mac = transformToERTILPFormat(macierz, align = prefetch*threadPerRow, ThreadsPerRow=threadPerRow)
-        rowLength = cuda.to_device(mac[2])
-    else:
-        mac = convertToErtilp(macierz, threadPerRow=threadPerRow, prefetch=prefetch)
-        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
+#    if convertMethod == 'new':
+    if True:
+        mac = convert_to_ertilp(macierz, prefetch=prefetch, threads_per_row=threadPerRow)
+#        rowLength = cuda.to_device(mac[2])
+#        print mac[2]
+#        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
+#        print numpy.ceil(numpy.float32(mac[2]) / (4))
+        rowLengthTemp = numpy.array(numpy.ceil(numpy.float32(mac[2]) / (threadPerRow*prefetch)), dtype=numpy.int32)
+#        print rowLengthTemp
+        rowLength = cuda.to_device(rowLengthTemp)
+#    else:
+#        mac = convert_to_ertilp(macierz, threads_per_row=threadPerRow, prefetch=prefetch)
+#        rowLength = cuda.to_device(numpy.array([int(ceil((i+0.0)/(threadPerRow*prefetch))) for i in mac[2]]))
     vals = cuda.to_device(mac[0])
     colIdx = cuda.to_device(mac[1])  
     wierszeMacierzy, kolumnyMacierzy = macierz.shape
@@ -236,7 +289,7 @@ def multiplyErtilp(macierz, vector, threadPerRow = 2, prefetch = 2, blockSize = 
     ###
     
     ### Przygotowanie stałych CUDA ###
-    gridSize = int(numpy.ceil((wierszeMacierzy+0.0)/blockSize))  
+    gridSize = int(numpy.ceil((wierszeMacierzy*threadPerRow+0.0)/blockSize))  
     block=(blockSize,1,1)
     grid=(gridSize,1)                    
     g_wektor = cuda.to_device(wektor)

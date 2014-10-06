@@ -7,7 +7,7 @@ Created on Sun Sep 21 19:03:24 2014
 
 import click
 import scipy.io
-from matrixFormat import convertToELL, convertToErtilp, convertToSertilpELL, convertToSlicedELL
+from matrixformat import convert_to_ellpack, convert_to_ertilp, convert_to_ertilp, convert_to_sertilp, convert_to_sliced
 from filesUtilites import sortPaths, pathReduction
 
 colors = {
@@ -42,17 +42,17 @@ def cli(block, ss, tpr, align, prefetch, ell, sle, see, ert, matrix_paths):
             continue
         if ell:
             click.secho(getMessage('convEll'), fg=colors['warning'])
-            printFormat(convertToELL(matrix, array=False))
+            printFormat(convert_to_ellpack(matrix, array=False))
         if sle:
             click.secho(getMessage('convSliced'), fg=colors['warning'])
-            printFormat(convertToSlicedELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align))
+            printFormat(convert_to_sliced(matrix, threads_per_row=tpr, slice_size=ss, align=align, array=False))
         if see:
             click.secho(getMessage('convSertilp'), fg=colors['warning'])
-            printFormat(convertToSertilpELL(matrix, array=False, watkiNaWiersz=tpr, sliceSize=ss, align=align, prefetch=prefetch))
+            printFormat(convert_to_sertilp(matrix, array=False, threads_per_row=tpr, slice_size=ss, align=align, prefetch=prefetch))
         if ert:
             click.secho(getMessage('convErtilp'), fg=colors['warning'])
-            printFormat(convertToErtilp(matrix, threadPerRow=tpr, prefetch=prefetch, array=False))
-
+#            printFormat(convert_to_ertilp(matrix, threads_per_row=tpr, prefetch=prefetch, array=False))
+            printFormat(convert_to_ertilp(matrix, prefetch=prefetch, threads_per_row=tpr, array=False))
 def printFormat(convertedMatrix):
     formatFirstRow = '{0:<7}{1:>18}{2:>18}'
     formatSecondRow = '{0:<7}{1:>12}'

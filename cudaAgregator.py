@@ -374,7 +374,7 @@ def getErtilpCudaCode(block_sice, threadPerRow, prefetch):
 				float preVals[{{ PREFETCH_SIZE }}];
 				int preColls[{{ PREFETCH_SIZE }}];
 			
-				float dot[{{ PREFETCH_SIZE }}]={0};
+				float dot[{{ PREFETCH_SIZE }}]={{ PREFETCH_INIT_TAB }};
 			
 				int maxEl = rowLength[row]; //original row length divided by T*PREFETCH
 
@@ -431,8 +431,64 @@ def getErtilpCudaCode(block_sice, threadPerRow, prefetch):
         
         }
         '''
-    tpl = convertString(tpl, BLOCK_SIZE = block_sice, THREADS_ROW = threadPerRow, PREFETCH_SIZE = prefetch)
+    prefetch_init_tab = '{' + \
+                        ', '.join('0' for i in range(prefetch)) + \
+                        '}'
+    tpl = convertString(tpl, BLOCK_SIZE = block_sice, THREADS_ROW = threadPerRow, PREFETCH_SIZE = prefetch, PREFETCH_INIT_TAB = prefetch_init_tab)
+    return tpl
+    
+def getCsrCudaCode(block_size = 128, warp_size = 32):
+    tpl = '''
+    texture<float, 1, cudaReadModeElementType> mainVecTexRef;
+
+    extern "C" __global__ void rbfCsrFormatKernel(const float * vals,
+    									   const int * idx, 
+    									   const int * vecPointers, 
+    									   float * results,
+    									   const int num_rows)
+    {
+    	__shared__ float sdata[{{ BLOCK_SIZE }} + 16];                    // padded to avoid reduction ifs
+    	__shared__ int ptrs[{{ BLOCK_SIZE }}/{{ WARP_SIZE }}][2];
+    	
+    	const int thread_id   = {{ BLOCK_SIZE }} * blockIdx.x + threadIdx.x;  // global thread index
+    	const int thread_lane = threadIdx.x & ({{ WARP_SIZE }}-1);            // thread index within the warp
+    	const int warp_id     = thread_id   / {{ WARP_SIZE }};                // global warp index
+    	const int warp_lane   = threadIdx.x / {{ WARP_SIZE }};                // warp index within the CTA
+    	const int num_warps   = ({{ BLOCK_SIZE }} / {{ WARP_SIZE }}) * gridDim.x;   // total number of active warps
+    
+    	for(int row = warp_id; row < num_rows; row += num_warps){
+    		// use two threads to fetch vecPointers[row] and vecPointers[row+1]
+    		// this is considerably faster than the straightforward version
+    		if(thread_lane < 2)
+    			ptrs[warp_lane][thread_lane] = vecPointers[row + thread_lane];
+    		const int row_start = ptrs[warp_lane][0];            //same as: row_start = vecPointers[row];
+    		const int row_end   = ptrs[warp_lane][1];            //same as: row_end   = vecPointers[row+1];
+    
+    		// compute local sum
+    		float sum = 0;
+    		for(int jj = row_start + thread_lane; jj < row_end; jj += {{ WARP_SIZE }})
+    		{
+    			sum += vals[jj] * tex1Dfetch(mainVecTexRef,idx[jj]);
+    			//__syncthreads();
+    		}
+    
+    		volatile float* smem = sdata;
+    		smem[threadIdx.x] = sum; __syncthreads(); 
+    		smem[threadIdx.x] = sum = sum + smem[threadIdx.x + 16]; //__syncthreads(); 
+    		smem[threadIdx.x] = sum = sum + smem[threadIdx.x +  8]; //__syncthreads();
+    		smem[threadIdx.x] = sum = sum + smem[threadIdx.x +  4]; //__syncthreads();
+    		smem[threadIdx.x] = sum = sum + smem[threadIdx.x +  2]; //__syncthreads();
+    		smem[threadIdx.x] = sum = sum + smem[threadIdx.x +  1]; //__syncthreads();
+    
+    		// first thread writes warp result
+    		if (thread_lane == 0){
+    			results[row]=smem[threadIdx.x];
+    		}
+    	}
+    }
+    '''
+    tpl = convertString(tpl, BLOCK_SIZE = block_size, WARP_SIZE = warp_size)
     return tpl
 if __name__ == "__main__":
-    p = getSertilpCudaCode()
+    p = getCsrCudaCode()
     print p
