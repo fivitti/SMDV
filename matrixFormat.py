@@ -272,8 +272,7 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
                          align=64, array=True):
     '''
     Method converts a matrix to a format SERTILP. Sertilp is
-    a format derived from Sliced ​​Ellpack. Method with automatic
-    standardization of vector length rows.
+    a format derived from Sliced ​​Ellpack.
 
     Parameters
     ==========
@@ -297,8 +296,6 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
         First list is list of values, list of float or numpy.float32.
         Second is list of columns indices, list of integers or numpy.int32.
         Third is list of rows length, list of integers or numpy.int32.
-        The lengths of rows are standardized according to formula:
-        ceil(length_row / (threads_per_row * prefetch ))
         Fourth is list of index slices start, list of integers or numpy.int32.
 
     Notes
@@ -339,8 +336,8 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
                 row_length[idx] = matrix.getrow(idx).getnnz()
                 if slice_max[i] < row_length[idx]:
                     slice_max[i] = row_length[idx]
-                row_length[idx] = int(ceil(1.0 * row_length[idx] \
-                                    / (threads_per_row * prefetch)))
+#                row_length[idx] = int(ceil(1.0 * row_length[idx] \
+#                                    / (threads_per_row * prefetch)))
         slices_start[i+1] = slices_start[i] + int(ceil(1.0*slice_max[i] \
                             / (prefetch * threads_per_row)) \
                             * prefetch * align)
@@ -381,8 +378,7 @@ def transform_to_sertilp(matrix, threads_per_row, slice_size, prefetch,
 def transform_to_ertilp(matrix, prefetch, threads_per_row, array=True):
     '''
     Method converts a matrix to a format ERTILP. Sertilp is
-    a format derived from ​​Ellpack. Method with automatic standardization
-    of vector length rows.
+    a format derived from ​​Ellpack.
 
     Parameters
     ==========
@@ -402,8 +398,6 @@ def transform_to_ertilp(matrix, prefetch, threads_per_row, array=True):
         First list is list of values, list of float or numpy.float32.
         Second is list of columns indices, list of integers or numpy.int32.
         Third is list of rows length, list of integers or numpy.int32.
-        The lengths of rows are standardized according to formula:
-        ceil(length_row / (threads_per_row * prefetch ))
 
     Notes
     =====
