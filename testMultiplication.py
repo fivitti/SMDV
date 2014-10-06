@@ -7,7 +7,7 @@ Created on Wed Jun 25 12:42:14 2014
 
 import scipy.io
 from matrixUtilites import resultEquals, stringVector
-from matrixMultiplication import multiplyCPU, multiplyErtilp
+from matrixMultiplication import multiply_cpu, multiplyErtilp
 import numpy
 
 if __name__ == '__main__':
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 #    wektor = numpy.load(plikWektora)
     wektor = numpy.arange(1, macierz.shape[1]+1, dtype=numpy.float32)
 
-    resultCPU = multiplyCPU(macierz, vector=wektor, repeat=powtorzenia)
+    resultCPU = multiply_cpu(macierz, vector=wektor, repeat=powtorzenia)
     resultErtilp = multiplyErtilp(macierz, vector=wektor, threadPerRow=threadPerRow, prefetch=prefetch, blockSize=blockSize, repeat=powtorzenia)
     rC =  resultCPU[0]
     rEr =resultErtilp[0]
