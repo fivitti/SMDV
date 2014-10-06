@@ -449,7 +449,8 @@ def transform_to_ertilp(matrix, prefetch, threads_per_row, array=True):
                      + i * threads_per_row + t] = vec.data[j]
             vec_cols[k * num_rows * threads_per_row \
                      + i * threads_per_row + t] = vec.indices[j]
-        row_length[i] = int(ceil((vec.getnnz() + 0.0) / align))
+#        row_length[i] = int(ceil((vec.getnnz() + 0.0) / align))
+        row_length[i] = int(vec.getnnz())
 
     if array == True:
         return (numpy.array(vec_vals, dtype=numpy.float32), \
