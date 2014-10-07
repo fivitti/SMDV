@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+'''
 Created on Thu Feb 20 15:02:08 2014
 @author: Sławomir Figiel
 
@@ -12,7 +12,7 @@ for matrix multiplication on GPU to formats:
     * ERTILP
 Make sure that the constant "KERNELS_PATH" indicates
 a folder with files kernels.
-"""
+'''
 from pycuda.compiler import SourceModule
 from os.path import join as path_join
 
