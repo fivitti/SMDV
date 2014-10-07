@@ -6,6 +6,7 @@ Created on Thu Feb 20 15:02:08 2014
 """
 from pycuda.compiler import SourceModule
 from os.path import join as path_join
+
 KERNELS_PATH = "kernels"
 
 def convertString(string, **kwargs):
@@ -29,12 +30,18 @@ def get_cuda_ellpack():
     texref = mod.get_texref(kernel_info['texref'])
     return (kernel, texref)
     
-def getSlicedELLCudaCode(sh_cache_size, threadPerRow = 2):
-    kernel_info = {'file_' : 'sliced_kernel.c'}
+def get_cuda_sliced(sh_cache_size, threadPerRow = 2):
+    kernel_info = {'file_' : 'sliced_kernel.c',
+                   'kernel' : 'SlicedEllpackFormatKernel',
+                   'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
-    tpl = convertString(tpl, sh_cache_size=sh_cache_size, threadPerRow=threadPerRow)
-    return tpl
+    tpl = convertString(tpl, sh_cache_size=sh_cache_size,
+                        threadPerRow=threadPerRow)
+    mod = SourceModule(tpl)
+    kernel = mod.get_function(kernel_info['kernel'])
+    texref = mod.get_texref(kernel_info['texref'])
+    return (kernel, texref)
 
 def getSertilpCudaCode(shDot_size = None, threadPerRow = 2, sliceSize = 32, prefetch = 2):
     if shDot_size is None:
