@@ -7,7 +7,7 @@ Created on Wed Jun 25 12:42:14 2014
 
 import scipy.io
 from matrixUtilites import resultEquals, stringVector
-from matrixMultiplication import multiply_cpu, multiply_ertilp
+from matrixmultiplication import multiply_cpu, multiply_ertilp
 import numpy
 
 if __name__ == '__main__':

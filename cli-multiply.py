@@ -9,7 +9,7 @@ import click
 import scipy.io
 from os.path import isfile
 from numpy import average as avr, std as nstd, load
-from matrixMultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiply_ertilp, multiply_csr
+from matrixmultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiply_ertilp, multiply_csr
 from matrixUtilites import stringVector, resultEquals, dictVectorPaths
 from filesUtilites import pathReduction, sortPaths
 
