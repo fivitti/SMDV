@@ -13,7 +13,6 @@ import pycuda.autoinit
 import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 import numpy
-
 from math import ceil
 
 start = cuda.Event()
