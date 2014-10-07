@@ -20,7 +20,6 @@ import cudaAgregator
 
 import pycuda.autoinit
 import pycuda.driver as cuda
-from pycuda.compiler import SourceModule
 import numpy
 from math import ceil
 
@@ -235,7 +234,7 @@ def multiply_sliced(matrix, vector, align,
 
     kernel, texref = cudaAgregator.get_cuda_sliced(
                         sh_cache_size=threads_per_row*slice_size,
-                        threadPerRow=threads_per_row)
+                        threads_per_row=threads_per_row)
     texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
 
@@ -320,8 +319,8 @@ def multiply_sertilp(matrix, vector, align, slice_size,
     g_vector = cuda.to_device(vector)
 
     kernel, texref = cudaAgregator.get_cuda_sertilp(
-                        threadPerRow=threads_per_row,
-                        sliceSize=slice_size,
+                        threads_per_row=threads_per_row,
+                        slice_size=slice_size,
                         prefetch=prefetch)
     texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
@@ -399,7 +398,7 @@ def multiply_ertilp(matrix, vector, threads_per_row=2,
 
     kernel, texref = cudaAgregator.get_cuda_ertilp(
                        block_sice=block_size,
-                       threadPerRow=threads_per_row,
+                       threads_per_row=threads_per_row,
                        prefetch=prefetch)
     texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
