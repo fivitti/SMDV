@@ -72,12 +72,16 @@ def get_cuda_ertilp(block_sice, threadPerRow, prefetch):
     texref = mod.get_texref(kernel_info['texref'])
     return (kernel, texref)
     
-def getCsrCudaCode(block_size = 128, warp_size = 32):
-    kernel_info = {'file_' : 'csr_kernel.c'}
+def get_cuda_csr(block_size = 128, warp_size = 32):
+    kernel_info = {'file_' : 'csr_kernel.c',
+                   'kernel' : 'rbfCsrFormatKernel',
+                   'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
     tpl = convertString(tpl, BLOCK_SIZE = block_size, WARP_SIZE = warp_size)
-    return tpl
+    mod = SourceModule(tpl)
+    kernel = mod.get_function(kernel_info['kernel'])
+    texref = mod.get_texref(kernel_info['texref'])
+    return (kernel, texref)
 if __name__ == "__main__":
-    p = getSertilpCudaCode()
-    print p
+    pass

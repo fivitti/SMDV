@@ -103,9 +103,7 @@ def multiply_csr(matrix, vector, block_size, repeat=1):
     g_vector = cuda.to_device(vector)
     num_rows = numpy.int32(num_rows)
 
-    mod = SourceModule(cudaAgregator.getCsrCudaCode(block_size=block_size))
-    kernel = mod.get_function("rbfCsrFormatKernel")
-    texref = mod.get_texref("mainVecTexRef")
+    kernel, texref = cudaAgregator.get_cuda_csr(block_size=block_size)
     texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
 
