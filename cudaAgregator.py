@@ -43,14 +43,19 @@ def get_cuda_sliced(sh_cache_size, threadPerRow = 2):
     texref = mod.get_texref(kernel_info['texref'])
     return (kernel, texref)
 
-def getSertilpCudaCode(shDot_size = None, threadPerRow = 2, sliceSize = 32, prefetch = 2):
-    if shDot_size is None:
-        shDot_size = threadPerRow * sliceSize
-    kernel_info = {'file_' : 'sertilp_kernel.c'}
+def get_cuda_sertilp(shDot_size = None, threadPerRow = 2, sliceSize = 32, prefetch = 2):
+    kernel_info = {'file_' : 'sertilp_kernel.c',
+                   'kernel' : 'rbfSERTILP_old',
+                   'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
+    if shDot_size is None:
+        shDot_size = threadPerRow * sliceSize
     tpl = convertString(tpl, shDot_size = shDot_size, threadPerRow = threadPerRow, sliceSize = sliceSize, prefetch = prefetch) 
-    return tpl
+    mod = SourceModule(tpl)
+    kernel = mod.get_function(kernel_info['kernel'])
+    texref = mod.get_texref(kernel_info['texref'])
+    return (kernel, texref)
 
 def getErtilpCudaCode(block_sice, threadPerRow, prefetch):
     kernel_info = {'file_' : 'ertilp_kernel.c'}
