@@ -9,7 +9,7 @@ from os.path import join as path_join
 
 KERNELS_PATH = "kernels"
 
-def convertString(string, **kwargs):
+def convert_string(string, **kwargs):
     s = string
     for name, value in kwargs.items():
         value = str(value)
@@ -37,7 +37,7 @@ def get_cuda_sliced(sh_cache_size, threads_per_row = 2):
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
         
-    tpl = convertString(tpl, sh_cache_size=sh_cache_size,
+    tpl = convert_string(tpl, sh_cache_size=sh_cache_size,
                         threadPerRow=threads_per_row)
 
     mod = SourceModule(tpl)
@@ -54,8 +54,8 @@ def get_cuda_sertilp(sh_dot_size = None, threads_per_row = 2,
         tpl = file_.read()
         
     if sh_dot_size is None:
-        shDot_size = threads_per_row * slice_size
-    tpl = convertString(tpl, sh_dot_size = shDot_size, 
+        sh_dot_size = threads_per_row * slice_size
+    tpl = convert_string(tpl, shDot_size = sh_dot_size, 
                         threadPerRow = threads_per_row, 
                         sliceSize = slice_size, prefetch = prefetch) 
     
@@ -74,7 +74,7 @@ def get_cuda_ertilp(block_sice, threads_per_row, prefetch):
     prefetch_init_tab = '{' + \
                         ', '.join('0' for i in range(prefetch)) + \
                         '}'
-    tpl = convertString(tpl, BLOCK_SIZE = block_sice,
+    tpl = convert_string(tpl, BLOCK_SIZE = block_sice,
                         THREADS_ROW = threads_per_row,
                         PREFETCH_SIZE = prefetch,
                         PREFETCH_INIT_TAB = prefetch_init_tab)
@@ -91,11 +91,12 @@ def get_cuda_csr(block_size = 128, warp_size = 32):
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
         
-    tpl = convertString(tpl, BLOCK_SIZE = block_size, WARP_SIZE = warp_size)
+    tpl = convert_string(tpl, BLOCK_SIZE = block_size, WARP_SIZE = warp_size)
     
     mod = SourceModule(tpl)
     kernel = mod.get_function(kernel_info['kernel'])
     texref = mod.get_texref(kernel_info['texref'])
     return (kernel, texref)
+    
 if __name__ == "__main__":
     pass
