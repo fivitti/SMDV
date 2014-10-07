@@ -16,7 +16,7 @@ for comparison.
 from matrixformat import convert_to_ellpack, convert_to_sliced, \
                          convert_to_sertilp, convert_to_ertilp, \
                          convert_to_scipy_csr
-import cudaAgregator
+import cudacodes
 
 import pycuda.autoinit
 import pycuda.driver as cuda
@@ -102,7 +102,7 @@ def multiply_csr(matrix, vector, block_size, repeat=1):
     g_vector = cuda.to_device(vector)
     num_rows = numpy.int32(num_rows)
 
-    kernel, texref = cudaAgregator.get_cuda_csr(block_size=block_size)
+    kernel, texref = cudacodes.get_cuda_csr(block_size=block_size)
     texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
 
@@ -160,7 +160,7 @@ def multiply_ellpack(matrix, vector, block_size=128, repeat=1):
     grid = (grid_size, 1)
     g_vector = cuda.to_device(vector)
 
-    kernel, texref = cudaAgregator.get_cuda_ellpack()
+    kernel, texref = cudacodes.get_cuda_ellpack()
     texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
 
@@ -232,7 +232,7 @@ def multiply_sliced(matrix, vector, align,
     grid = (grid_size, 1)
     g_vector = cuda.to_device(vector)
 
-    kernel, texref = cudaAgregator.get_cuda_sliced(
+    kernel, texref = cudacodes.get_cuda_sliced(
                         sh_cache_size=threads_per_row*slice_size,
                         threads_per_row=threads_per_row)
     texref.set_address(g_vector, vector.nbytes)
@@ -318,7 +318,7 @@ def multiply_sertilp(matrix, vector, align, slice_size,
     grid = (grid_size, 1)
     g_vector = cuda.to_device(vector)
 
-    kernel, texref = cudaAgregator.get_cuda_sertilp(
+    kernel, texref = cudacodes.get_cuda_sertilp(
                         threads_per_row=threads_per_row,
                         slice_size=slice_size,
                         prefetch=prefetch)
@@ -396,7 +396,7 @@ def multiply_ertilp(matrix, vector, threads_per_row=2,
     grid = (grid_size, 1)
     g_vector = cuda.to_device(vector)
 
-    kernel, texref = cudaAgregator.get_cuda_ertilp(
+    kernel, texref = cudacodes.get_cuda_ertilp(
                        block_size=block_size,
                        threads_per_row=threads_per_row,
                        prefetch=prefetch)
