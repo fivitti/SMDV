@@ -9,7 +9,7 @@ import click
 import scipy.io
 from os.path import isfile
 from numpy import average as avr, std as nstd, load
-from matrixMultiplication import multiplyCPU, multiplyELL, multiplySlicedELL, multiplySertilp, multiplyErtilp, multiplyCsr
+from matrixmultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiply_ertilp, multiply_csr
 from matrixUtilites import stringVector, resultEquals, dictVectorPaths
 from filesUtilites import pathReduction, sortPaths
 
@@ -97,34 +97,34 @@ def cli(block, ss, tpr, align, prefetch, csr, ell, sle, see, ert, cpu, repeat, r
         resultNumpy = ''
         if cpu:
             if not quite: click.secho(getMessage('multiplyCpu'), fg=colors['warning'])
-            resultMultiply = multiplyCPU(matrix, repeat=repeat, vector=vector)
+            resultMultiply = multiply_cpu(matrix, repeat=repeat, vector=vector)
             if test: resultNumpy = resultMultiply[0]
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='cpu', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
         elif test:
-            resultNumpy = multiplyCPU(matrix, vector=vector, repeat=repeat)[0]
+            resultNumpy = multiply_cpu(matrix, vector=vector, repeat=repeat)[0]
         if csr:
-            if not quite: click.secho(getMessage('multiplyCsr'), fg=colors['warning'])
-            resultMultiply = multiplyCsr(matrix, vector=vector, repeat=repeat, block_size=block)
+            if not quite: click.secho(getMessage('multiply_csr'), fg=colors['warning'])
+            resultMultiply = multiply_csr(matrix, vector=vector, repeat=repeat, block_size=block)
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='csr', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)            
         if ell:
             if not quite: click.secho(getMessage('multiplyEll'), fg=colors['warning'])
-            resultMultiply = multiplyELL(matrix, vector=vector, repeat=repeat, blockSize=block)
+            resultMultiply = multiply_ellpack(matrix, vector=vector, repeat=repeat, block_size=block)
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='ellpack', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
         if sle:
             if not quite: click.secho(getMessage('multiplySliced'), fg=colors['warning'])
-            resultMultiply = multiplySlicedELL(matrix, vector=vector, alignConst=align, sliceSize=ss, threadPerRow=tpr, repeat=repeat)
+            resultMultiply = multiply_sliced(matrix, vector=vector, align=align, slice_size=ss, threads_per_row=tpr, repeat=repeat)
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='sliced', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
         if see:
-            if not quite: click.secho(getMessage('multiplySertilp'), fg=colors['warning'])
-            resultMultiply = multiplySertilp(matrix, vector=vector, alignConst=align, sliceSize=ss, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
+            if not quite: click.secho(getMessage('multiply_sertilp'), fg=colors['warning'])
+            resultMultiply = multiply_sertilp(matrix, vector=vector, align=align, slice_size=ss, threads_per_row=tpr, prefetch=prefetch, repeat=repeat)
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='sertilp', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
         if ert:
-            if not quite: click.secho(getMessage('multiplyErtilp'), fg=colors['warning'])
-            resultMultiply = multiplyErtilp(matrix, vector=vector, blockSize=block, threadPerRow=tpr, prefetch=prefetch, repeat=repeat)
+            if not quite: click.secho(getMessage('multiply_ertilp'), fg=colors['warning'])
+            resultMultiply = multiply_ertilp(matrix, vector=vector, block_size=block, threads_per_row=tpr, prefetch=prefetch, repeat=repeat)
             resumeResult(resultMuliply=resultMultiply, resultPrint=result, timePrint=time, avrTimePrint=avrtime, stdTimePrint=std, quite=quite, output=output, formatName='ertilp', compensate=com, matrixName=matrixPath, sep=sep, eol=eol)
             if test: testResult(resultNumpy, resultMultiply[0], test, quite)
              
@@ -171,10 +171,10 @@ def getMessage(idMessage):
         'multiply' : u'Multiply matrix %s by the vector %s',
         'multiplyCpu' : u'Multiplication with Numpy (only CPU)',
         'multiplyEll' : u'Multiplication with ELLPACK',
-        'multiplySertilp' : u'Multiplication with SERTILP',
+        'multiply_sertilp' : u'Multiplication with SERTILP',
         'multiplySliced' : u'Multiplication with SLICED',
-        'multiplyErtilp' : u'Multiplication with ERTILP',
-        'multiplyCsr' : 'Multiplication with CSR',
+        'multiply_ertilp' : u'Multiplication with ERTILP',
+        'multiply_csr' : 'Multiplication with CSR',
         'result' : u'Result: ',
         'timeList' : u'List of times multiplication [ms]: ',
         'avrTime' : u'Average time [ms]: ',
