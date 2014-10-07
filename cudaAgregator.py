@@ -4,6 +4,7 @@ Created on Thu Feb 20 15:02:08 2014
 
 @author: Sławomir Figiel
 """
+from pycuda.compiler import SourceModule
 from os.path import join as path_join
 KERNELS_PATH = "kernels"
 
@@ -17,11 +18,16 @@ def convertString(string, **kwargs):
         s = s.replace("{{ "+name+" }}", value)
     return s
         
-def getELLCudaCode():
-    kernel_info = {'file_' : 'ellpack_kernel.c'}
+def get_cuda_ellpack():
+    kernel_info = {'file_' : 'ellpack_kernel.c',
+                   'kernel' : 'EllpackFormatKernel',
+                   'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
-    return tpl
+    mod = SourceModule(tpl)
+    kernel = mod.get_function(kernel_info['kernel'])
+    texref = mod.get_texref(kernel_info['texref'])
+    return (kernel, texref)
     
 def getSlicedELLCudaCode(sh_cache_size, threadPerRow = 2):
     kernel_info = {'file_' : 'sliced_kernel.c'}

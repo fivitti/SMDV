@@ -163,9 +163,10 @@ def multiply_ellpack(matrix, vector, block_size=128, repeat=1):
     grid = (grid_size, 1)
     g_vector = cuda.to_device(vector)
 
-    mod = SourceModule(cudaAgregator.getELLCudaCode())
-    kernel = mod.get_function("EllpackFormatKernel")
-    texref = mod.get_texref("mainVecTexRef")
+#    mod = SourceModule(cudaAgregator.getELLCudaCode())
+#    kernel = mod.get_function("EllpackFormatKernel")
+#    texref = mod.get_texref("mainVecTexRef")
+    kernel, texref = cudaAgregator.get_cuda_ellpack()
     texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
 
