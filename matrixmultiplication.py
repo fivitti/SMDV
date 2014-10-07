@@ -3,6 +3,15 @@
 Created on Wed Jun 25 12:35:44 2014
 
 @author: Sławomir Figiel
+Module provides the methods for multiplication on GPU matrix to formats:
+    * CSR (Scipy)
+    * Ellpack
+    * Sliced Ellpack
+    * SERTILP
+    * ERTILP
+ 
+There is also method for multiplication using Numpy.dot function
+for comparison.
 """
 from matrixformat import convert_to_ellpack, convert_to_sliced, \
                          convert_to_sertilp, convert_to_ertilp, \
