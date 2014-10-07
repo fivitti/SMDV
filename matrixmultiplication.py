@@ -321,13 +321,6 @@ def multiply_sertilp(matrix, vector, align, slice_size,
     grid = (grid_size, 1)
     g_vector = cuda.to_device(vector)
 
-#    mod = SourceModule( \
-#            cudaAgregator.getSertilpCudaCode(
-#                threadPerRow=threads_per_row,
-#                sliceSize=slice_size,
-#                prefetch=prefetch))
-#    kernel = mod.get_function("rbfSERTILP_old")
-#    texref = mod.get_texref("mainVecTexRef")
     kernel, texref = cudaAgregator.get_cuda_sertilp(
                         threadPerRow=threads_per_row,
                         sliceSize=slice_size,
@@ -406,12 +399,10 @@ def multiply_ertilp(matrix, vector, threads_per_row=2,
     grid = (grid_size, 1)
     g_vector = cuda.to_device(vector)
 
-    mod = SourceModule(cudaAgregator.getErtilpCudaCode( \
+    kernel, texref = cudaAgregator.get_cuda_ertilp(
                        block_sice=block_size,
                        threadPerRow=threads_per_row,
-                       prefetch=prefetch))
-    kernel = mod.get_function("rbfERTILP")
-    texref = mod.get_texref("labelsTexRef")
+                       prefetch=prefetch)
     texref.set_address(g_vector, vector.nbytes)
     tex = [texref]
 
