@@ -358,7 +358,7 @@ def multiply_ertilp(matrix, vector, threads_per_row=2,
         matrix.
     threads_per_row : int > 0(recommended 2, 4 or 8)
         Threads per row
-    prefetch : int > 0 (reommended 2, 4 or 8)
+    prefetch : int > 0 (recommended 2, 4 or 8)
         Number of requests for access to data notified in advance.
     block_size : int (recommended 128 or 256)
         Size of block CUDA.
@@ -397,7 +397,7 @@ def multiply_ertilp(matrix, vector, threads_per_row=2,
     g_vector = cuda.to_device(vector)
 
     kernel, texref = cudaAgregator.get_cuda_ertilp(
-                       block_sice=block_size,
+                       block_size=block_size,
                        threads_per_row=threads_per_row,
                        prefetch=prefetch)
     texref.set_address(g_vector, vector.nbytes)
