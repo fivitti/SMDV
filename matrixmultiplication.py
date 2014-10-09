@@ -277,7 +277,7 @@ def multiply_sertilp(matrix, vector, align, slice_size,
         Size of simple slice
     threads_per_row : int > 0(recommended 2, 4 or 8)
         Threads per row
-    prefetch : int > 0 (reommended 2, 4 or 8)
+    prefetch : int > 0 (recommended 2, 4 or 8)
         Number of requests for access to data notified in advance.
     repeat : int > 0
         Number of repetitions multiplications. It has no effect on
