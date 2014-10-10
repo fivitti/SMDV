@@ -20,6 +20,11 @@ You can use them as a reference point for measurements performed on the GPU.
 ### Functions
 The main purpose of the project is to measure the execution time
 of multiplications on the GPU for different matrix formats.
+You can repeat our research on your own computer (you only need to have a 
+compatible Nvidia GPU with CUDA).  
+You can also carry out their own experiments and their own data 
+independently chosen parameters.  
+SMDV allows easy collaboration with external scripts.
 
 SMDV further includes tools to help take the measurements for different data:
 
@@ -29,18 +34,28 @@ SMDV further includes tools to help take the measurements for different data:
     * Handled by the module _matrixformat.py_.
     * Command line interfaces in module _cli-conv.py_.
 2. Return result multiplication
-    * Methods for multiplying addition to the time the calculation return also the result of these calculations. You can use it to check its accuracy, either as an end in itself. It's a great, quick way to obtain a result of matrix by vector multiplication.
+    * Methods for multiplying addition to the time the calculation return also 
+    the result of these calculations. You can use it to check its accuracy, 
+    either as an end in itself. It's a great, quick way to obtain a result of 
+    matrix by vector multiplication.
     * Handled by the module _matrixmultiplication.py_.
     * Command line interfaces in module _cli-multiply.py_.
 3. Get CUDA kernels for multiplication
-    * You can view the source files to see exactly how the multiplication is performed. You can also use the kernels implemented in their programs. In order to further optimize thecodes are written in CUDA C using metaprogramming.
+    * You can view the source files to see exactly how the multiplication is 
+    performed. You can also use the kernels implemented in their programs. 
+    In order to further optimize thecodes are written in CUDA C using 
+    metaprogramming.
     * Files in CUDA C are located in the _kernels_.
-    * Module for metaprogramming and code compilation is handled by _cudacodes.py_.
+    * Module for metaprogramming and code compilation is handled 
+    by _cudacodes.py_.
 4. Get info about matrix and vector files
-    * You can quickly get information about the many of matrices stored in the format .mtx and Numpy vectors in .npy and export this information to a CSV file.
+    * You can quickly get information about the many of matrices stored in 
+    the format .mtx and Numpy vectors in .npy and export this information 
+    to a CSV file.
     * Command line interfaces in module _cli-info.py_.
 5. Simple and fast generating matrix and vectors
-    * You can generate random matrices and vectors for testing on selected sizes and densities.
+    * You can generate random matrices and vectors for testing on selected 
+    sizes and densities.
     * Handled by the module _matrixUtilites.py_.
     * Command line interfaces in module _cli-gen.py_.
 6. And more...
@@ -55,28 +70,31 @@ SMDV uses the packages:
 * and standard library, of course
 
 ## Results
-The following are examples of the results of test using the 10 largest matrices from [matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT).
+The following are examples of the results of test using the 10 largest 
+matrices from [matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT).
 
 The calculations were performed on a computer TO BE COMPLETED <<< >>
 
 Version software:
     
-    * OS: Ubuntu 13.10
-    * python 2.7.5+
-    * PyCuda 2013.1.1
-    * Numpy 1.7.1
+* OS: Ubuntu 13.10
+* python 2.7.5+
+* PyCuda 2013.1.1
+* Numpy 1.7.1
     
 Arguments:
     
-    * Block size: 128
-    * Threads per row 2: 2
-    * Slice size: 64
-    * Prefetch: 2
-    * Align: 32
-    * Repeats: 10
-    * Compensation: 10 - So much has been made ​​multiplications "starting". Their results were not included.
+* Block size: 128
+* Threads per row 2: 2
+* Slice size: 64
+* Prefetch: 2
+* Align: 32
+* Repeats: 10
+* Compensation: 10 - So much has been made multiplications
+  "starting". Their results were not included.
 
-Test vectors are generated at random in the range of -1 to 1 Their density is 15%. You can download them from the folder _vectors_.
+Test vectors are generated at random in the range of -1 to 1.
+Their density is 15%. You can download them from the folder _vectors_.
     
 Informations about matrices:
 
@@ -95,7 +113,7 @@ Informations about matrices:
 
 Results:
 
-| Matrix | Format | Avr time [ms] | Std |
+| Matrix | Format | Avr time [ms] | Std [ms] |
 | ------ | ------ | ------------- | --- |
 | cant   | CPU    |  7.658        | 0.021 |
 |        | CSR    | 0.444         | 0.002 |
@@ -161,21 +179,45 @@ Results:
 
     
 ## Authors
+* Krzysztof Sopyła - [ksirg](https://github.com/ksirg) on Github
+* Paweł Drozda - [pdrozda](https://github.com/pdrozda) on Github
+* Sławomir Figiel - [fivitti](https://github.com/fivitti) on Github
+
 ## License
-## References  
+SMDV is licensed under the MIT License.
+
+## References
+*  "Efficient Sparse Matrix-Vector Multiplication on CUDA", Nathan Bell, 
+Michael Garland [11 December 2008]
+* "The sparse matrix vector product on GPUs", F. Vazquez, E. M. Garzon, 
+J. A. Martınez, J. J. Fernandez [14 June 2009]
+* "Improving the performance of the sparse matrix vector product with GPUs",
+F. Vazquez, G. Ortega, J.J. Fernandez, E.M. Garzon [2010]
+* "Automatically Tuning Sparse Matrix-Vector Multiplication for GPU 
+Architectures", Alexander Monakov, Anton Lokhmotov, and Arutyun Avetisyan
+* "A memory efficient and fast sparse matrix vector product on a gpu",
+A. Dziekonski, A. Lamecki, and M. Mrozowski
 
 # How to run
 -------------
 How to make SMDV to action and self test the speed of matrix multiplication?  
 There are two ways. You can write a script in Python, or use the attached CLI.
 
-> We assume that you have a test matrices and vectors of length equal to the number of columns of the matrix. If not, you can visit [MatrixMarket](http://math.nist.gov/MatrixMarket/) . We also recommend [matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT) . You can also use tools provided to generate data described in next section or use package Numpy or Scipy.
+> We assume that you have a test matrices and vectors of length equal to 
+the number of columns of the matrix. If not, you can 
+visit [MatrixMarket](http://math.nist.gov/MatrixMarket/) . We also 
+recommend [matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT) . 
+You can also use tools provided to generate data described in next section or 
+use package Numpy or Scipy.
 
 ## 1. Multiplication in script
-We will use module _matrixmultiplication.py_. It is the core of the whole process. This module include moduls _cudacode.py_ and _matrixformat.py_. You do not have to worry about it. You only need to use core-module.
+We will use module _matrixmultiplication.py_. It is the core of the whole 
+process. This module include moduls _cudacode.py_ and _matrixformat.py_. 
+You do not have to worry about it. You only need to use core-module.
 
 ### 1.1 Full script
-The complete script multiplication script is in _examples/multiplication.py_ will work according to the scheme:
+The complete script multiplication script is in _examples/multiplication.py_ 
+will work according to the scheme:
 
 1. Read data
 2. Determination of parameters
@@ -183,7 +225,9 @@ The complete script multiplication script is in _examples/multiplication.py_ wil
 4. Results
 
 ### 1.2 ELLPACK multiplication
-Call multiply this format is very simple. As any of the methods has in arguments matrix, vector and the number of repetitions of this operation. In addition, a takes one special parameter - **block size**.
+Call multiply this format is very simple. As any of the methods has in 
+arguments matrix, vector and the number of repetitions of this operation. 
+In addition, a takes one special parameter - **block size**.
 
 ```python
 
@@ -225,7 +269,8 @@ This method has specials parameters: **threads per row**, **slice size**,
 ```
 
 ### 1.5 ERTILP multiplication
-This method has specials parameters: **threads per row**, **block size**, **prefetch** - number of requests for access to data notified in advance.
+This method has specials parameters: **threads per row**, **block size**, 
+**prefetch** - number of requests for access to data notified in advance.
 
 ```python
 
@@ -250,7 +295,8 @@ This method has only one specials parameters: **block size**.
 ```
 
 ### 1.6 CPU (Numpy) multiplication
-This method using fuction dot from numpy. It is here for comparison. It works only on CPU.
+This method using fuction dot from numpy. It is here for comparison. 
+It works only on CPU.
 
 ```python
 
@@ -261,30 +307,46 @@ This method using fuction dot from numpy. It is here for comparison. It works on
 ```
 
 ## 2 Multiplication in command line interface (CLI)
-CLI to multiply is in module _cli-multiply.py_. Description all parameters get using flag **--help**.
+CLI to multiply is in module _cli-multiply.py_. Description all parameters 
+get using flag **--help**.
 
-As arguments required program takes two paths. First indicates vector, and the second matrix. 
+As arguments required program takes two paths. First indicates vector, and 
+the second matrix. 
 
-If the directory path vectors will then be searched for files _.npy_. The program alone try to match the vector for the given matrix. Will match the last alphabetically vector of length equal to the number of columns of the matrix If you do not succeed will be displayed message.
+If the directory path vectors will then be searched for files _.npy_. 
+The program alone try to match the vector for the given matrix. 
+Will match the last alphabetically vector of length equal to the number of 
+columns of the matrix If you do not succeed will be displayed message.
 
-If the path is a directory matrix program will search it for files _.mtx_. Then try to perform calculations for each array in turn.
+If the path is a directory matrix program will search it for files _.mtx_. 
+Then try to perform calculations for each array in turn.
 
-Specifying of two paths as directory  is a simple way to automate testing on a collection.
+Specifying of two paths as directory  is a simple way to automate testing 
+on a collection.
 
 You can easily specify all the parameters.  
-Multiplications are making a choice of formats by using the flag: **-ell** (ELLPACK), **-sle** (SLICED), **-ert** (ERTILP), **-see** (SERTILP), **-csr** (CSR) and **-cpu** (multiplication on CPU).
+Multiplications are making a choice of formats by using the flag: 
+**-ell** (ELLPACK), **-sle** (SLICED), **-ert** (ERTILP), **-see** (SERTILP), 
+**-csr** (CSR) and **-cpu** (multiplication on CPU).
 
-CLI allows you to display the result of multiplication, all execution times, average execution time and standard deviation of the mean.
+CLI allows you to display the result of multiplication, all execution times, 
+average execution time and standard deviation of the mean.
 
-You can also test the correctness of the returned results with a confidence factor. To do this, use the flag **--test**. The result will be the result of a standard function **dot** with Numpy package. If errors do not coming within specified range will be displayed corresponding messages.
+You can also test the correctness of the returned results with a confidence 
+factor. To do this, use the flag **--test**. The result will be the result 
+of a standard function **dot** with Numpy package. If errors do not coming 
+within specified range will be displayed corresponding messages.
 
-You can also save the results of the measurements in the CSV file with the flags **-o**.
+You can also save the results of the measurements in the CSV file with 
+the flags **-o**.
 ### 2.1 Examples
-Multiplications matrix by vectors in ELLPACK, ERTILP and CPU formats with own parameters and print average time and standard deviation.
+Multiplications matrix by vectors in ELLPACK, ERTILP and CPU formats with own 
+parameters and print average time and standard deviation.
 
 ```
     
-    user@host:~/projekty/SMDV$ python cli-multiply.py -b 128 -tpr 4 -p 2 -ell-ert -cpu -avr -std Data/vectors/Vector_62451.npy Data/real/cant.mtx
+    user@host:~/projekty/SMDV$ python cli-multiply.py -b 128 -tpr 4 -p 2 -ell 
+    -ert -cpu -avr -std Data/vectors/Vector_62451.npy Data/real/cant.mtx
     Multiply matrix Data/real/cant.mtx by the vector Data/vectors/Vector_62451.npy
     Multiplication with Numpy (only CPU)
     Average time [ms]: 7.84460783005
@@ -318,3 +380,9 @@ Auto search matrices and vectors:
 
 ```
 
+Under construction:
+
+    3. Data generation
+    4. Matrix convertion
+    5. Information about data
+    6. Building kernels
