@@ -10,7 +10,7 @@ import scipy.io
 from os.path import isfile
 from numpy import average as avr, std as nstd, load
 from matrixmultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiply_ertilp, multiply_csr
-from matrixUtilites import stringVector, resultEquals, dictVectorPaths
+from matrixutilites import string_vector, result_equals, dict_vector_paths
 from filesUtilites import pathReduction, sortPaths
 
 colors = {
@@ -61,7 +61,7 @@ def cli(block, ss, tpr, align, prefetch, csr, ell, sle, see, ert, cpu, repeat, r
             'Repeat' : str(repeat),
             'Compensate' : str(com) if com else '0'
         }
-    vectorsDict = dictVectorPaths(sortPaths(pathReduction([str(vector_path),]), '.npy')['.npy'])
+    vectorsDict = dict_vector_paths(sortPaths(pathReduction([str(vector_path),]), '.npy')['.npy'])
     matricesPaths = sortPaths(pathReduction([str(matrix_path),]), '.mtx')['.mtx']
     
     if com: 
@@ -133,7 +133,7 @@ def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, stdTimePri
     if compensate:
         times = times[compensate:]
     if resultPrint:
-        click.echo(('' if quite else getMessage('result')) + stringVector(resultMuliply[0]))
+        click.echo(('' if quite else getMessage('result')) + string_vector(resultMuliply[0]))
     if timePrint:
         click.echo(('' if quite else getMessage('timeList')) + str(times))
     if avrTimePrint:
@@ -147,13 +147,13 @@ def resumeResult(resultMuliply, resultPrint, timePrint, avrTimePrint, stdTimePri
         data.extend(map(str, times))
         output.write(sep.join(data) + eol )
         
-def testResult(model, check, confidenceFactor, quite):
+def testResult(model, check, confidence_factor, quite):
     string = [('' if quite else getMessage('test')) ]
-    vectorString = stringVector(
-                        map(str, resultEquals(model, check, confidenceFactor)), \
-                        valueFormat='%s', \
+    vectorString = string_vector(
+                        map(str, result_equals(model, check, confidence_factor)), \
+                        value_format='%s', \
                         width=100, \
-                        rowFormat='  {0:<7}{1:<}'
+                        row_format='  {0:<7}{1:<}'
                     )
     if vectorString.lstrip(): 
         string.append(vectorString)

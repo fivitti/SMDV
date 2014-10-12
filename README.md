@@ -71,7 +71,8 @@ SMDV uses the packages:
 
 ## Results
 The following are examples of the results of test using the 10 largest 
-matrices from [matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT).
+matrices from 
+[matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT).
 
 The calculations were performed on a computer TO BE COMPLETED <<< >>
 
@@ -85,7 +86,7 @@ Version software:
 Arguments:
     
 * Block size: 128
-* Threads per row 2: 2
+* Threads per row: 2
 * Slice size: 64
 * Prefetch: 2
 * Align: 32
@@ -94,7 +95,8 @@ Arguments:
   "starting". Their results were not included.
 
 Test vectors are generated at random in the range of -1 to 1.
-Their density is 15%. You can download them from the folder _vectors_.
+Their density is 15%. You can download them from the 
+folder [_vectors_](../tree/sync/vectors].
     
 Informations about matrices:
 
@@ -179,12 +181,12 @@ Results:
 
     
 ## Authors
-* Krzysztof Sopyła - [ksirg](https://github.com/ksirg) on Github
-* Paweł Drozda - [pdrozda](https://github.com/pdrozda) on Github
-* Sławomir Figiel - [fivitti](https://github.com/fivitti) on Github
+* Krzysztof Sopyła ["ksirg"](https://github.com/ksirg)
+* Paweł Drozda ["pdrozda"](https://github.com/pdrozda)
+* Sławomir Figiel ["fivitti"](https://github.com/fivitti)
 
 ## License
-SMDV is licensed under the MIT License.
+SMDV is licensed under the [MIT License](../blob/master/LICENSE).
 
 ## References
 *  "Efficient Sparse Matrix-Vector Multiplication on CUDA", Nathan Bell, 
@@ -206,7 +208,8 @@ There are two ways. You can write a script in Python, or use the attached CLI.
 > We assume that you have a test matrices and vectors of length equal to 
 the number of columns of the matrix. If not, you can 
 visit [MatrixMarket](http://math.nist.gov/MatrixMarket/) . We also 
-recommend [matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT) . 
+recommend 
+[matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT) . 
 You can also use tools provided to generate data described in next section or 
 use package Numpy or Scipy.
 
@@ -216,7 +219,8 @@ process. This module include moduls _cudacode.py_ and _matrixformat.py_.
 You do not have to worry about it. You only need to use core-module.
 
 ### 1.1 Full script
-The complete script multiplication script is in _examples/multiplication.py_ 
+The complete script multiplication script is in 
+[_examples/multiplication.py_](blob/sync/examples/multiplication.py) 
 will work according to the scheme:
 
 1. Read data
@@ -255,7 +259,8 @@ This method has three specials parameters: **threads per row**, **slice size**,
 
 ### 1.4 SERTILP multiplication
 This method has specials parameters: **threads per row**, **slice size**,
-**align**, **prefetch** - number of requests for access to data notified in advance.
+**align**, **prefetch** - number of requests for access to data notified 
+in advance.
 
 ```python
 
