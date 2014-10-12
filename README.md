@@ -56,7 +56,7 @@ SMDV further includes tools to help take the measurements for different data:
 5. Simple and fast generating matrix and vectors
     * You can generate random matrices and vectors for testing on selected 
     sizes and densities.
-    * Handled by the module _matrixUtilites.py_.
+    * Handled by the module _matrixutilites.py_.
     * Command line interfaces in module _cli-gen.py_.
 6. And more...
 
