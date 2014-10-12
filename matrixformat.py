@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Mar 23 20:16:06 2014
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 
 Module provides the methods for converting matrix to formats:
     * CSR (Scipy)

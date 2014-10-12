@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun May 04 20:45:18 2014
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 
 Module provides the methods helpers to work in matrices and vectors:
     * Methods generated data

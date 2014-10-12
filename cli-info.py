@@ -2,13 +2,13 @@
 """
 Created on Sun Sep 21 15:01:37 2014
 
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 """
 import click
 from numpy import load
 import scipy.io
 from matrixutilites import two_column_string, get_info_matrix, get_info_vector, string_vector
-from filesUtilites import sortPaths, pathReduction
+from filesUtilites import sort_paths, path_reduction
 
 colors = {
         'success' : 'green',
@@ -30,7 +30,7 @@ def cli(info_print, representation, sparse, sep, output, paths):
     paths = map(str, paths)
     headersMatrix = ['matrix', 'rows', 'cols', 'nnz', 'sparsing [%]']
     headersVector = ['vector', 'length', 'nnz', 'sparsing [%]']
-    dictFile = sortPaths(pathReduction(paths), '.mtx', '.npy')
+    dictFile = sort_paths(path_reduction(paths), '.mtx', '.npy')
     matrices = dictFile['.mtx']
     vectors = dictFile['.npy']
     if output and matrices:

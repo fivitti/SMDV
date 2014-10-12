@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Sep 24 17:57:18 2014
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 
 Module have method work in lists and list of list.
 """

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 Created on Thu Feb 20 15:02:08 2014
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 
 Module provides the methods returns metaprogrammed and compiled CUDA code
 for matrix multiplication on GPU to formats:

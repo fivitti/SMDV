@@ -2,7 +2,7 @@
 """
 Created on Fri Sep 19 21:01:14 2014
 
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 """
 import click
 from matrixutilites import generate_vector, generate_sparse_matrix, string_vector, save_matrix_to_file, save_vector_to_numpy_file

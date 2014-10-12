@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jun 25 12:35:44 2014
+@author: Slawomir Figiel
 
-@author: Sławomir Figiel
 Module provides the methods for multiplication on GPU matrix to formats:
     * CSR (Scipy)
     * Ellpack

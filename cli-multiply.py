@@ -2,7 +2,7 @@
 """
 Created on Wed Sep 17 13:47:34 2014
 
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 """
 
 import click
@@ -11,7 +11,7 @@ from os.path import isfile
 from numpy import average as avr, std as nstd, load
 from matrixmultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiply_ertilp, multiply_csr
 from matrixutilites import string_vector, result_equals, dict_vector_paths
-from filesUtilites import pathReduction, sortPaths
+from filesUtilites import path_reduction, sort_paths
 
 colors = {
         'success' : 'green',
@@ -61,8 +61,8 @@ def cli(block, ss, tpr, align, prefetch, csr, ell, sle, see, ert, cpu, repeat, r
             'Repeat' : str(repeat),
             'Compensate' : str(com) if com else '0'
         }
-    vectorsDict = dict_vector_paths(sortPaths(pathReduction([str(vector_path),]), '.npy')['.npy'])
-    matricesPaths = sortPaths(pathReduction([str(matrix_path),]), '.mtx')['.mtx']
+    vectorsDict = dict_vector_paths(sort_paths(path_reduction([str(vector_path),]), '.npy')['.npy'])
+    matricesPaths = sort_paths(path_reduction([str(matrix_path),]), '.mtx')['.mtx']
     
     if com: 
         repeat += com
