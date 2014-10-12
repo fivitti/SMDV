@@ -1,3 +1,7 @@
+/*  Kernel SLICED
+ *  @author: Krzysztof Sopyla
+ *  Source: KMLib [https://github.com/ksirg/KMLib]
+ */
 texture<float, 1, cudaReadModeElementType> mainVecTexRef;
 
 extern "C" __global__ void SlicedEllpackFormatKernel(
@@ -45,8 +49,3 @@ extern "C" __global__ void SlicedEllpackFormatKernel(
             }
         }//if row<nrRows 
 }//end func
-
-__global__ void copy_texture_kernel(float * data) {
-   int ty=threadIdx.x;
-   data[ty] =tex1Dfetch(mainVecTexRef, ty);
-}

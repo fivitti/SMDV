@@ -1,3 +1,7 @@
+/*  Kernel CSR
+ *  @author: Krzysztof Sopyla
+ *  Source: KMLib [https://github.com/ksirg/KMLib]
+ */
 texture<float, 1, cudaReadModeElementType> mainVecTexRef;
 
 extern "C" __global__ void rbfCsrFormatKernel(const float * vals,
