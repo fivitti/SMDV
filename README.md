@@ -96,7 +96,7 @@ Arguments:
 
 Test vectors are generated at random in the range of -1 to 1.
 Their density is 15%. You can download them from the 
-folder [_vectors_](../tree/sync/vectors].
+folder [_vectors_](/vectors).
     
 Informations about matrices:
 
