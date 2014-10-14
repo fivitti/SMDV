@@ -1,3 +1,7 @@
+/*  Kernel ERTILP
+ *  @author: Krzysztof Sopyla
+ *  Source: KMLib [https://github.com/ksirg/KMLib]
+ */
 texture<float,1,cudaReadModeElementType> labelsTexRef;
 
 extern "C" __global__ void rbfERTILP(const float * vals,
@@ -16,18 +20,13 @@ extern "C" __global__ void rbfERTILP(const float * vals,
     }
     __syncthreads();
 
-
-    //const int idx  = blockDim.x * blockIdx.x + threadIdx.x;  // global thread index
     int row  = (blockDim.x * blockIdx.x + threadIdx.x)/{{ THREADS_ROW }};
 
-    const int rowsB= blockDim.x/{{ THREADS_ROW }} ;//{{ BLOCK_SIZE }}/{{ THREADS_ROW }};  //rows in block
-    //#define rowsB {{ BLOCK_SIZE }}/{{ THREADS_ROW }}
+    const int rowsB= blockDim.x/{{ THREADS_ROW }} ;
     unsigned int j=0;
     const int tid = threadIdx.x; // index in block
     if(row<shRows)
-    {
-
-        
+    { 
         const int idxR = tid/{{ THREADS_ROW }}; //row index mapped into block region
         const int idxT = tid%{{ THREADS_ROW }}; // thread number in Thread Group
     
@@ -41,8 +40,7 @@ extern "C" __global__ void rbfERTILP(const float * vals,
         unsigned int arIdx=0;
     
         for(int i=0; i<maxEl;i++)
-        {
-            
+        {        
             #pragma unroll
             for( j=0; j<{{ PREFETCH_SIZE }};j++)			
             {
@@ -61,9 +59,7 @@ extern "C" __global__ void rbfERTILP(const float * vals,
         for( j=1; j<{{ PREFETCH_SIZE }};j++){
             dot[0]+=dot[j];
         }
-    
-        //__syncthreads();	
-    
+
         // special indexing, values for example for T=4 BlockSize=256
         //for row=0 values are stored on position 0,64,128,192 
         //for row=1 values are stored on position 1,65,129,193 ...
@@ -82,8 +78,7 @@ extern "C" __global__ void rbfERTILP(const float * vals,
         __syncthreads();
     }
     //if(row2<shRows){
-    if(threadIdx.x<rowsB){
-        //results[row2]=row2;			
+    if(threadIdx.x<rowsB){		
         unsigned int row2=blockIdx.x* rowsB+threadIdx.x;
         if(row2<shRows)
             results[row2]=shDotv[threadIdx.x];

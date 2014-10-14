@@ -1,3 +1,7 @@
+/*  Kernel ELLPACK
+ *  @author: Krzysztof Sopyla
+ *  Source: KMLib [https://github.com/ksirg/KMLib]
+ */
 texture<float,1,cudaReadModeElementType> mainVecTexRef;
 
 __device__ float SpMV_Ellpack(const float * vals,
@@ -17,7 +21,6 @@ __device__ float SpMV_Ellpack(const float * vals,
     {
         col=colIdx[num_rows*i+row];
         val= vals[num_rows*i+row];
-        //dot+=val*tex1Dfetch(mainVecTexRef,col);
         dot+=val*tex1Dfetch(mainVecTexRef,col);
     }
 
@@ -32,15 +35,9 @@ extern "C" __global__ void EllpackFormatKernel(const float * vals,
 {
     
     const int row   = blockDim.x * blockIdx.x + threadIdx.x;  // global thread index
-    //const int num_rows =numRows;
     if(row<numRows)
     {
         float dot = SpMV_Ellpack(vals,colIdx,rowLength,row,numRows);
         results[row]=dot;
     }	
-}
-
-__global__ void copy_texture_kernel(float * data) {
-   int ty=threadIdx.x;
-   data[ty] =tex1Dfetch(mainVecTexRef, ty);
 }

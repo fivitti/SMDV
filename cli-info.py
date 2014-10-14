@@ -2,13 +2,13 @@
 """
 Created on Sun Sep 21 15:01:37 2014
 
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 """
 import click
 from numpy import load
 import scipy.io
-from matrixUtilites import twoColumnString, getInfoMatrix, getInfoVector, stringVector
-from filesUtilites import sortPaths, pathReduction
+from matrixutilites import two_column_string, get_info_matrix, get_info_vector, string_vector
+from filesutilites import sort_paths, path_reduction
 
 colors = {
         'success' : 'green',
@@ -30,7 +30,7 @@ def cli(info_print, representation, sparse, sep, output, paths):
     paths = map(str, paths)
     headersMatrix = ['matrix', 'rows', 'cols', 'nnz', 'sparsing [%]']
     headersVector = ['vector', 'length', 'nnz', 'sparsing [%]']
-    dictFile = sortPaths(pathReduction(paths), '.mtx', '.npy')
+    dictFile = sort_paths(path_reduction(paths), '.mtx', '.npy')
     matrices = dictFile['.mtx']
     vectors = dictFile['.npy']
     if output and matrices:
@@ -43,10 +43,10 @@ def cli(info_print, representation, sparse, sep, output, paths):
         except:
             click.secho(getMessage('open_failed') % matrixPath, fg=colors['danger'])
             continue
-        info = map(str, getInfoMatrix(matrix))
+        info = map(str, get_info_matrix(matrix))
         if info_print:
             click.secho(getMessage('info_title_matrix'), fg=colors['info'])
-            click.echo(twoColumnString(headersMatrix[1:], info))
+            click.echo(two_column_string(headersMatrix[1:], info))
         if output:
             output.write(matrixPath + sep + sep.join(info))
             output.write(eol)
@@ -66,15 +66,15 @@ def cli(info_print, representation, sparse, sep, output, paths):
         except:
             click.secho(getMessage('open_failed') % vectorPath, fg=colors['danger'])
             continue
-        info = map(str, getInfoVector(vector))
+        info = map(str, get_info_vector(vector))
         if info_print:
             click.secho(getMessage('info_title_vector'), fg=colors['info'])
-            click.echo(twoColumnString(headersVector[1:], info))
+            click.echo(two_column_string(headersVector[1:], info))
         if output:
             output.write(vectorPath + sep + sep.join(info) + eol) 
         if representation:
             click.secho(getMessage('vec'), fg=colors['info'])
-            click.echo(stringVector(vector))
+            click.echo(string_vector(vector))
 
 
 def getMessage(idMessage):

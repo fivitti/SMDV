@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Sep 24 17:57:18 2014
+@author: Slawomir Figiel
 
-@author: Sławomir Figiel
+Module have method work in lists and list of list.
 """
 from itertools import izip, chain
 

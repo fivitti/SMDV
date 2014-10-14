@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jun 25 12:35:44 2014
+@author: Slawomir Figiel
 
-@author: Sławomir Figiel
 Module provides the methods for multiplication on GPU matrix to formats:
     * CSR (Scipy)
     * Ellpack
@@ -13,9 +13,7 @@ Module provides the methods for multiplication on GPU matrix to formats:
 There is also method for multiplication using Numpy.dot function
 for comparison.
 """
-from matrixformat import convert_to_ellpack, convert_to_sliced, \
-                         convert_to_sertilp, convert_to_ertilp, \
-                         convert_to_scipy_csr
+import matrixformat as mf
 import cudacodes
 
 import pycuda.autoinit
@@ -85,7 +83,7 @@ def multiply_csr(matrix, vector, block_size, repeat=1):
     if len(vector) != matrix.shape[1]:
         raise ArithmeticError('Length of the vector is not equal to the'
                               'number of columns of the matrix.')
-    matrix = convert_to_scipy_csr(matrix)
+    matrix = mf.convert_to_scipy_csr(matrix)
     data = numpy.array(matrix.data, dtype=numpy.float32)
     indices = numpy.array(matrix.indices, dtype=numpy.int32)
     indptr = numpy.array(matrix.indptr, dtype=numpy.int32)
@@ -147,7 +145,7 @@ def multiply_ellpack(matrix, vector, block_size=128, repeat=1):
     if len(vector) != num_cols:
         raise ArithmeticError('Length of the vector is not equal to the '
                               'number of columns of the matrix.')
-    matrix = convert_to_ellpack(matrix)
+    matrix = mf.convert_to_ellpack(matrix)
     vals = cuda.to_device(matrix[0])
     col_idx = cuda.to_device(matrix[1])
     rows_length = cuda.to_device(matrix[2])
@@ -214,7 +212,7 @@ def multiply_sliced(matrix, vector, align,
         raise ArithmeticError('Length of the vector is not equal to'
                               'the number of columns of the matrix.')
     align = int(ceil((slice_size*threads_per_row*1.0)/align)*align)
-    matrix = convert_to_sliced(matrix, threads_per_row=threads_per_row,
+    matrix = mf.convert_to_sliced(matrix, threads_per_row=threads_per_row,
                                slice_size=slice_size, align=align)
     vals = cuda.to_device(matrix[0])
     col_idx = cuda.to_device(matrix[1])
@@ -277,7 +275,7 @@ def multiply_sertilp(matrix, vector, align, slice_size,
         Size of simple slice
     threads_per_row : int > 0(recommended 2, 4 or 8)
         Threads per row
-    prefetch : int > 0 (reommended 2, 4 or 8)
+    prefetch : int > 0 (recommended 2, 4 or 8)
         Number of requests for access to data notified in advance.
     repeat : int > 0
         Number of repetitions multiplications. It has no effect on
@@ -292,7 +290,7 @@ def multiply_sertilp(matrix, vector, align, slice_size,
         raise ArithmeticError('Length of the vector is not equal to'
                               'the number of columns of the matrix.')
     align = int(ceil((slice_size*threads_per_row*1.0)/align)*align)
-    matrix = convert_to_sertilp(matrix, threads_per_row=threads_per_row,
+    matrix = mf.convert_to_sertilp(matrix, threads_per_row=threads_per_row,
                                 slice_size=slice_size, prefetch=prefetch,
                                 align=align)
     # Array matrix[2] is converted explicitly to an array of float,
@@ -374,7 +372,7 @@ def multiply_ertilp(matrix, vector, threads_per_row=2,
     if len(vector) != num_cols:
         raise ArithmeticError('Length of the vector is not equal to '
                               'the number of columns of the matrix.')
-    matrix = convert_to_ertilp(matrix, prefetch=prefetch,
+    matrix = mf.convert_to_ertilp(matrix, prefetch=prefetch,
                                threads_per_row=threads_per_row)
     # Array matrix[2] is converted explicitly to an array of float,
     # because it is element of a tuple. Without this

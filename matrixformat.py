@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Mar 23 20:16:06 2014
-@author: Sławomir Figiel
+@author: Slawomir Figiel
 
 Module provides the methods for converting matrix to formats:
     * CSR (Scipy)
@@ -11,7 +11,7 @@ Module provides the methods for converting matrix to formats:
     * ERTILP
 There are also specific, support method for the conversion.
 """
-from listutilites import normalize_length, columns_to_list, grouped
+import listutilites as lu
 import scipy.sparse
 import numpy
 from math import ceil
@@ -198,8 +198,8 @@ def convert_to_ellpack(matrix, array=True):
     matrix = preconvert_to_ell(matrix)
     rows_length = matrix[2]
 
-    values = columns_to_list(normalize_length(matrix[0]))
-    cols_indices = columns_to_list(normalize_length(matrix[1]))
+    values = lu.columns_to_list(lu.normalize_length(matrix[0]))
+    cols_indices = lu.columns_to_list(lu.normalize_length(matrix[1]))
 
     if array == True:
         return (numpy.array(values, dtype=numpy.float32), \
@@ -257,13 +257,13 @@ def convert_to_sliced(matrix, threads_per_row=2, slice_size=2,
     rows_length = matrix[2]
     slices_start = [0, ]
 
-    for group_rows in grouped(matrix[0], slice_size):
-        group_rows = normalize_length(group_rows, threads_per_row)
-        values.extend(columns_to_list(group_rows, threads_per_row))
+    for group_rows in lu.grouped(matrix[0], slice_size):
+        group_rows = lu.normalize_length(group_rows, threads_per_row)
+        values.extend(lu.columns_to_list(group_rows, threads_per_row))
         slices_start.append(len(values))
-    for group_rows in grouped(matrix[1], slice_size):
-        group_rows = normalize_length(group_rows, threads_per_row)
-        columns_indices.extend(columns_to_list(group_rows, threads_per_row))
+    for group_rows in lu.grouped(matrix[1], slice_size):
+        group_rows = lu.normalize_length(group_rows, threads_per_row)
+        columns_indices.extend(lu.columns_to_list(group_rows, threads_per_row))
 
     set_align((values, columns_indices, rows_length, slices_start), align)
 
