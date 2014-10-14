@@ -96,7 +96,7 @@ Arguments:
 
 Test vectors are generated at random in the range of -1 to 1.
 Their density is 15%. You can download them from the 
-folder [_vectors_](../tree/sync/vectors].
+folder [_vectors_](/vectors).
     
 Informations about matrices:
 
@@ -186,7 +186,7 @@ Results:
 * Sławomir Figiel ["fivitti"](https://github.com/fivitti)
 
 ## License
-SMDV is licensed under the [MIT License](../blob/master/LICENSE).
+SMDV is licensed under the [MIT License](LICENSE).
 
 ## References
 *  "Efficient Sparse Matrix-Vector Multiplication on CUDA", Nathan Bell, 
@@ -220,7 +220,7 @@ You do not have to worry about it. You only need to use core-module.
 
 ### 1.1 Full script
 The complete script multiplication script is in 
-[_examples/multiplication.py_](blob/sync/examples/multiplication.py) 
+[_examples/multiplication.py_](/examples/multiplication.py) 
 will work according to the scheme:
 
 1. Read data
