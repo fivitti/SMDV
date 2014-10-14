@@ -8,7 +8,7 @@ Created on Sun Sep 21 19:03:24 2014
 import click
 import scipy.io
 from matrixformat import convert_to_ellpack, convert_to_ertilp, convert_to_ertilp, convert_to_sertilp, convert_to_sliced
-from filesUtilites import sort_paths, path_reduction
+from filesutilites import sort_paths, path_reduction
 
 colors = {
         'success' : 'green',

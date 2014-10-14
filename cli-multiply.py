@@ -11,7 +11,7 @@ from os.path import isfile
 from numpy import average as avr, std as nstd, load
 from matrixmultiplication import multiply_cpu, multiply_ellpack, multiply_sliced, multiply_sertilp, multiply_ertilp, multiply_csr
 from matrixutilites import string_vector, result_equals, dict_vector_paths
-from filesUtilites import path_reduction, sort_paths
+from filesutilites import path_reduction, sort_paths
 
 colors = {
         'success' : 'green',

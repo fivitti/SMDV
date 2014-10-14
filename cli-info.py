@@ -8,7 +8,7 @@ import click
 from numpy import load
 import scipy.io
 from matrixutilites import two_column_string, get_info_matrix, get_info_vector, string_vector
-from filesUtilites import sort_paths, path_reduction
+from filesutilites import sort_paths, path_reduction
 
 colors = {
         'success' : 'green',
