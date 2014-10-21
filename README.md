@@ -74,7 +74,12 @@ The following are examples of the results of test using the 10 largest
 matrices from 
 [matrix choice of Francisco Vazquez](http://www.hpca.ual.es/~fvazquez/?page=ELLRT).
 
-The calculations were performed on a computer TO BE COMPLETED <<< >>
+The calculations were performed on a computer:
+
+* CPU: Intel(R) Core(TM) i7-4930K CPU @ 3.40GHz
+* GPU Card: GeForce GTX 780 Ti
+* CUDA Capability Major: 3.5
+* CUDA Driver version: 6.0
 
 Version software:
     
