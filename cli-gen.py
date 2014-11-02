@@ -94,7 +94,7 @@ def matrix(ctx, shape, minimum, maximum, integer, percent, precision):
 @click.pass_context
 def echo(ctx, dense, without_zeros):
     '''
-    Command to display the loaded and generated vectors and matrices.
+    Command to display generated vectors and matrices.
     Displays all objects stored in memory.
     '''
     if 'vectors' in ctx.obj:

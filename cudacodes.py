@@ -60,7 +60,7 @@ def get_cuda_ellpack():
     Tuple of compiled kernel and texture
     '''
     kernel_info = {'file_' : 'ellpack_kernel.c',
-                   'kernel' : 'EllpackFormatKernel',
+                   'kernel' : 'SpMV_Ellpack',
                    'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
@@ -89,7 +89,7 @@ def get_cuda_sliced(sh_cache_size, threads_per_row=2):
     Tuple of compiled kernel and texture
     '''
     kernel_info = {'file_' : 'sliced_kernel.c',
-                   'kernel' : 'SlicedEllpackFormatKernel',
+                   'kernel' : 'SpMV_Sliced',
                    'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
@@ -128,7 +128,7 @@ def get_cuda_sertilp(sh_dot_size=None, threads_per_row=2,
     Tuple of compiled kernel and texture
     '''
     kernel_info = {'file_' : 'sertilp_kernel.c',
-                   'kernel' : 'rbfSERTILP_old',
+                   'kernel' : 'SpMV_Sertilp',
                    'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
@@ -165,8 +165,8 @@ def get_cuda_ertilp(block_size, threads_per_row, prefetch):
     Tuple of compiled kernel and texture
     '''
     kernel_info = {'file_' : 'ertilp_kernel.c',
-                   'kernel' : 'rbfERTILP',
-                   'texref' : 'labelsTexRef'}
+                   'kernel' : 'SpMV_Ertilp',
+                   'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()
 
@@ -202,7 +202,7 @@ def get_cuda_csr(block_size=128, warp_size=32):
     Tuple of compiled kernel and texture
     '''
     kernel_info = {'file_' : 'csr_kernel.c',
-                   'kernel' : 'rbfCsrFormatKernel',
+                   'kernel' : 'SpMV_Csr',
                    'texref' : 'mainVecTexRef'}
     with open(path_join(KERNELS_PATH, kernel_info['file_'])) as file_:
         tpl = file_.read()

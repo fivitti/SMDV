@@ -355,7 +355,7 @@ parameters and print average time and standard deviation.
 
 ```
     
-    user@host:~/projekty/SMDV$ python cli-multiply.py -b 128 -tpr 4 -p 2 -ell 
+    user@host:~/SMDV$ python cli-multiply.py -b 128 -tpr 4 -p 2 -ell 
     -ert -cpu -avr -std Data/vectors/Vector_62451.npy Data/real/cant.mtx
     Multiply matrix Data/real/cant.mtx by the vector Data/vectors/Vector_62451.npy
     Multiplication with Numpy (only CPU)
@@ -374,7 +374,7 @@ Auto search vector:
 
 ```
 
-    user@host:~/projekty/SMDV$ python cli-multiply.py Data/vectors/ Data/real/cant.mtx
+    user@host:$ python cli-multiply.py Data/vectors/ Data/real/cant.mtx
     Multiply matrix Data/real/cant.mtx by the vector Data/vectors/Vector_62451.npy
     
 ```
@@ -390,9 +390,81 @@ Auto search matrices and vectors:
 
 ```
 
-Under construction:
+## Data generation
+In your script use module _matrixutilites.py_. Use method _generate_sparse_matrix_
+to generate sparse matrix (for very dense is inefficient).  
+Use method _generate_vector_ to generate dense vector (for very sparse is inefficient).
 
-    3. Data generation
-    4. Matrix convertion
-    5. Information about data
-    6. Building kernels
+You can save the matrix generated using method _save_matrix_to_file_. Format file is Market Matrix File (.mtx).  
+For vectors use _save_vector_to_numpy_file_. Format file is Numpy Binary File (.npy).
+These methods are "overlay" functions _scipy.io.mmwrite_ and _numpy.save_ to help you create a name for the file.
+
+You can use CLI _cli-gen_ to generate data.  
+Use command __matrix__ to matrix generation. Parameter __-s INT INT__
+specifies dimension matrix (width, height). You can use it repeatedly. Please note the exhaustion 
+of memory when generating many large matrices. Using other parameters you can specify the minimum, 
+maximum, percentage of zeros, precision and the type of generated numbers. Use __--help__ for more info.
+
+Use command __vector__ to vector generation. Parameter __-l INT__ specifies length of vector.
+You can use it repeatedly. For info about other parameters use __--help__.
+
+Use command __save__ to save all generated data. Can you define directory and filename.
+
+Use command __echo__ to display generated matrix and vectors. Caution when large matrices.
+
+The commands are executed sequentially from left to right. Their order is important!
+First should be generating command (vectors or/and matrix). Then are (optional) save command
+and display command.
+
+```
+
+    user@host:$ python cli-gen.py vector -l 5 -i matrix -s 3 3 -min 1 -max 5 echo
+    Vector (len: 5):
+      (0)            0
+      (1)            4
+      (2)           -9
+      (3)            5
+      (4)            0
+    Matrix (rows: 3, cols: 3):
+      (0, 0)        5.0
+      (0, 1)        1.0
+      (1, 1)        1.0
+      (1, 2)        4.0
+      (2, 1)        5.0
+
+```
+
+## Information about data
+_cli-info_ returns basic information about matrices and vectors stored in files, 
+such as size, number of non-zero value and density.
+You can save this information to a CSV file using parameter __-o FILEPATH__.
+You can also view the contents of a small matrix.
+
+CLI as an argument to the paths to files and directories. If you specify the 
+path to the directory will be checked all the matrices and vectors within it.
+
+```
+
+    user@host:~/SMDV$ python cli-info.py Data/Generated/
+    Process: Data/Generated/Matrix_67x67.mtx
+    Info about matrix:
+      rows         67
+      cols         67
+      nnz           4
+      sparsing [%]    0.0891
+    Process: Data/Generated/Vector_5.npy
+    Info about vector:
+      length         5
+      nnz           2
+      sparsing [%]      40.0
+      
+```
+
+## Building kernels
+You can use the formats used by us in their projects. CUDA code is located in the (_kernels_)[/kernels/].
+Kernels are prepared to metaprogramming.
+It is built and compiled by _cudacodes.py_. Methods __get_cuda_FORMAT_ (where FORMAT is name of kernel)
+return tuple with multiplication function and texture. Some of them take arguments to optimize the code for a given situation.
+If you enter an incorrect value of the code will not work correctly.  
+Your job is to just set the texture to the correct address in the GPU memory and call the function with the appropriate parameters.  
+For examples see to (_matrixmultiplication.py_)[/matrixmultiplication.py] where we use it.

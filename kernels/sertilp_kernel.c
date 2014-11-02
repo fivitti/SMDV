@@ -1,16 +1,16 @@
 /*  Kernel SERTILP
- *  @author: Krzysztof Sopyla
+ *  @author: Krzysztof Sopyla, Slawomir Figiel
  *  Source: KMLib [https://github.com/ksirg/KMLib]
  */
 texture<float, 1, cudaReadModeElementType> mainVecTexRef;
 
-extern "C" __global__ void rbfSERTILP_old(const float *vecVals,
-                                          const int *vecCols,
-                                          const int *vecLengths, 
-                                          const int * sliceStart, 
-                                          float *result,
-                                          const int nrRows, 
-                                          const int align)
+extern "C" __global__ void SpMV_Sertilp(const float *vecVals,
+                                        const int *vecCols,
+                                        const int *vecLengths, 
+                                        const int * sliceStart, 
+                                        float *result,
+                                        const int nrRows, 
+                                        const int align)
 {
 
     __shared__  float shDot[{{ shDot_size }}];	
@@ -20,7 +20,7 @@ extern "C" __global__ void rbfSERTILP_old(const float *vecVals,
     {
         shSliceStart=sliceStart[blockIdx.x];
     }
-     shDot[threadIdx.x]=0.0f;
+    shDot[threadIdx.x]=0.0f;
     __syncthreads();
 
     int idxT = threadIdx.x % {{ threadPerRow }}; //thread number in Thread group
@@ -28,7 +28,6 @@ extern "C" __global__ void rbfSERTILP_old(const float *vecVals,
 
     //map group of thread to row, in this case 4 threads are mapped to one row
     int row = (blockIdx.x*blockDim.x+threadIdx.x)/{{ threadPerRow }}; 
-     //(blockIdx.x*blockDim.x+threadIdx.x)>> LOG_THREADS; 
     unsigned int j=0;
     if (row < nrRows){
         int maxRow = vecLengths[row];
@@ -64,7 +63,7 @@ extern "C" __global__ void rbfSERTILP_old(const float *vecVals,
 
     volatile float *shDotv = shDot;
     //reduction to some level
-    for( j=blockDim.x/2; j>={{ sliceSize }}; j>>=1) //s/=2
+    for( j=blockDim.x/2; j>={{ sliceSize }}; j>>=1)
     {
         if(threadIdx.x<j){
             shDotv[threadIdx.x]+=shDotv[threadIdx.x+j];

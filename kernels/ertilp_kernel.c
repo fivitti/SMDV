@@ -1,10 +1,10 @@
 /*  Kernel ERTILP
- *  @author: Krzysztof Sopyla
+ *  @author: Krzysztof Sopyla, Slawomir Figiel
  *  Source: KMLib [https://github.com/ksirg/KMLib]
  */
-texture<float,1,cudaReadModeElementType> labelsTexRef;
+texture<float,1,cudaReadModeElementType> mainVecTexRef;
 
-extern "C" __global__ void rbfERTILP(const float * vals,
+extern "C" __global__ void SpMV_Ertilp(const float * vals,
                                        const int * colIdx, 
                                        const int * rowLength, 
                                        float * results,
@@ -51,7 +51,7 @@ extern "C" __global__ void rbfERTILP(const float * vals,
             
             #pragma unroll
             for( j=0; j<{{ PREFETCH_SIZE }};j++){
-                dot[j]+=preVals[j]*tex1Dfetch(labelsTexRef,preColls[j]);
+                dot[j]+=preVals[j]*tex1Dfetch(mainVecTexRef,preColls[j]);
             }
         }
         
@@ -77,11 +77,9 @@ extern "C" __global__ void rbfERTILP(const float * vals,
         }
         __syncthreads();
     }
-    //if(row2<shRows){
     if(threadIdx.x<rowsB){		
         unsigned int row2=blockIdx.x* rowsB+threadIdx.x;
         if(row2<shRows)
             results[row2]=shDotv[threadIdx.x];
     }	
-
 }
