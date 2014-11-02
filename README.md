@@ -461,10 +461,10 @@ path to the directory will be checked all the matrices and vectors within it.
 ```
 
 ## Building kernels
-You can use the formats used by us in their projects. CUDA code is located in the (_kernels_)[/kernels/].
+You can use the formats used by us in their projects. CUDA code is located in the [_kernels_](/kernels/).
 Kernels are prepared to metaprogramming.
-It is built and compiled by _cudacodes.py_. Methods __get_cuda_FORMAT_ (where FORMAT is name of kernel)
+It is built and compiled by _cudacodes.py_. Methods _get_cuda_FORMAT_ (where FORMAT is name of kernel)
 return tuple with multiplication function and texture. Some of them take arguments to optimize the code for a given situation.
 If you enter an incorrect value of the code will not work correctly.  
 Your job is to just set the texture to the correct address in the GPU memory and call the function with the appropriate parameters.  
-For examples see to (_matrixmultiplication.py_)[/matrixmultiplication.py] where we use it.
+For examples see to [_matrixmultiplication.py_](/matrixmultiplication.py) where we use it.
