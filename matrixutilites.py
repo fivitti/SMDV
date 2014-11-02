@@ -515,7 +515,7 @@ def dict_vector_paths(vector_paths):
     result = {}
     for path in vector_paths:
         try:
-            numpy.load(path)
+            vector = numpy.load(path)
         except:
             continue
         result[len(vector)] = path
