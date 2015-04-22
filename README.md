@@ -1,5 +1,6 @@
 # SMDV
-------
+
+
 ## Description
 SMDV is a collection of modules to test the speed of execution of
 multiplication for different matrices formats.  
@@ -21,6 +22,8 @@ You can use them as a reference point for measurements performed on the GPU.
 * Krzysztof Sopyła ["ksirg"](https://github.com/ksirg) <krzysztofsopyla@gmail.com>
 * Paweł Drozda ["pdrozda"](https://github.com/pdrozda)
 * Sławomir Figiel ["fivitti"](https://github.com/fivitti)
+
+If you use this software in academic publication please cite: (TODO)
 
 ## License
 SMDV is licensed under the [MIT License](LICENSE).
