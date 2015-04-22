@@ -17,7 +17,15 @@ SMDV also allows use of the multiplication module Numpy.
 Such calculations will be performed only on the CPU.
 You can use them as a reference point for measurements performed on the GPU.
 
-### Functions
+## Authors
+* Krzysztof Sopyła ["ksirg"](https://github.com/ksirg) <krzysztofsopyla@gmail.com>
+* Paweł Drozda ["pdrozda"](https://github.com/pdrozda)
+* Sławomir Figiel ["fivitti"](https://github.com/fivitti)
+
+## License
+SMDV is licensed under the [MIT License](LICENSE).
+
+## Functions
 The main purpose of the project is to measure the execution time
 of multiplications on the GPU for different matrix formats.
 You can repeat our research on your own computer (you only need to have a 
@@ -185,25 +193,7 @@ Results:
 
 
     
-## Authors
-* Krzysztof Sopyła ["ksirg"](https://github.com/ksirg)
-* Paweł Drozda ["pdrozda"](https://github.com/pdrozda)
-* Sławomir Figiel ["fivitti"](https://github.com/fivitti)
 
-## License
-SMDV is licensed under the [MIT License](LICENSE).
-
-## References
-*  "Efficient Sparse Matrix-Vector Multiplication on CUDA", Nathan Bell, 
-Michael Garland [11 December 2008]
-* "The sparse matrix vector product on GPUs", F. Vazquez, E. M. Garzon, 
-J. A. Martınez, J. J. Fernandez [14 June 2009]
-* "Improving the performance of the sparse matrix vector product with GPUs",
-F. Vazquez, G. Ortega, J.J. Fernandez, E.M. Garzon [2010]
-* "Automatically Tuning Sparse Matrix-Vector Multiplication for GPU 
-Architectures", Alexander Monakov, Anton Lokhmotov, and Arutyun Avetisyan
-* "A memory efficient and fast sparse matrix vector product on a gpu",
-A. Dziekonski, A. Lamecki, and M. Mrozowski
 
 # How to run
 -------------
@@ -468,3 +458,17 @@ return tuple with multiplication function and texture. Some of them take argumen
 If you enter an incorrect value of the code will not work correctly.  
 Your job is to just set the texture to the correct address in the GPU memory and call the function with the appropriate parameters.  
 For examples see to [_matrixmultiplication.py_](/matrixmultiplication.py) where we use it.
+
+
+
+## References
+*  "Efficient Sparse Matrix-Vector Multiplication on CUDA", Nathan Bell, 
+Michael Garland [11 December 2008]
+* "The sparse matrix vector product on GPUs", F. Vazquez, E. M. Garzon, 
+J. A. Martınez, J. J. Fernandez [14 June 2009]
+* "Improving the performance of the sparse matrix vector product with GPUs",
+F. Vazquez, G. Ortega, J.J. Fernandez, E.M. Garzon [2010]
+* "Automatically Tuning Sparse Matrix-Vector Multiplication for GPU 
+Architectures", Alexander Monakov, Anton Lokhmotov, and Arutyun Avetisyan
+* "A memory efficient and fast sparse matrix vector product on a gpu",
+A. Dziekonski, A. Lamecki, and M. Mrozowski
