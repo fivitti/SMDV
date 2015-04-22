@@ -5,6 +5,9 @@
 SMDV is a collection of modules to test the speed of execution of
 multiplication for different matrices formats.  
 Multiplications are performed on the GPU using technology NVIDIA CUDA.
+
+Multiplication algortihms ERTILP and SERTILP were originally created for [KMLib - SVM with CUDA](https://github.com/ksirg/KMLib)
+
 ### Supported formats
 Implemented multiplication formats (in CUDA C):  
 
